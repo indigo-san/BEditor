@@ -10,6 +10,7 @@ using Avalonia.Media;
 
 using BEditor.Data;
 using BEditor.Extensions;
+using BEditor.Media;
 using BEditor.Models;
 
 using Reactive.Bindings;
@@ -51,7 +52,7 @@ namespace BEditor.ViewModels.Timelines
             Copy.Subscribe(async () =>
             {
                 await using var memory = new MemoryStream();
-                await Serialize.SaveToStreamAsync(ClipElement, memory, SerializeMode.Json);
+                await Serialize.SaveToStreamAsync(ClipElement, memory);
 
                 var json = Encoding.Default.GetString(memory.ToArray());
                 await Application.Current.Clipboard.SetTextAsync(json);
@@ -62,7 +63,7 @@ namespace BEditor.ViewModels.Timelines
                 ClipElement.Parent.RemoveClip(ClipElement).Execute();
 
                 await using var memory = new MemoryStream();
-                await Serialize.SaveToStreamAsync(ClipElement, memory, SerializeMode.Json);
+                await Serialize.SaveToStreamAsync(ClipElement, memory);
 
                 var json = Encoding.Default.GetString(memory.ToArray());
                 await Application.Current.Clipboard.SetTextAsync(json);
@@ -73,7 +74,7 @@ namespace BEditor.ViewModels.Timelines
             MessageLog.Subscribe(async () =>
             {
                 var text =
-                    $"ID : {ClipElement.ID}\n" +
+                    $"ID : {ClipElement.Id}\n" +
                     $"Name : {ClipElement.Name}\n" +
                     $"Length : {ClipElement.Length.Value}\n" +
                     $"Layer : {ClipElement.Layer}\n" +
@@ -90,7 +91,7 @@ namespace BEditor.ViewModels.Timelines
                 ClipElement.Split(frame).Execute();
             });
 
-            CopyID.Subscribe(async () => await Application.Current.Clipboard.SetTextAsync(ClipElement.ID.ToString()));
+            CopyID.Subscribe(async () => await Application.Current.Clipboard.SetTextAsync(ClipElement.Id.ToString()));
         }
 
         ~ClipViewModel()
@@ -196,8 +197,8 @@ namespace BEditor.ViewModels.Timelines
 
             if (timelinevm.ClipTimeChange)
             {
-                var frame = selectedClip.Parent.ToFrame(selectedClip.GetCreateClipViewModel().MarginLeft);
-                var layer = selectedClip.GetCreateClipViewModel().Row;
+                var frame = Math.Clamp(selectedClip.Parent.ToFrame(selectedClip.GetCreateClipViewModel().MarginLeft), 0, Scene.TotalFrame);
+                var layer = Math.Clamp(selectedClip.GetCreateClipViewModel().Row, 1, 100);
 
                 selectedClip.MoveFrameLayer(frame, layer).Execute();
 

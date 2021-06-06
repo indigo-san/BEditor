@@ -1,14 +1,18 @@
-﻿using System.Collections.Generic;
+﻿// StrokeText.cs
+//
+// Copyright (C) BEditor
+//
+// This software may be modified and distributed under the terms
+// of the MIT license. See the LICENSE file for details.
+
+using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
-using System.Linq;
-using System.Numerics;
 
 using BEditor.Data;
 using BEditor.Data.Primitive;
 using BEditor.Data.Property;
 using BEditor.Drawing;
 using BEditor.Drawing.Pixel;
-using BEditor.Graphics;
 using BEditor.Primitive.Objects;
 using BEditor.Primitive.Resources;
 
@@ -22,20 +26,20 @@ namespace BEditor.Primitive.Effects
         /// <summary>
         /// Defines the <see cref="CenterX"/> property.
         /// </summary>
-        public static readonly DirectEditingProperty<StrokeText, EaseProperty> CenterXProperty = EditingProperty.RegisterSerializeDirect<EaseProperty, StrokeText>(
+        public static readonly DirectEditingProperty<StrokeText, EaseProperty> CenterXProperty = EditingProperty.RegisterDirect<EaseProperty, StrokeText>(
             nameof(CenterX),
             owner => owner.CenterX,
             (owner, obj) => owner.CenterX = obj,
-            new EasePropertyMetadata(Strings.CenterX, 0));
+            EditingPropertyOptions<EaseProperty>.Create(new EasePropertyMetadata(Strings.CenterX, 0)).Serialize());
 
         /// <summary>
         /// Defines the <see cref="CenterY"/> property.
         /// </summary>
-        public static readonly DirectEditingProperty<StrokeText, EaseProperty> CenterYProperty = EditingProperty.RegisterSerializeDirect<EaseProperty, StrokeText>(
+        public static readonly DirectEditingProperty<StrokeText, EaseProperty> CenterYProperty = EditingProperty.RegisterDirect<EaseProperty, StrokeText>(
             nameof(CenterY),
             owner => owner.CenterY,
             (owner, obj) => owner.CenterY = obj,
-            new EasePropertyMetadata(Strings.CenterY, 0));
+            EditingPropertyOptions<EaseProperty>.Create(new EasePropertyMetadata(Strings.CenterY, 0)).Serialize());
 
         /// <summary>
         /// Defines the <see cref="LineSpacing"/> property.
@@ -120,37 +124,6 @@ namespace BEditor.Primitive.Effects
                 args.Value.Dispose();
 
                 args.Value = stroke;
-            }
-        }
-
-        /// <inheritdoc/>
-        public override void Apply(EffectApplyArgs<IEnumerable<ImageInfo>> args)
-        {
-            if (Parent.Effect[0] is Text textObj)
-            {
-                if (!textObj.EnableMultiple.Value)
-                {
-                    var imageArgs = new EffectApplyArgs<Image<BGRA32>>(args.Frame, args.Value.First().Source, args.Type);
-                    Apply(imageArgs);
-                    args.Value = new ImageInfo[]
-                    {
-                        new(imageArgs.Value, _ => default)
-                    };
-
-                    return;
-                }
-                args.Value = args.Value.Select((imageInfo, index) =>
-                {
-                    var stroke = Image.StrokeText(textObj.Document.Value, textObj.Font.Value, textObj.Size[args.Frame], Size[args.Frame], Color.Value, (HorizontalAlign)textObj.HorizontalAlign.Index);
-
-                    stroke.DrawImage(
-                        new((stroke.Width - imageInfo.Source.Width) / 2, (stroke.Height - imageInfo.Source.Height) / 2),
-                        imageInfo.Source);
-
-                    imageInfo.Dispose();
-
-                    return new ImageInfo(stroke, img => new Transform(new(img.Source.Width * index, 0, 0), Vector3.Zero, Vector3.Zero, Vector3.Zero));
-                });
             }
         }
 

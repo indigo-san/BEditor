@@ -1,0 +1,30 @@
+name: Debug Build & Test
+
+on: [push, pull_request]
+
+jobs:
+  test:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    env:
+      NUGET_PACKAGES: ${{ github.workspace }}/.nuget/packages
+    steps:
+    - uses: actions/checkout@v2
+    - uses: actions/cache@v1
+      with:
+        path: ${{ github.workspace }}/.nuget/packages 
+        key: nuget-${{ runner.os }}-${{ matrix.dotnet-version }}
+        restore-keys: |
+          nuget-${{ runner.os }}-
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: 5.0.x
+    - name: Restore dependencies
+      run: dotnet restore BEditor.sln
+    - name: Build
+      run: dotnet msbuild BEditor.sln -property:DefineConstants=GITHUB_ACTIONS
+    - name: Test
+      run: dotnet test BEditor.sln --no-build --verbosity normal

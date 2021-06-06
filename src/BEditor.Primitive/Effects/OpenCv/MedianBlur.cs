@@ -1,4 +1,11 @@
-﻿using System.Collections.Generic;
+﻿// MedianBlur.cs
+//
+// Copyright (C) BEditor
+//
+// This software may be modified and distributed under the terms
+// of the MIT license. See the LICENSE file for details.
+
+using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 
 using BEditor.Data;
@@ -11,27 +18,27 @@ using BEditor.Primitive.Resources;
 namespace BEditor.Primitive.Effects.OpenCv
 {
     /// <summary>
-    /// 
+    /// Represents the <see cref="ImageEffect"/> that blurs the image.
     /// </summary>
     public sealed class MedianBlur : ImageEffect
     {
         /// <summary>
         /// Defines the <see cref="Size"/> property.
         /// </summary>
-        public static readonly DirectEditingProperty<MedianBlur, EaseProperty> SizeProperty = EditingProperty.RegisterSerializeDirect<EaseProperty, MedianBlur>(
+        public static readonly DirectEditingProperty<MedianBlur, EaseProperty> SizeProperty = EditingProperty.RegisterDirect<EaseProperty, MedianBlur>(
             nameof(Size),
             owner => owner.Size,
             (owner, obj) => owner.Size = obj,
-            new EasePropertyMetadata(Strings.Size, 20, Min: 0));
+            EditingPropertyOptions<EaseProperty>.Create(new EasePropertyMetadata(Strings.Size, 20, min: 0)).Serialize());
 
         /// <summary>
         /// Defines the <see cref="Resize"/> property.
         /// </summary>
-        public static readonly DirectEditingProperty<MedianBlur, CheckProperty> ResizeProperty = EditingProperty.RegisterSerializeDirect<CheckProperty, MedianBlur>(
+        public static readonly DirectEditingProperty<MedianBlur, CheckProperty> ResizeProperty = EditingProperty.RegisterDirect<CheckProperty, MedianBlur>(
             nameof(Resize),
             owner => owner.Resize,
             (owner, obj) => owner.Resize = obj,
-            new CheckPropertyMetadata(Strings.Resize, true));
+            EditingPropertyOptions<CheckProperty>.Create(new CheckPropertyMetadata(Strings.Resize, true)).Serialize());
 
         /// <summary>
         /// Initializes a new instance of the <see cref="MedianBlur"/> class.

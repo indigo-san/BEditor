@@ -1,4 +1,12 @@
-﻿using System.Collections.Generic;
+﻿// ListenerObject.cs
+//
+// Copyright (C) BEditor
+//
+// This software may be modified and distributed under the terms
+// of the MIT license. See the LICENSE file for details.
+
+using System;
+using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 
 using BEditor.Data;
@@ -10,6 +18,7 @@ namespace BEditor.Primitive.Objects
     /// <summary>
     /// Represents an <see cref="ObjectElement"/> that sets the listener for OpenAL.
     /// </summary>
+    [Obsolete("Please do not use this class.")]
     public sealed class ListenerObject : ObjectElement
     {
         /// <summary>
@@ -57,11 +66,11 @@ namespace BEditor.Primitive.Objects
         /// <summary>
         /// Defines the <see cref="Gain"/> property.
         /// </summary>
-        public static readonly DirectEditingProperty<ListenerObject, EaseProperty> GainProperty = EditingProperty.RegisterSerializeDirect<EaseProperty, ListenerObject>(
+        public static readonly DirectEditingProperty<ListenerObject, EaseProperty> GainProperty = EditingProperty.RegisterDirect<EaseProperty, ListenerObject>(
             nameof(Gain),
             owner => owner.Gain,
             (owner, obj) => owner.Gain = obj,
-            new EasePropertyMetadata("Gain", 100, Min: 0));
+            EditingPropertyOptions<EaseProperty>.Create(new EasePropertyMetadata("Gain", 100, min: 0)).Serialize());
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ListenerObject"/> class.
@@ -110,7 +119,7 @@ namespace BEditor.Primitive.Objects
         public EaseProperty TargetZ { get; private set; }
 
         /// <summary>
-        /// 
+        /// Gets the gain.
         /// </summary>
         [AllowNull]
         public EaseProperty Gain { get; private set; }

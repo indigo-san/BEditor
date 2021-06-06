@@ -1,4 +1,11 @@
-﻿using System.Collections.Generic;
+﻿// ColorKey.cs
+//
+// Copyright (C) BEditor
+//
+// This software may be modified and distributed under the terms
+// of the MIT license. See the LICENSE file for details.
+
+using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 
 using BEditor.Data;
@@ -18,20 +25,20 @@ namespace BEditor.Primitive.Effects
         /// <summary>
         /// Defines the <see cref="Color"/> property.
         /// </summary>
-        public static readonly DirectEditingProperty<ColorKey, ColorProperty> ColorProperty = EditingProperty.RegisterSerializeDirect<ColorProperty, ColorKey>(
+        public static readonly DirectEditingProperty<ColorKey, ColorProperty> ColorProperty = EditingProperty.RegisterDirect<ColorProperty, ColorKey>(
             nameof(Color),
             owner => owner.Color,
             (owner, obj) => owner.Color = obj,
-            new ColorPropertyMetadata(Strings.Color, Drawing.Color.Light));
+            EditingPropertyOptions<ColorProperty>.Create(new ColorPropertyMetadata(Strings.Color, Colors.White)).Serialize());
 
         /// <summary>
         /// Defines the <see cref="ThresholdValue"/> property.
         /// </summary>
-        public static readonly DirectEditingProperty<ColorKey, EaseProperty> ThresholdValueProperty = EditingProperty.RegisterSerializeDirect<EaseProperty, ColorKey>(
+        public static readonly DirectEditingProperty<ColorKey, EaseProperty> ThresholdValueProperty = EditingProperty.RegisterDirect<EaseProperty, ColorKey>(
             nameof(ThresholdValue),
             owner => owner.ThresholdValue,
             (owner, obj) => owner.ThresholdValue = obj,
-            new EasePropertyMetadata(Strings.ThresholdValue, 60));
+            EditingPropertyOptions<EaseProperty>.Create(new EasePropertyMetadata(Strings.ThresholdValue, 60)).Serialize());
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ColorKey"/> class.

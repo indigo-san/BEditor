@@ -1,4 +1,11 @@
-﻿using System.Collections.Generic;
+﻿// Binarization.cs
+//
+// Copyright (C) BEditor
+//
+// This software may be modified and distributed under the terms
+// of the MIT license. See the LICENSE file for details.
+
+using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 
 using BEditor.Data;
@@ -18,11 +25,11 @@ namespace BEditor.Primitive.Effects
         /// <summary>
         /// Difines the <see cref="Value"/> property.
         /// </summary>
-        public static readonly EditingProperty<EaseProperty> ValueProperty = EditingProperty.RegisterSerializeDirect<EaseProperty, Binarization>(
+        public static readonly DirectEditingProperty<Binarization, EaseProperty> ValueProperty = EditingProperty.RegisterDirect<EaseProperty, Binarization>(
             nameof(Value),
             owner => owner.Value,
             (owner, obj) => owner.Value = obj,
-            new EasePropertyMetadata(Strings.ThresholdValue, 127, 255, 0));
+            EditingPropertyOptions<EaseProperty>.Create(new EasePropertyMetadata(Strings.ThresholdValue, 127, 255, 0)).Serialize());
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Binarization"/> class.

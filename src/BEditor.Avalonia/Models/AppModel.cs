@@ -9,6 +9,7 @@ using System.Threading;
 using BEditor.Command;
 using BEditor.Data;
 using BEditor.Extensions;
+using BEditor.Packaging;
 
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -52,8 +53,8 @@ namespace BEditor.Models
 
             // DIの設定
             Services = new ServiceCollection()
-                .AddSingleton<IFileDialogService>(_ => new FileDialogService())
-                .AddSingleton<IMessage>(_ => new MessageService())
+                .AddSingleton(_ => FileDialog)
+                .AddSingleton(_ => Message)
                 .AddSingleton(_ => LoggingFactory)
                 .AddSingleton<HttpClient>();
 
@@ -85,18 +86,12 @@ namespace BEditor.Models
         public IServiceProvider ServiceProvider
         {
             get => _serviceProvider ??= Services.BuildServiceProvider();
-            set
-            {
-                _serviceProvider = value;
-
-                Message = ServiceProvider.GetService<IMessage>()!;
-                FileDialog = ServiceProvider.GetService<IFileDialogService>()!;
-            }
+            set => _serviceProvider = value;
         }
 
-        public IMessage Message { get; set; }
+        public IMessage Message { get; } = new MessageService();
 
-        public IFileDialogService FileDialog { get; set; }
+        public IFileDialogService FileDialog { get; } = new FileDialogService();
 
         public ILoggerFactory LoggingFactory { get; }
 
@@ -105,6 +100,12 @@ namespace BEditor.Models
         Project IParentSingle<Project>.Child => Project;
 
         public event EventHandler<ProjectOpenedEventArgs> ProjectOpened;
+        public event EventHandler Exit;
+
+        public void RaiseExit()
+        {
+            Exit?.Invoke(this, EventArgs.Empty);
+        }
 
         public void RaiseProjectOpened(Project project)
         {
@@ -142,10 +143,7 @@ namespace BEditor.Models
                     };
 
                     await using var stream = new FileStream(sceneCache, FileMode.Create);
-                    await JsonSerializer.SerializeAsync(stream, cacheObj, new JsonSerializerOptions
-                    {
-                        WriteIndented = true
-                    });
+                    await JsonSerializer.SerializeAsync(stream, cacheObj, PackageFile._serializerOptions);
                 }
             }
         }
@@ -183,10 +181,7 @@ namespace BEditor.Models
                         var span = buffer.AsSpan();
                         stream.Read(span);
 
-                        var cacheObj = JsonSerializer.Deserialize<SceneCache>(span, new JsonSerializerOptions
-                        {
-                            WriteIndented = true
-                        });
+                        var cacheObj = JsonSerializer.Deserialize<SceneCache>(span, PackageFile._serializerOptions);
 
                         if (cacheObj is not null)
                         {

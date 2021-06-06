@@ -1,4 +1,11 @@
-﻿using System;
+﻿// AudioObject.cs
+//
+// Copyright (C) BEditor
+//
+// This software may be modified and distributed under the terms
+// of the MIT license. See the LICENSE file for details.
+
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
@@ -23,56 +30,47 @@ namespace BEditor.Primitive.Objects
     public sealed class AudioObject : ObjectElement
     {
         /// <summary>
-        /// Defines the <see cref="Coordinate"/> property.
-        /// </summary>
-        public static readonly DirectEditingProperty<AudioObject, AudioCoordinate> CoordinateProperty = EditingProperty.RegisterSerializeDirect<AudioCoordinate, AudioObject>(
-            nameof(Coordinate),
-            owner => owner.Coordinate,
-            (owner, obj) => owner.Coordinate = obj,
-            new AudioCoordinateMetadata(Strings.Coordinate));
-
-        /// <summary>
         /// Defines the <see cref="Volume"/> property.
         /// </summary>
-        public static readonly DirectEditingProperty<AudioObject, EaseProperty> VolumeProperty = EditingProperty.RegisterSerializeDirect<EaseProperty, AudioObject>(
+        public static readonly DirectEditingProperty<AudioObject, EaseProperty> VolumeProperty = EditingProperty.RegisterDirect<EaseProperty, AudioObject>(
             nameof(Volume),
             owner => owner.Volume,
             (owner, obj) => owner.Volume = obj,
-            new EasePropertyMetadata(Strings.Volume, 50, float.NaN, 0));
+            EditingPropertyOptions<EaseProperty>.Create(new EasePropertyMetadata(Strings.Volume, 50, float.NaN, 0)).Serialize());
 
         /// <summary>
         /// Defines the <see cref="Pitch"/> property.
         /// </summary>
-        public static readonly DirectEditingProperty<AudioObject, EaseProperty> PitchProperty = EditingProperty.RegisterSerializeDirect<EaseProperty, AudioObject>(
+        public static readonly DirectEditingProperty<AudioObject, EaseProperty> PitchProperty = EditingProperty.RegisterDirect<EaseProperty, AudioObject>(
             nameof(Pitch),
             owner => owner.Pitch,
             (owner, obj) => owner.Pitch = obj,
-            new EasePropertyMetadata(Strings.Pitch, 100, 200, 50));
+            EditingPropertyOptions<EaseProperty>.Create(new EasePropertyMetadata(Strings.Pitch, 100, 200, 50)).Serialize());
 
         /// <summary>
         /// Defines the <see cref="Start"/> property.
         /// </summary>
-        public static readonly DirectEditingProperty<AudioObject, ValueProperty> StartProperty = EditingProperty.RegisterSerializeDirect<ValueProperty, AudioObject>(
+        public static readonly DirectEditingProperty<AudioObject, ValueProperty> StartProperty = EditingProperty.RegisterDirect<ValueProperty, AudioObject>(
             nameof(Start),
             owner => owner.Start,
             (owner, obj) => owner.Start = obj,
-            new ValuePropertyMetadata(Strings.Start + "(Milliseconds)", 0, Min: 0));
+            EditingPropertyOptions<ValueProperty>.Create(new ValuePropertyMetadata(Strings.Start + "(Milliseconds)", 0, Min: 0)).Serialize());
 
         /// <summary>
         /// Defines the <see cref="File"/> property.
         /// </summary>
-        public static readonly DirectEditingProperty<AudioObject, FileProperty> FileProperty = EditingProperty.RegisterSerializeDirect<FileProperty, AudioObject>(
+        public static readonly DirectEditingProperty<AudioObject, FileProperty> FileProperty = EditingProperty.RegisterDirect<FileProperty, AudioObject>(
             nameof(File),
             owner => owner.File,
             (owner, obj) => owner.File = obj,
-            new FilePropertyMetadata(Strings.File, Filter: new("", new FileExtension[] { new("mp3"), new("wav") })));
+            EditingPropertyOptions<FileProperty>.Create(new FilePropertyMetadata(Strings.File, Filter: new(string.Empty, new FileExtension[] { new("mp3"), new("wav") }))).Serialize());
 
         /// <summary>
         /// Defines the <see cref="SetLength"/> property.
         /// </summary>
         public static readonly EditingProperty<ButtonComponent> SetLengthProperty = EditingProperty.Register<ButtonComponent, AudioObject>(
             nameof(SetLength),
-            new ButtonComponentMetadata(Strings.ClipLengthAsAudioLength));
+            EditingPropertyOptions<ButtonComponent>.Create(new ButtonComponentMetadata(Strings.ClipLengthAsAudioLength)));
 
         private MediaFile? _mediaFile;
 
@@ -83,7 +81,7 @@ namespace BEditor.Primitive.Objects
         private IDisposable? _disposable2;
 
         /// <summary>
-        /// Initializes a new instance of <see cref="AudioObject"/> class.
+        /// Initializes a new instance of the <see cref="AudioObject"/> class.
         /// </summary>
         public AudioObject()
         {
@@ -91,12 +89,6 @@ namespace BEditor.Primitive.Objects
 
         /// <inheritdoc/>
         public override string Name => Strings.Audio;
-
-        /// <summary>
-        /// Get the coordinates.
-        /// </summary>
-        [AllowNull]
-        public AudioCoordinate Coordinate { get; private set; }
 
         /// <summary>
         /// Get the <see cref="EaseProperty"/> representing the volume.
@@ -123,12 +115,12 @@ namespace BEditor.Primitive.Objects
         public FileProperty File { get; private set; }
 
         /// <summary>
-        /// 
+        /// Gets the command to set the length of the clip.
         /// </summary>
         public ButtonComponent SetLength => GetValue(SetLengthProperty);
 
         /// <summary>
-        /// 
+        /// Gets the opened decoder.
         /// </summary>
         public MediaFile? Decoder
         {
@@ -151,7 +143,7 @@ namespace BEditor.Primitive.Objects
         }
 
         /// <summary>
-        ///
+        /// Gets the loaded audio data.
         /// </summary>
         public Sound<StereoPCMFloat>? Loaded { get; private set; }
 
@@ -163,8 +155,6 @@ namespace BEditor.Primitive.Objects
             if (Decoder is null) return;
 
             _source!.Gain = Volume[args.Frame] / 100f;
-            _source.Position = new(Coordinate.X[args.Frame], Coordinate.Y[args.Frame], Coordinate.Z[args.Frame]);
-            _source.Direction = new(Coordinate.DirectionX[args.Frame], Coordinate.DirectionY[args.Frame], Coordinate.DirectionZ[args.Frame]);
             _source.Pitch = Pitch[args.Frame] / 100f;
 
             if (args.Frame == Parent.Start)
@@ -184,7 +174,6 @@ namespace BEditor.Primitive.Objects
         /// <inheritdoc/>
         public override IEnumerable<PropertyElement> GetProperties()
         {
-            yield return Coordinate;
             yield return Volume;
             yield return Pitch;
             yield return Start;
@@ -202,13 +191,13 @@ namespace BEditor.Primitive.Objects
                 Decoder = MediaFile.Open(file, new()
                 {
                     StreamsToLoad = MediaMode.Audio,
-                    SampleRate = this.GetParentRequired<Project>().Samplingrate
+                    SampleRate = this.GetRequiredParent<Project>().Samplingrate,
                 });
             });
 
             _disposable2 = SetLength.Where(_ => Loaded is not null).Subscribe(_ =>
             {
-                var length = Frame.FromTimeSpan(Loaded!.Time, this.GetParentRequired<Project>().Framerate);
+                var length = Frame.FromTimeSpan(Loaded!.Duration, this.GetRequiredParent<Project>().Framerate);
 
                 Parent.ChangeLength(Parent.Start, Parent.Start + length).Execute();
             });
@@ -239,33 +228,7 @@ namespace BEditor.Primitive.Objects
 
         private static Sound<StereoPCMFloat> GetAllFrame(IAudioStream stream)
         {
-            stream.TryGetFrame(TimeSpan.Zero, out _);
-            var sampleL = new List<float>();
-            var sampleR = new List<float>();
-
-            while (stream.TryGetNextFrame(out var audio))
-            {
-                var array = audio.Extract();
-
-                sampleL.AddRange(array[0]);
-
-                if (array.Length is 2)
-                {
-                    sampleR.AddRange(array[1]);
-                }
-                else
-                {
-                    sampleR.AddRange(array[0]);
-                }
-            }
-
-            var sound = new Sound<StereoPCMFloat>(stream.Info.SampleRate, sampleL.Count);
-
-            sampleL.Zip(sampleR, (l, r) => new StereoPCMFloat(l, r))
-                .ToArray()
-                .CopyTo(sound.Data);
-
-            return sound;
+            return stream.GetFrame(TimeSpan.Zero, stream.Info.Duration);
         }
 
         private async void Player_PlayingAsync(object? sender, PlayingEventArgs e)
@@ -299,131 +262,6 @@ namespace BEditor.Primitive.Objects
             if (_source.State is AudioSourceState.Playing)
             {
                 _source.Stop();
-            }
-        }
-
-        /// <summary>
-        /// Represents a property for setting XYZ coordinates.
-        /// </summary>
-        public sealed class AudioCoordinate : ExpandGroup
-        {
-            /// <summary>
-            /// Defines the <see cref="X"/> property.
-            /// </summary>
-            public static readonly DirectEditingProperty<AudioCoordinate, EaseProperty> XProperty = EditingProperty.RegisterSerializeDirect<EaseProperty, AudioCoordinate>(
-                nameof(X),
-                owner => owner.X,
-                (owner, obj) => owner.X = obj,
-                new EasePropertyMetadata(Strings.X, 0));
-
-            /// <summary>
-            /// Defines the <see cref="Y"/> property.
-            /// </summary>
-            public static readonly DirectEditingProperty<AudioCoordinate, EaseProperty> YProperty = EditingProperty.RegisterSerializeDirect<EaseProperty, AudioCoordinate>(
-                nameof(Y),
-                owner => owner.Y,
-                (owner, obj) => owner.Y = obj,
-                new EasePropertyMetadata(Strings.Y, 0));
-
-            /// <summary>
-            /// Defines the <see cref="Z"/> property.
-            /// </summary>
-            public static readonly DirectEditingProperty<AudioCoordinate, EaseProperty> ZProperty = EditingProperty.RegisterSerializeDirect<EaseProperty, AudioCoordinate>(
-                nameof(Z),
-                owner => owner.Z,
-                (owner, obj) => owner.Z = obj,
-                new EasePropertyMetadata(Strings.Z, 0));
-
-            /// <summary>
-            /// Defines the <see cref="DirectionX"/> property.
-            /// </summary>
-            public static readonly DirectEditingProperty<AudioCoordinate, EaseProperty> CenterXProperty = EditingProperty.RegisterSerializeDirect<EaseProperty, AudioCoordinate>(
-                nameof(DirectionX),
-                owner => owner.DirectionX,
-                (owner, obj) => owner.DirectionX = obj,
-                new EasePropertyMetadata("Direction x", 0, float.NaN, float.NaN, true));
-
-            /// <summary>
-            /// Defines the <see cref="DirectionY"/> property.
-            /// </summary>
-            public static readonly DirectEditingProperty<AudioCoordinate, EaseProperty> CenterYProperty = EditingProperty.RegisterSerializeDirect<EaseProperty, AudioCoordinate>(
-                nameof(DirectionY),
-                owner => owner.DirectionY,
-                (owner, obj) => owner.DirectionY = obj,
-                new EasePropertyMetadata("Direction y", 0, float.NaN, float.NaN, true));
-
-            /// <summary>
-            /// Defines the <see cref="DirectionZ"/> property.
-            /// </summary>
-            public static readonly DirectEditingProperty<AudioCoordinate, EaseProperty> CenterZProperty = EditingProperty.RegisterSerializeDirect<EaseProperty, AudioCoordinate>(
-                nameof(DirectionZ),
-                owner => owner.DirectionZ,
-                (owner, obj) => owner.DirectionZ = obj,
-                new EasePropertyMetadata("Direction z", 0, float.NaN, float.NaN, true));
-
-            /// <summary>
-            /// Initializes a new instance of the <see cref="AudioCoordinate"/> class.
-            /// </summary>
-            /// <param name="metadata">Metadata of this property.</param>
-            /// <exception cref="ArgumentNullException"><paramref name="metadata"/> is <see langword="null"/>.</exception>
-#pragma warning disable CS8618
-            public AudioCoordinate(AudioCoordinateMetadata metadata) : base(metadata)
-#pragma warning restore CS8618
-            {
-            }
-
-            /// <summary>
-            /// Get the <see cref="EaseProperty"/> representing the X coordinate.
-            /// </summary>
-            public EaseProperty X { get; private set; }
-
-            /// <summary>
-            /// Get the <see cref="EaseProperty"/> representing the Y coordinate.
-            /// </summary>
-            public EaseProperty Y { get; private set; }
-
-            /// <summary>
-            /// Get the <see cref="EaseProperty"/> representing the Z coordinate.
-            /// </summary>
-            public EaseProperty Z { get; private set; }
-
-            /// <summary>
-            /// Get the <see cref="EaseProperty"/> representing the X coordinate.
-            /// </summary>
-            public EaseProperty DirectionX { get; private set; }
-
-            /// <summary>
-            /// Get the <see cref="EaseProperty"/> representing the Y coordinate.
-            /// </summary>
-            public EaseProperty DirectionY { get; private set; }
-
-            /// <summary>
-            /// Get the <see cref="EaseProperty"/> representing the Z coordinate.
-            /// </summary>
-            public EaseProperty DirectionZ { get; private set; }
-
-            /// <inheritdoc/>
-            public override IEnumerable<PropertyElement> GetProperties()
-            {
-                yield return X;
-                yield return Y;
-                yield return Z;
-                yield return DirectionX;
-                yield return DirectionY;
-                yield return DirectionZ;
-            }
-        }
-
-        /// <summary>
-        /// The metadata of <see cref="AudioCoordinate"/>.
-        /// </summary>
-        /// <param name="Name">The string displayed in the property header.</param>
-        public record AudioCoordinateMetadata(string Name) : PropertyElementMetadata(Name), IEditingPropertyInitializer<AudioCoordinate>
-        {
-            /// <inheritdoc/>
-            public AudioCoordinate Create()
-            {
-                return new(this);
             }
         }
     }

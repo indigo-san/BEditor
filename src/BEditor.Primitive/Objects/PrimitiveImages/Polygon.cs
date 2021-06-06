@@ -1,4 +1,11 @@
-﻿using System.Collections.Generic;
+﻿// Polygon.cs
+//
+// Copyright (C) BEditor
+//
+// This software may be modified and distributed under the terms
+// of the MIT license. See the LICENSE file for details.
+
+using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 
 using BEditor.Data;
@@ -33,11 +40,11 @@ namespace BEditor.Primitive.Objects
         /// <summary>
         /// Defines the <see cref="Number"/> property.
         /// </summary>
-        public static readonly DirectEditingProperty<Polygon, ValueProperty> NumberProperty = EditingProperty.RegisterSerializeDirect<ValueProperty, Polygon>(
+        public static readonly DirectEditingProperty<Polygon, ValueProperty> NumberProperty = EditingProperty.RegisterDirect<ValueProperty, Polygon>(
             nameof(Number),
             owner => owner.Number,
             (owner, obj) => owner.Number = obj,
-            new ValuePropertyMetadata("角", 3, Min: 3));
+            EditingPropertyOptions<ValueProperty>.Create(new ValuePropertyMetadata("角", 3, Min: 3)).Serialize());
 
         /// <summary>
         /// Defines the <see cref="Color"/> property.
@@ -47,7 +54,7 @@ namespace BEditor.Primitive.Objects
             (owner, obj) => owner.Color = obj);
 
         /// <summary>
-        /// Iniitializes a new instance of the <see cref="Polygon"/> class.
+        /// Initializes a new instance of the <see cref="Polygon"/> class.
         /// </summary>
         public Polygon()
         {

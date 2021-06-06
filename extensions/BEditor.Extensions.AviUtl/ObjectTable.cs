@@ -12,10 +12,14 @@ using BEditor.Media.Decoding;
 
 using Microsoft.Extensions.DependencyInjection;
 
+using Neo.IronLua;
+
 namespace BEditor.Extensions.AviUtl
 {
     public class ObjectTable
     {
+        internal delegate int RandomDelegate(int st_num, int ed_num, int? seed = null, int? frame = null);
+
         [AllowNull]
         internal static GraphicsContext _sharedGraphics;
         private readonly ImageObject _imageobj;
@@ -23,13 +27,15 @@ namespace BEditor.Extensions.AviUtl
         private readonly Frame _frame;
         private readonly Project _proj;
         private readonly Scene _scene;
+        private readonly ClipElement _clip;
         // クリップからの現在のフレーム
         private readonly Frame _rframe;
+        private readonly CustomSettings _settings;
         private DrawTarget _drawTarget = DrawTarget.FrameBuffer;
         private Image<BGRA32> _img;
         private Font _font;
         private int _fontsize = 16;
-        private Color _fontcolor = Color.Light;
+        private Color _fontcolor = Colors.White;
 
         public ObjectTable(EffectApplyArgs<Image<BGRA32>> args, ImageObject image)
         {
@@ -37,10 +43,12 @@ namespace BEditor.Extensions.AviUtl
             _frame = args.Frame;
             _img = args.Value;
             _imageobj = image;
+            _clip = image.Parent;
             _scene = image.Parent.Parent;
             _proj = image.Parent.Parent.Parent;
             _font = FontManager.Default.LoadedFonts.First();
             _rframe = args.Frame - image.Parent.Start;
+            _settings = (CustomSettings)Plugin.Default.Settings;
 
             if (_sharedGraphics is null)
             {
@@ -63,14 +71,14 @@ namespace BEditor.Extensions.AviUtl
 
         public float oy
         {
-            get => _imageobj.Coordinate.CenterY.Optional;
-            set => _imageobj.Coordinate.CenterY.Optional = value;
+            get => _settings.ReverseYAsis ? -_imageobj.Coordinate.CenterY.Optional : _imageobj.Coordinate.CenterY.Optional;
+            set => _imageobj.Coordinate.CenterY.Optional = _settings.ReverseYAsis ? -value : value;
         }
 
         public float oz
         {
-            get => _imageobj.Coordinate.CenterZ.Optional;
-            set => _imageobj.Coordinate.CenterZ.Optional = value;
+            get => _settings.ReverseYAsis ? -_imageobj.Coordinate.CenterZ.Optional : _imageobj.Coordinate.CenterZ.Optional;
+            set => _imageobj.Coordinate.CenterZ.Optional = _settings.ReverseYAsis ? -value : value;
         }
 
         public float rx
@@ -99,14 +107,14 @@ namespace BEditor.Extensions.AviUtl
 
         public float cy
         {
-            get => _imageobj.Coordinate.CenterY[_frame];
-            set => _imageobj.Coordinate.CenterY.Optional = value - cy;
+            get => _settings.ReverseYAsis ? -_imageobj.Coordinate.CenterY[_frame] : _imageobj.Coordinate.CenterY[_frame];
+            set => _imageobj.Coordinate.CenterY.Optional = _settings.ReverseYAsis ? -(value - cy) : (value - cy);
         }
 
         public float cz
         {
-            get => _imageobj.Coordinate.CenterZ[_frame];
-            set => _imageobj.Coordinate.CenterZ.Optional = value - cz;
+            get => _settings.ReverseYAsis ? -_imageobj.Coordinate.CenterZ[_frame] : _imageobj.Coordinate.CenterZ[_frame];
+            set => _imageobj.Coordinate.CenterZ.Optional = _settings.ReverseYAsis ? -(value - cz) : (value - cz);
         }
 
         public float zoom
@@ -123,32 +131,32 @@ namespace BEditor.Extensions.AviUtl
 
         public float aspect
         {
-            get => ToAspect(zoom_w, zoom_h);
+            get => ToAspect(_imageobj.Scale.ScaleX[_frame], _imageobj.Scale.ScaleY[_frame]);
             set
             {
-                var size = ToSize(MathF.Max(zoom_w, zoom_h), value);
-                zoom_w = size.Width;
-                zoom_h = size.Height;
+                var size = ToSize(MathF.Max(_imageobj.Scale.ScaleX[_frame], _imageobj.Scale.ScaleY[_frame]), value);
+                zoom_w = size.Width / 100f;
+                zoom_h = size.Height / 100f;
             }
         }
 
         public float zoom_w
         {
-            get => _imageobj.Scale.ScaleX[_frame];
-            set => _imageobj.Scale.ScaleX.Optional = value - zoom_w;
+            get => _imageobj.Scale.ScaleX[_frame] / 100;
+            set => _imageobj.Scale.ScaleX.Optional = (value - zoom_w) * 100;
         }
 
         public float zoom_h
         {
-            get => _imageobj.Scale.ScaleY[_frame];
-            set => _imageobj.Scale.ScaleY.Optional = value - zoom_h;
+            get => _imageobj.Scale.ScaleY[_frame] / 100;
+            set => _imageobj.Scale.ScaleY.Optional = (value - zoom_h) * 100;
         }
 
         public float x => _imageobj.Coordinate.X[_frame];
 
-        public float y => _imageobj.Coordinate.Y[_frame];
+        public float y => _settings.ReverseYAsis ? -_imageobj.Coordinate.Y[_frame] : _imageobj.Coordinate.Y[_frame];
 
-        public float z => _imageobj.Coordinate.Z[_frame];
+        public float z => _settings.ReverseYAsis ? -_imageobj.Coordinate.Z[_frame] : _imageobj.Coordinate.Z[_frame];
 
         public int w => _img.Width;
 
@@ -173,6 +181,18 @@ namespace BEditor.Extensions.AviUtl
         public int index => 0;
 
         public int num => 1;
+
+        public float track0 { get; set; }
+
+        public float track1 { get; set; }
+
+        public float track2 { get; set; }
+
+        public float track3 { get; set; }
+
+        public bool check0 { get; set; }
+
+        public int color { get; set; }
         #endregion
 
         #region Methods
@@ -203,12 +223,20 @@ namespace BEditor.Extensions.AviUtl
             var ctxt = GetContext();
             ctxt.MakeCurrentAndBindFbo();
             using var texture = Texture.FromImage(_img);
-            texture.Transform = _drawTarget is DrawTarget.FrameBuffer ?
-                new(new(x, y, z), new(ox, oy, oz), new(rx, ry, rz), new(zoom, zoom, zoom)) :
-                new(new(ox, oy, oz), default, new(rx, ry, rz), new(zoom, zoom, zoom));
+            if (_settings.ReverseYAsis)
+            {
+                texture.Transform = _drawTarget is DrawTarget.FrameBuffer ?
+                    new(new(x, -y, -z), new(ox, -oy, -oz), new(rx, ry, rz), new(zoom, zoom, zoom)) :
+                    new(new(ox, -oy, -oz), default, new(rx, ry, rz), new(zoom, zoom, zoom));
+            }
+            else
+            {
+                texture.Transform = _drawTarget is DrawTarget.FrameBuffer ?
+                    new(new(x, y, z), new(ox, oy, oz), new(rx, ry, rz), new(zoom, zoom, zoom)) :
+                    new(new(ox, oy, oz), default, new(rx, ry, rz), new(zoom, zoom, zoom));
+            }
 
             texture.Color = Color.FromARGB((byte)(255 * alpha), 255, 255, 255);
-
             ctxt.DrawTexture(texture);
         }
 
@@ -239,18 +267,34 @@ namespace BEditor.Extensions.AviUtl
         {
             var ctxt = GetContext();
             ctxt.MakeCurrentAndBindFbo();
+            Texture texture;
 
-            using var texture = Texture.FromImage(_img, new[]
+            if (_settings.ReverseYAsis)
             {
-                x0, y0, z0,  0, 0,
-                x1, y1, z1,  1, 0,
-                x2, y2, z2,  1, 1,
-                x3, y3, z3,  0, 1,
-            });
-            texture.Transform = _drawTarget is DrawTarget.FrameBuffer ?
-                new(new(x, y, z), default, new(rx, ry, rz), new(zoom, zoom, zoom)) :
-                new(default, default, new(0, 0, 0), new(1, 1, 1));
-
+                texture = Texture.FromImage(_img, new[]
+                {
+                    x0, -y0, -z0,  0, 0,
+                    x1, -y1, -z1,  1, 0,
+                    x2, -y2, -z2,  1, 1,
+                    x3, -y3, -z3,  0, 1,
+                });
+                texture.Transform = _drawTarget is DrawTarget.FrameBuffer ?
+                    new(new(x, -y, -z), default, new(rx, ry, rz), new(zoom, zoom, zoom)) :
+                    new(default, default, new(0, 0, 0), new(1, 1, 1));
+            }
+            else
+            {
+                texture = Texture.FromImage(_img, new[]
+                {
+                    x0, y0, z0,  0, 0,
+                    x1, y1, z1,  1, 0,
+                    x2, y2, z2,  1, 1,
+                    x3, y3, z3,  0, 1,
+                });
+                texture.Transform = _drawTarget is DrawTarget.FrameBuffer ?
+                    new(new(x, y, z), default, new(rx, ry, rz), new(zoom, zoom, zoom)) :
+                    new(default, default, new(0, 0, 0), new(1, 1, 1));
+            }
             texture.Color = Color.FromARGB((byte)(255 * alpha), 255, 255, 255);
 
             ctxt.DrawTexture(texture);
@@ -295,17 +339,34 @@ namespace BEditor.Extensions.AviUtl
             ctxt.MakeCurrentAndBindFbo();
             var w = _img.Width;
             var h = _img.Height;
+            Texture texture;
 
-            using var texture = Texture.FromImage(_img, new[]
+            if (_settings.ReverseYAsis)
             {
-                x0, y0, z0,  u0 / w, v0 / h,
-                x1, y1, z1,  u1 / w, v1 / h,
-                x2, y2, z2,  u2 / w, v2 / h,
-                x3, y3, z3,  u3 / w, v3 / h,
-            });
-            texture.Transform = _drawTarget is DrawTarget.FrameBuffer ?
-                new(new(x, y, z), default, new(rx, ry, rz), new(zoom, zoom, zoom)) :
-                new(default, default, new(0, 0, 0), new(1, 1, 1));
+                texture = Texture.FromImage(_img, new[]
+                {
+                    x0, -y0, -z0,  u0 / w, v0 / h,
+                    x1, -y1, -z1,  u1 / w, v1 / h,
+                    x2, -y2, -z2,  u2 / w, v2 / h,
+                    x3, -y3, -z3,  u3 / w, v3 / h,
+                });
+                texture.Transform = _drawTarget is DrawTarget.FrameBuffer ?
+                    new(new(x, -y, -z), default, new(rx, ry, rz), new(zoom, zoom, zoom)) :
+                    new(default, default, new(0, 0, 0), new(1, 1, 1));
+            }
+            else
+            {
+                texture = Texture.FromImage(_img, new[]
+                {
+                    x0, y0, z0,  u0 / w, v0 / h,
+                    x1, y1, z1,  u1 / w, v1 / h,
+                    x2, y2, z2,  u2 / w, v2 / h,
+                    x3, y3, z3,  u3 / w, v3 / h,
+                });
+                texture.Transform = _drawTarget is DrawTarget.FrameBuffer ?
+                    new(new(x, y, z), default, new(rx, ry, rz), new(zoom, zoom, zoom)) :
+                    new(default, default, new(0, 0, 0), new(1, 1, 1));
+            }
 
             texture.Color = Color.FromARGB((byte)(255 * alpha), 255, 255, 255);
 
@@ -389,12 +450,38 @@ namespace BEditor.Extensions.AviUtl
             _font = FontManager.Default.Find(f => f.FamilyName == name) ?? _font;
             _fontsize = size;
             _fontcolor = Color.FromARGB(col1);
-
         }
 
-        public int rand(int st_num, int ed_num, int seed = -1, int frame = -1)
+        public int rand(int st_num, int ed_num, int? seed = null, int? frame = null)
         {
-            throw new NotImplementedException();
+            seed ??= Math.Abs(_imageobj.Id.GetHashCode());
+
+            if (seed < 0)
+            {
+                frame ??= _frame;
+                var rand = new RandomStruct((int)seed);
+                var value = 0;
+
+                for (var i = 0; i < frame; i++)
+                {
+                    value = rand.Next(st_num, ed_num);
+                }
+
+                return value;
+            }
+            else
+            {
+                frame ??= this.frame;
+                var rand = new RandomStruct((int)seed);
+                var value = 0;
+
+                for (var i = 0; i < frame; i++)
+                {
+                    value = rand.Next(st_num, ed_num);
+                }
+
+                return value;
+            }
         }
 
         public void setoption(string name, params dynamic[] value)
@@ -427,9 +514,68 @@ namespace BEditor.Extensions.AviUtl
         //{
 
         //}
+
+        public LuaResult interpolation(
+            float time,
+            float x0, float y0, float z0,
+            float x1, float y1, float z1,
+            float x2, float y2, float z2,
+            float x3, float y3, float z3)
+        {
+            var result = InterpolationPrivate(time, x0, y0, z0, x1, y1, z1, x2, y2, z2, x3, y3, z3);
+            return new(result.x, result.y, result.z);
+        }
+
+        public LuaResult interpolation(
+            float time,
+            float x0, float y0,
+            float x1, float y1,
+            float x2, float y2,
+            float x3, float y3)
+        {
+            var result = InterpolationPrivate(time, x0, y0, 0, x1, y1, 0, x2, y2, 0, x3, y3, 0);
+            return new(result.x, result.y);
+        }
+
+        public LuaResult interpolation(float time, float x0, float x1, float x2, float x3)
+        {
+            var result = InterpolationPrivate(time, x0, 0, 0, x1, 0, 0, x2, 0, 0, x3, 0, 0);
+            return new(result.x);
+        }
         #endregion
 
 #pragma warning restore IDE1006, CA1822, IDE0060
+
+        private (float x, float y, float z) InterpolationPrivate(
+            float time,
+            float x0, float y0, float z0,
+            float x1, float y1, float z1,
+            float x2, float y2, float z2,
+            float x3, float y3, float z3)
+        {
+            if (_settings.ReverseYAsis)
+            {
+                var curve = new BezierCurveCubic(
+                    new(x0, -y0, -z0),
+                    new(x3, -y3, -z3),
+                    new(x1, -y1, -z1),
+                    new(x2, -y2, -z2));
+
+                var result = curve.CalculatePoint(time);
+                return (result.X, result.Y, result.Z);
+            }
+            else
+            {
+                var curve = new BezierCurveCubic(
+                    new(x0, y0, z0),
+                    new(x3, y3, z3),
+                    new(x1, y1, z1),
+                    new(x2, y2, z2));
+
+                var result = curve.CalculatePoint(time);
+                return (result.X, result.Y, result.Z);
+            }
+        }
 
         private static dynamic? GetArgValue(dynamic[] args, int index, dynamic? @default)
         {

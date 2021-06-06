@@ -1,14 +1,18 @@
-﻿using System.Collections.Generic;
+﻿// Text.cs
+//
+// Copyright (C) BEditor
+//
+// This software may be modified and distributed under the terms
+// of the MIT license. See the LICENSE file for details.
+
+using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
-using System.Linq;
-using System.Numerics;
 
 using BEditor.Data;
 using BEditor.Data.Primitive;
 using BEditor.Data.Property;
 using BEditor.Drawing;
 using BEditor.Drawing.Pixel;
-using BEditor.Graphics;
 using BEditor.Primitive.Resources;
 
 namespace BEditor.Primitive.Objects
@@ -21,84 +25,75 @@ namespace BEditor.Primitive.Objects
         /// <summary>
         /// Defines the <see cref="Size"/> property.
         /// </summary>
-        public static readonly DirectEditingProperty<Text, EaseProperty> SizeProperty = EditingProperty.RegisterSerializeDirect<EaseProperty, Text>(
+        public static readonly DirectEditingProperty<Text, EaseProperty> SizeProperty = EditingProperty.RegisterDirect<EaseProperty, Text>(
             nameof(Size),
             owner => owner.Size,
             (owner, obj) => owner.Size = obj,
-            new EasePropertyMetadata(Strings.Size, 100, float.NaN, 0));
+            EditingPropertyOptions<EaseProperty>.Create(new EasePropertyMetadata(Strings.Size, 100, float.NaN, 0)).Serialize());
 
         /// <summary>
         /// Defines the <see cref="LineSpacing"/> property.
         /// </summary>
-        public static readonly DirectEditingProperty<Text, EaseProperty> LineSpacingProperty = EditingProperty.RegisterSerializeDirect<EaseProperty, Text>(
+        public static readonly DirectEditingProperty<Text, EaseProperty> LineSpacingProperty = EditingProperty.RegisterDirect<EaseProperty, Text>(
             nameof(LineSpacing),
             owner => owner.LineSpacing,
             (owner, obj) => owner.LineSpacing = obj,
-            new EasePropertyMetadata(Strings.LineSpacing, 0, float.NaN, 0));
+            EditingPropertyOptions<EaseProperty>.Create(new EasePropertyMetadata(Strings.LineSpacing, 0, float.NaN, 0)).Serialize());
 
         /// <summary>
         /// Defines the <see cref="Color"/> property.
         /// </summary>
-        public static readonly DirectEditingProperty<Text, ColorProperty> ColorProperty = EditingProperty.RegisterSerializeDirect<ColorProperty, Text>(
+        public static readonly DirectEditingProperty<Text, ColorProperty> ColorProperty = EditingProperty.RegisterDirect<ColorProperty, Text>(
             nameof(Color),
             owner => owner.Color,
             (owner, obj) => owner.Color = obj,
-            new ColorPropertyMetadata(Strings.Color, Drawing.Color.Light));
+            EditingPropertyOptions<ColorProperty>.Create(new ColorPropertyMetadata(Strings.Color, Colors.White)).Serialize());
 
         /// <summary>
         /// Defines the <see cref="Color"/> property.
         /// </summary>
-        public static readonly DirectEditingProperty<Text, FontProperty> FontProperty = EditingProperty.RegisterSerializeDirect<FontProperty, Text>(
+        public static readonly DirectEditingProperty<Text, FontProperty> FontProperty = EditingProperty.RegisterDirect<FontProperty, Text>(
             nameof(Font),
             owner => owner.Font,
             (owner, obj) => owner.Font = obj,
-            new FontPropertyMetadata());
+            EditingPropertyOptions<FontProperty>.Create(new FontPropertyMetadata()).Serialize());
 
         /// <summary>
         /// Defines the <see cref="HorizontalAlign"/> property.
         /// </summary>
-        public static readonly DirectEditingProperty<Text, SelectorProperty> HorizontalAlignProperty = EditingProperty.RegisterSerializeDirect<SelectorProperty, Text>(
+        public static readonly DirectEditingProperty<Text, SelectorProperty> HorizontalAlignProperty = EditingProperty.RegisterDirect<SelectorProperty, Text>(
             nameof(HorizontalAlign),
             owner => owner.HorizontalAlign,
             (owner, obj) => owner.HorizontalAlign = obj,
-            new SelectorPropertyMetadata(Strings.HorizontalAlignment, new[]
+            EditingPropertyOptions<SelectorProperty>.Create(new SelectorPropertyMetadata(Strings.HorizontalAlignment, new[]
             {
                 Strings.Left,
                 Strings.Center,
-                Strings.Right
-            }));
+                Strings.Right,
+            })).Serialize());
 
         /// <summary>
         /// Defines the <see cref="VerticalAlign"/> property.
         /// </summary>
-        public static readonly DirectEditingProperty<Text, SelectorProperty> VerticalAlignProperty = EditingProperty.RegisterSerializeDirect<SelectorProperty, Text>(
+        public static readonly DirectEditingProperty<Text, SelectorProperty> VerticalAlignProperty = EditingProperty.RegisterDirect<SelectorProperty, Text>(
             nameof(VerticalAlign),
             owner => owner.VerticalAlign,
             (owner, obj) => owner.VerticalAlign = obj,
-            new SelectorPropertyMetadata(Strings.VerticalAlignment, new[]
+            EditingPropertyOptions<SelectorProperty>.Create(new SelectorPropertyMetadata(Strings.VerticalAlignment, new[]
             {
                 Strings.Top,
                 Strings.Center,
-                Strings.Bottom
-            }));
+                Strings.Bottom,
+            })).Serialize());
 
         /// <summary>
         /// Defines the <see cref="Document"/> property.
         /// </summary>
-        public static readonly DirectEditingProperty<Text, DocumentProperty> DocumentProperty = EditingProperty.RegisterSerializeDirect<DocumentProperty, Text>(
+        public static readonly DirectEditingProperty<Text, DocumentProperty> DocumentProperty = EditingProperty.RegisterDirect<DocumentProperty, Text>(
             nameof(Document),
             owner => owner.Document,
             (owner, obj) => owner.Document = obj,
-            new DocumentPropertyMetadata(string.Empty));
-
-        /// <summary>
-        /// Defines the <see cref="EnableMultiple"/> property.
-        /// </summary>
-        public static readonly DirectEditingProperty<Text, CheckProperty> EnableMultipleProperty = EditingProperty.RegisterSerializeDirect<CheckProperty, Text>(
-            nameof(EnableMultiple),
-            owner => owner.EnableMultiple,
-            (owner, obj) => owner.EnableMultiple = obj,
-            new CheckPropertyMetadata(Strings.EnableMultipleObjects));
+            EditingPropertyOptions<DocumentProperty>.Create(new DocumentPropertyMetadata(string.Empty)).Serialize());
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Text"/> class.
@@ -147,12 +142,6 @@ namespace BEditor.Primitive.Objects
         public SelectorProperty VerticalAlign { get; private set; }
 
         /// <summary>
-        /// Gets whether or not to enable multiple objects.
-        /// </summary>
-        [AllowNull]
-        public CheckProperty EnableMultiple { get; private set; }
-
-        /// <summary>
         /// Gets the string to be drawn.
         /// </summary>
         [AllowNull]
@@ -172,7 +161,6 @@ namespace BEditor.Primitive.Objects
             yield return Font;
             yield return HorizontalAlign;
             yield return VerticalAlign;
-            yield return EnableMultiple;
             yield return Document;
         }
 
@@ -187,31 +175,6 @@ namespace BEditor.Primitive.Objects
                 (HorizontalAlign)HorizontalAlign.Index,
                 (VerticalAlign)VerticalAlign.Index,
                 LineSpacing[args.Frame]);
-        }
-
-        /// <inheritdoc/>
-        protected override void OnRender(EffectApplyArgs<IEnumerable<ImageInfo>> args)
-        {
-            if (!EnableMultiple.Value)
-            {
-                args.Value = new ImageInfo[]
-                {
-                    new(OnRender(args as EffectApplyArgs), _ => default)
-                };
-
-                return;
-            }
-            args.Value = Document.Value
-                .Select((c, index) => (Image.Text(c.ToString(), Font.Value, Size[args.Frame], Color.Value, (HorizontalAlign)HorizontalAlign.Index, (VerticalAlign)VerticalAlign.Index, LineSpacing[args.Frame]), index))
-                .Select(t =>
-                {
-                    return new ImageInfo(t.Item1, img => GetTransform(img.Source.Width * t.index, 0));
-                });
-        }
-
-        private static Transform GetTransform(int x, int y)
-        {
-            return new Transform(new(x, y, 0), Vector3.Zero, Vector3.Zero, Vector3.Zero);
         }
     }
 }

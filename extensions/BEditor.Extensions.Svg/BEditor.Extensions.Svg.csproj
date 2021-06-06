@@ -1,19 +1,20 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <Import Project="..\..\props\plugin.props" />
+    <Import Project="..\..\props\plugin.props" />
 
-  <PropertyGroup>
-    <TargetFramework>net5.0</TargetFramework>
-    <Nullable>enable</Nullable>
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-  </PropertyGroup>
+    <PropertyGroup>
+        <OutputPath>..\..\src\BEditor.Avalonia\bin\$(Configuration)\net5.0\user\plugins\BEditor.Extensions.Svg</OutputPath>
+        <Company>b-editor</Company>
+        <Copyright>MIT License</Copyright>
+        <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+    </PropertyGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\..\src\BEditor.Core\BEditor.Core.csproj" />
-  </ItemGroup>
+    <ItemGroup>
+        <ProjectReference Include="..\..\src\BEditor.Core\BEditor.Core.csproj" />
+    </ItemGroup>
 
-  <ItemGroup>
-    <PackageReference Include="Svg.Skia" Version="0.5.4.3" />
-  </ItemGroup>
+    <ItemGroup>
+        <PackageReference Include="Svg.Skia" Version="0.5.5.5" />
+    </ItemGroup>
 
 </Project>

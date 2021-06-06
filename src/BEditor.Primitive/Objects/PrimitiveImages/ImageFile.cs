@@ -1,4 +1,11 @@
-﻿using System.Collections.Generic;
+﻿// ImageFile.cs
+//
+// Copyright (C) BEditor
+//
+// This software may be modified and distributed under the terms
+// of the MIT license. See the LICENSE file for details.
+
+using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Reactive.Linq;
@@ -22,17 +29,17 @@ namespace BEditor.Primitive.Objects
         /// <summary>
         /// Defines the <see cref="File"/> property.
         /// </summary>
-        public static readonly DirectEditingProperty<ImageFile, FileProperty> FileProperty = EditingProperty.RegisterSerializeDirect<FileProperty, ImageFile>(
+        public static readonly DirectEditingProperty<ImageFile, FileProperty> FileProperty = EditingProperty.RegisterDirect<FileProperty, ImageFile>(
             nameof(File),
             owner => owner.File,
             (owner, obj) => owner.File = obj,
-            new FilePropertyMetadata(Strings.File, "", new(Strings.ImageFile, new FileExtension[]
+            EditingPropertyOptions<FileProperty>.Create(new FilePropertyMetadata(Strings.File, string.Empty, new(Strings.ImageFile, new FileExtension[]
             {
                 new("png"),
                 new("jpeg"),
                 new("jpg"),
                 new("bmp"),
-            })));
+            }))).Serialize());
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ImageFile"/> class.
@@ -83,7 +90,6 @@ namespace BEditor.Primitive.Objects
                     return Image.Decode(stream);
                 })
                 .ToReactiveProperty();
-
         }
 
         /// <inheritdoc/>

@@ -1,7 +1,16 @@
-﻿using System;
+﻿// Serialize.cs
+//
+// Copyright (C) BEditor
+//
+// This software may be modified and distributed under the terms
+// of the MIT license. See the LICENSE file for details.
+
+using System;
 using System.IO;
 using System.Runtime.Serialization;
+using System.Text.Encodings.Web;
 using System.Text.Json;
+using System.Text.Unicode;
 using System.Threading.Tasks;
 
 using BEditor.Data;
@@ -11,35 +20,23 @@ using Microsoft.Extensions.Logging;
 namespace BEditor
 {
     /// <summary>
-    /// Represents the mode of serialization.
-    /// </summary>
-    public enum SerializeMode
-    {
-        /// <summary>
-        /// The binary.
-        /// </summary>
-        Binary,
-
-        /// <summary>
-        /// The json.
-        /// </summary>
-        Json,
-    }
-
-    /// <summary>
     /// Represents a class that uses the <see cref="System.Text.Json"/> to provide methods for serialization, cloning, etc.
     /// </summary>
     public static class Serialize
     {
-#pragma warning disable RCS1163, IDE0060
+        internal static readonly JsonWriterOptions _options = new()
+        {
+            Indented = true,
+            Encoder = JavaScriptEncoder.Create(UnicodeRanges.All),
+        };
+
         /// <summary>
         /// Reads and restores the contents of an object from a stream.
         /// </summary>
         /// <typeparam name="T">Type of the object to be loaded.</typeparam>
         /// <param name="stream">Stream to load.</param>
-        /// <param name="mode">This is the mode of serialization.</param>
         /// <returns>Returns the restored object on success, <see langword="null"/> otherwise.</returns>
-        public static async Task<T?> LoadFromStreamAsync<T>(Stream stream, SerializeMode mode = SerializeMode.Binary)
+        public static async Task<T?> LoadFromStreamAsync<T>(Stream stream)
             where T : IJsonObject
         {
             try
@@ -64,9 +61,9 @@ namespace BEditor
         /// </summary>
         /// <typeparam name="T">Type of the object to be loaded.</typeparam>
         /// <param name="stream">Stream to load.</param>
-        /// <param name="mode">This is the mode of serialization.</param>
         /// <returns>Returns the restored object on success, <see langword="null"/> otherwise.</returns>
-        public static T? LoadFromStream<T>(Stream stream, SerializeMode mode = SerializeMode.Binary) where T : IJsonObject
+        public static T? LoadFromStream<T>(Stream stream)
+            where T : IJsonObject
         {
             try
             {
@@ -90,9 +87,8 @@ namespace BEditor
         /// </summary>
         /// <typeparam name="T">Type of the object to be loaded.</typeparam>
         /// <param name="path">The name of the file to load.</param>
-        /// <param name="mode">This is the mode of serialization.</param>
         /// <returns>Returns the restored object on success, <see langword="null"/> otherwise.</returns>
-        public static async Task<T?> LoadFromFileAsync<T>(string path, SerializeMode mode = SerializeMode.Binary)
+        public static async Task<T?> LoadFromFileAsync<T>(string path)
             where T : IJsonObject
         {
             try
@@ -117,9 +113,9 @@ namespace BEditor
         /// </summary>
         /// <typeparam name="T">Type of the object to be loaded.</typeparam>
         /// <param name="path">The name of the file to load.</param>
-        /// <param name="mode">This is the mode of serialization.</param>
         /// <returns>Returns the restored object on success, <see langword="null"/> otherwise.</returns>
-        public static T? LoadFromFile<T>(string path, SerializeMode mode = SerializeMode.Binary) where T : IJsonObject
+        public static T? LoadFromFile<T>(string path)
+            where T : IJsonObject
         {
             try
             {
@@ -144,14 +140,14 @@ namespace BEditor
         /// <typeparam name="T">Type of the object to be saved.</typeparam>
         /// <param name="obj">The object to save.</param>
         /// <param name="stream">The stream to save to.</param>
-        /// <param name="mode">This is the mode of serialization.</param>
-        public static async Task<bool> SaveToStreamAsync<T>(T obj, Stream stream, SerializeMode mode = SerializeMode.Binary)
+        /// <returns>Returns <see langword="true"/> if the save was successful, <see langword="false"/> otherwise.</returns>
+        public static async Task<bool> SaveToStreamAsync<T>(T obj, Stream stream)
             where T : IJsonObject
         {
             try
             {
                 stream.Position = 0;
-                await using var writer = new Utf8JsonWriter(stream, new() { Indented = true });
+                await using var writer = new Utf8JsonWriter(stream, _options);
 
                 writer.WriteStartObject();
 
@@ -176,14 +172,14 @@ namespace BEditor
         /// <typeparam name="T">Type of the object to be saved.</typeparam>
         /// <param name="obj">The object to save.</param>
         /// <param name="stream">The stream to save to.</param>
-        /// <param name="mode">This is the mode of serialization.</param>
-        public static bool SaveToStream<T>(T obj, Stream stream, SerializeMode mode = SerializeMode.Binary)
+        /// <returns>Returns <see langword="true"/> if the save was successful, <see langword="false"/> otherwise.</returns>
+        public static bool SaveToStream<T>(T obj, Stream stream)
             where T : IJsonObject
         {
             try
             {
                 stream.Position = 0;
-                using var writer = new Utf8JsonWriter(stream, new() { Indented = true });
+                using var writer = new Utf8JsonWriter(stream, _options);
 
                 writer.WriteStartObject();
 
@@ -208,14 +204,14 @@ namespace BEditor
         /// <typeparam name="T">Type of the object to be saved.</typeparam>
         /// <param name="obj">The object to save.</param>
         /// <param name="path">The name of the file to save to.</param>
-        /// <param name="mode">This is the mode of serialization.</param>
-        public static async Task<bool> SaveToFileAsync<T>(T obj, string path, SerializeMode mode = SerializeMode.Binary)
+        /// <returns>Returns <see langword="true"/> if the save was successful, <see langword="false"/> otherwise.</returns>
+        public static async Task<bool> SaveToFileAsync<T>(T obj, string path)
             where T : IJsonObject
         {
             try
             {
                 await using var stream = new FileStream(path, FileMode.Create);
-                await using var writer = new Utf8JsonWriter(stream, new() { Indented = true });
+                await using var writer = new Utf8JsonWriter(stream, _options);
 
                 writer.WriteStartObject();
 
@@ -240,13 +236,14 @@ namespace BEditor
         /// <typeparam name="T">Type of the object to be saved.</typeparam>
         /// <param name="obj">The object to save.</param>
         /// <param name="path">The name of the file to save to.</param>
-        /// <param name="mode">This is the mode of serialization.</param>
-        public static bool SaveToFile<T>(T obj, string path, SerializeMode mode = SerializeMode.Binary) where T : IJsonObject
+        /// <returns>Returns <see langword="true"/> if the save was successful, <see langword="false"/> otherwise.</returns>
+        public static bool SaveToFile<T>(T obj, string path)
+            where T : IJsonObject
         {
             try
             {
                 using var stream = new FileStream(path, FileMode.Create);
-                using var writer = new Utf8JsonWriter(stream, new() { Indented = true });
+                using var writer = new Utf8JsonWriter(stream, _options);
 
                 writer.WriteStartObject();
 
@@ -270,17 +267,12 @@ namespace BEditor
         /// </summary>
         /// <typeparam name="T">Type of the object to be clone.</typeparam>
         /// <param name="obj">The object to clone.</param>
-        public static async Task<T?> DeepCloneAsync<T>(this T obj) where T : IJsonObject
+        /// <returns>Returns the cloned object if it can be replicated, or <see langword="null"/> if it fails.</returns>
+        public static async Task<T?> DeepCloneAsync<T>(this T obj)
+            where T : IJsonObject
         {
             using var ms = new MemoryStream();
-            if (await SaveToStreamAsync(obj, ms))
-            {
-                return await LoadFromStreamAsync<T>(ms);
-            }
-            else
-            {
-                return default;
-            }
+            return await SaveToStreamAsync(obj, ms) ? await LoadFromStreamAsync<T>(ms) : default;
         }
 
         /// <summary>
@@ -288,7 +280,9 @@ namespace BEditor
         /// </summary>
         /// <typeparam name="T">Type of the object to be clone.</typeparam>
         /// <param name="obj">The object to clone.</param>
-        public static T? DeepClone<T>(this T obj) where T : IJsonObject
+        /// <returns>Returns the cloned object if it can be replicated, or <see langword="null"/> if it fails.</returns>
+        public static T? DeepClone<T>(this T obj)
+            where T : IJsonObject
         {
             using var ms = new MemoryStream();
             if (SaveToStream(obj, ms))
@@ -303,12 +297,7 @@ namespace BEditor
 
         private static void Log(Exception e)
         {
-            if (LogManager.Logger is not null)
-            {
-                LogManager.Logger.LogWarning(e, "Failed to serialize or deserialize.");
-            }
+            LogManager.Logger?.LogWarning(e, "Failed to serialize or deserialize.");
         }
-
-#pragma warning restore IDE0060, RCS1163
     }
 }

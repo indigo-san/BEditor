@@ -1,4 +1,11 @@
-﻿using System.Collections.Generic;
+﻿// ImageObject.cs
+//
+// Copyright (C) BEditor
+//
+// This software may be modified and distributed under the terms
+// of the MIT license. See the LICENSE file for details.
+
+using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 
@@ -21,47 +28,47 @@ namespace BEditor.Data.Primitive
         /// <summary>
         /// Defines the <see cref="Coordinate"/> property.
         /// </summary>
-        public static readonly DirectEditingProperty<ImageObject, Coordinate> CoordinateProperty = EditingProperty.RegisterSerializeDirect<Coordinate, ImageObject>(
+        public static readonly DirectEditingProperty<ImageObject, Coordinate> CoordinateProperty = EditingProperty.RegisterDirect<Coordinate, ImageObject>(
             nameof(Coordinate),
             owner => owner.Coordinate,
             (owner, obj) => owner.Coordinate = obj,
-            new CoordinateMetadata(Strings.Coordinate));
+            EditingPropertyOptions<Coordinate>.Create(new CoordinateMetadata(Strings.Coordinate)).Serialize());
 
         /// <summary>
         /// Defines the <see cref="Scale"/> property.
         /// </summary>
-        public static readonly DirectEditingProperty<ImageObject, Scale> ScaleProperty = EditingProperty.RegisterSerializeDirect<Scale, ImageObject>(
+        public static readonly DirectEditingProperty<ImageObject, Scale> ScaleProperty = EditingProperty.RegisterDirect<Scale, ImageObject>(
             nameof(Scale),
             owner => owner.Scale,
             (owner, obj) => owner.Scale = obj,
-            new ScaleMetadata(Strings.Scale));
+            EditingPropertyOptions<Scale>.Create(new ScaleMetadata(Strings.Scale)).Serialize());
 
         /// <summary>
         /// Defines the <see cref="Blend"/> property.
         /// </summary>
-        public static readonly DirectEditingProperty<ImageObject, Blend> BlendProperty = EditingProperty.RegisterSerializeDirect<Blend, ImageObject>(
+        public static readonly DirectEditingProperty<ImageObject, Blend> BlendProperty = EditingProperty.RegisterDirect<Blend, ImageObject>(
             nameof(Blend),
             owner => owner.Blend,
             (owner, obj) => owner.Blend = obj,
-            new BlendMetadata(Strings.Blend));
+            EditingPropertyOptions<Blend>.Create(new BlendMetadata(Strings.Blend)).Serialize());
 
         /// <summary>
         /// Defines the <see cref="Rotate"/> property.
         /// </summary>
-        public static readonly DirectEditingProperty<ImageObject, Rotate> RotateProperty = EditingProperty.RegisterSerializeDirect<Rotate, ImageObject>(
+        public static readonly DirectEditingProperty<ImageObject, Rotate> RotateProperty = EditingProperty.RegisterDirect<Rotate, ImageObject>(
             nameof(Rotate),
             owner => owner.Rotate,
             (owner, obj) => owner.Rotate = obj,
-            new RotateMetadata(Strings.Rotate));
+            EditingPropertyOptions<Rotate>.Create(new RotateMetadata(Strings.Rotate)).Serialize());
 
         /// <summary>
         /// Defines the <see cref="Rotate"/> property.
         /// </summary>
-        public static readonly DirectEditingProperty<ImageObject, Property.PrimitiveGroup.Material> MaterialProperty = EditingProperty.RegisterSerializeDirect<Property.PrimitiveGroup.Material, ImageObject>(
+        public static readonly DirectEditingProperty<ImageObject, Property.PrimitiveGroup.Material> MaterialProperty = EditingProperty.RegisterDirect<Property.PrimitiveGroup.Material, ImageObject>(
             nameof(Material),
             owner => owner.Material,
             (owner, obj) => owner.Material = obj,
-            new MaterialMetadata(Strings.Material));
+            EditingPropertyOptions<Property.PrimitiveGroup.Material>.Create(new MaterialMetadata(Strings.Material)).Serialize());
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ImageObject"/> class.
@@ -158,6 +165,8 @@ namespace BEditor.Data.Primitive
         /// <summary>
         /// Render the image.
         /// </summary>
+        /// <param name="args">The data used to apply the effect.</param>
+        /// <param name="image">Returns the rendered image.</param>
         public void Render(EffectApplyArgs args, out Image<BGRA32>? image)
         {
             // Todo: 多重オブジェクトに対応させる
@@ -269,19 +278,22 @@ namespace BEditor.Data.Primitive
             static void DrawLine(GraphicsContext context, float width, float height, Transform trans)
             {
                 // 右上～右下
-                context.DrawLine(new(width, height, 0), new(width, -height, 0), 1.5f, trans, Color.Light);
+                context.DrawLine(new(width, height, 0), new(width, -height, 0), 1.5f, trans, Colors.White);
 
                 // 右下～左下
-                context.DrawLine(new(width, -height, 0), new(-width, -height, 0), 1.5f, trans, Color.Light);
+                context.DrawLine(new(width, -height, 0), new(-width, -height, 0), 1.5f, trans, Colors.White);
 
                 // 左下～左上
-                context.DrawLine(new(-width, -height, 0), new(-width, height, 0), 1.5f, trans, Color.Light);
+                context.DrawLine(new(-width, -height, 0), new(-width, height, 0), 1.5f, trans, Colors.White);
 
                 // 左上～右上
-                context.DrawLine(new(-width, height, 0), new(width, height, 0), 1.5f, trans, Color.Light);
+                context.DrawLine(new(-width, height, 0), new(width, height, 0), 1.5f, trans, Colors.White);
             }
 
-            if (image.Source.IsDisposed || args.Handled) return;
+            if (image.Source.IsDisposed || args.Handled)
+            {
+                return;
+            }
 
             var frame = args.Frame;
 

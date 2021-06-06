@@ -1,4 +1,11 @@
-﻿using System.Collections.Generic;
+﻿// Negaposi.cs
+//
+// Copyright (C) BEditor
+//
+// This software may be modified and distributed under the terms
+// of the MIT license. See the LICENSE file for details.
+
+using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 
 using BEditor.Data;
@@ -11,36 +18,36 @@ using BEditor.Primitive.Resources;
 namespace BEditor.Primitive.Effects
 {
     /// <summary>
-    /// 
+    /// Represents the effect of flipping an image negative-positive.
     /// </summary>
     public sealed class Negaposi : ImageEffect
     {
         /// <summary>
         /// Defines the <see cref="Red"/> property.
         /// </summary>
-        public static readonly DirectEditingProperty<Negaposi, EaseProperty> RedProperty = EditingProperty.RegisterSerializeDirect<EaseProperty, Negaposi>(
+        public static readonly DirectEditingProperty<Negaposi, EaseProperty> RedProperty = EditingProperty.RegisterDirect<EaseProperty, Negaposi>(
             nameof(Red),
             owner => owner.Red,
             (owner, obj) => owner.Red = obj,
-            new EasePropertyMetadata(Strings.Red, 255, 255, 0));
+            EditingPropertyOptions<EaseProperty>.Create(new EasePropertyMetadata(Strings.Red, 255, 255, 0)).Serialize());
 
         /// <summary>
         /// Defines the <see cref="Green"/> property.
         /// </summary>
-        public static readonly DirectEditingProperty<Negaposi, EaseProperty> GreenProperty = EditingProperty.RegisterSerializeDirect<EaseProperty, Negaposi>(
+        public static readonly DirectEditingProperty<Negaposi, EaseProperty> GreenProperty = EditingProperty.RegisterDirect<EaseProperty, Negaposi>(
             nameof(Green),
             owner => owner.Green,
             (owner, obj) => owner.Green = obj,
-            new EasePropertyMetadata(Strings.Green, 255, 255, 0));
+            EditingPropertyOptions<EaseProperty>.Create(new EasePropertyMetadata(Strings.Green, 255, 255, 0)).Serialize());
 
         /// <summary>
         /// Defines the <see cref="Blue"/> property.
         /// </summary>
-        public static readonly DirectEditingProperty<Negaposi, EaseProperty> BlueProperty = EditingProperty.RegisterSerializeDirect<EaseProperty, Negaposi>(
+        public static readonly DirectEditingProperty<Negaposi, EaseProperty> BlueProperty = EditingProperty.RegisterDirect<EaseProperty, Negaposi>(
             nameof(Blue),
             owner => owner.Blue,
             (owner, obj) => owner.Blue = obj,
-            new EasePropertyMetadata(Strings.Blue, 255, 255, 0));
+            EditingPropertyOptions<EaseProperty>.Create(new EasePropertyMetadata(Strings.Blue, 255, 255, 0)).Serialize());
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Negaposi"/> class.

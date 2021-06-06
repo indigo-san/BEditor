@@ -1,4 +1,11 @@
-﻿using System;
+﻿// SoundExtension.cs
+//
+// Copyright (C) BEditor
+//
+// This software may be modified and distributed under the terms
+// of the MIT license. See the LICENSE file for details.
+
+using System;
 using System.Threading.Tasks;
 
 using BEditor.Media.PCM;
@@ -16,13 +23,14 @@ namespace BEditor.Media
         /// <typeparam name="TConvert">The type of audio data to convert to.</typeparam>
         /// <typeparam name="TSource">The type of audio data from which to convert.</typeparam>
         /// <param name="sound">The Sound to convert.</param>
+        /// <returns>Returns the converted sound.</returns>
         public static Sound<TConvert> Convert<TConvert, TSource>(this Sound<TSource> sound)
             where TConvert : unmanaged, IPCM<TConvert>
             where TSource : unmanaged, IPCM<TSource>, IPCMConvertable<TConvert>
         {
-            var result = new Sound<TConvert>(sound.SampleRate, sound.Length);
+            var result = new Sound<TConvert>(sound.SampleRate, sound.NumSamples);
 
-            Parallel.For(0, sound.Length, i => sound.Data[i].ConvertTo(out result.Data[i]));
+            Parallel.For(0, sound.NumSamples, i => sound.Data[i].ConvertTo(out result.Data[i]));
 
             return result;
         }
@@ -38,7 +46,7 @@ namespace BEditor.Media
             fixed (StereoPCMFloat* dst = sound.Data)
             {
                 var dataf = (float*)dst;
-                var soundlength = sound.Length * 2;
+                var soundlength = sound.NumSamples * 2;
                 var length = data.Length;
                 var l = 0;
 
@@ -58,12 +66,10 @@ namespace BEditor.Media
         /// <param name="data">The channel data to be set.</param>
         public static void SetChannelData(this Sound<StereoPCMFloat> sound, int start, int channel, Span<float> data)
         {
-#pragma warning disable RCS1176
             fixed (StereoPCMFloat* dst = &sound.Data[start])
-#pragma warning restore RCS1176
             {
                 var dataf = (float*)dst;
-                var soundlength = (sound.Length - start) * 2;
+                var soundlength = (sound.NumSamples - start) * 2;
                 var length = data.Length;
                 var l = 0;
 
@@ -78,6 +84,7 @@ namespace BEditor.Media
         /// Extracts the channel data into multiple arrays.
         /// </summary>
         /// <param name="sound">The <see cref="Sound{T}"/> that expands the channel data.</param>
+        /// <returns>Returns an array with the left channel data in the first and the right channel data in the second.</returns>
         public static float[][] Extract(this Sound<StereoPCMFloat> sound)
         {
             var left = new float[sound.Data.Length];
@@ -97,6 +104,7 @@ namespace BEditor.Media
         /// </summary>
         /// <param name="sound">The sound to resamples.</param>
         /// <param name="frequency">The new sampling frequency.</param>
+        /// <returns>Returns a sound that has been resampled to the specified frequency.</returns>
         public static Sound<StereoPCMFloat> Resamples(this Sound<StereoPCMFloat> sound, int frequency)
         {
             if (sound.SampleRate == frequency) return sound.Clone();
@@ -106,7 +114,7 @@ namespace BEditor.Media
             var corre = Sinc(100, degree, ref param);
             fixed (void* ptr = sound.Data)
             {
-                var resample = Resampling(corre, ref param, new Span<float>(ptr, sound.Length * 2), sound.Length, 2);
+                var resample = Resampling(corre, ref param, new Span<float>(ptr, sound.NumSamples * 2), sound.NumSamples, 2);
 
                 fixed (float* resampled = resample)
                 {
@@ -121,13 +129,13 @@ namespace BEditor.Media
         }
 
         /// <summary>
-        ///
+        /// Adjusts the gain of the sound.
         /// </summary>
-        /// <param name="sound"></param>
-        /// <param name="gain"></param>
+        /// <param name="sound">The sound to adjust the gain.</param>
+        /// <param name="gain">The gain.</param>
         public static void Gain(this Sound<StereoPCMFloat> sound, float gain)
         {
-            Parallel.For(0, sound.Length, i =>
+            Parallel.For(0, sound.NumSamples, i =>
             {
                 sound.Data[i].Left *= gain;
                 sound.Data[i].Right *= gain;

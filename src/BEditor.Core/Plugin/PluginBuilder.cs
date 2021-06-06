@@ -1,5 +1,15 @@
-﻿using System;
+﻿// PluginBuilder.cs
+//
+// Copyright (C) BEditor
+//
+// This software may be modified and distributed under the terms
+// of the MIT license. See the LICENSE file for details.
+
+using System;
 using System.Collections.Generic;
+using System.ComponentModel;
+using System.Linq;
+using System.Threading.Tasks;
 
 using BEditor.Data;
 using BEditor.Data.Property.Easing;
@@ -17,11 +27,12 @@ namespace BEditor.Plugin
         /// <summary>
         /// The plugin config.
         /// </summary>
-        internal static PluginConfig? Config = null;
+        internal static PluginConfig? Config;
         private readonly Func<PluginObject> _plugin;
         private readonly List<EffectMetadata> _effects = new();
         private readonly List<ObjectMetadata> _objects = new();
         private readonly List<EasingMetadata> _eases = new();
+        private readonly List<PluginTask> _task = new();
         private (string?, IEnumerable<ICustomMenu>?) _menus;
 
         private PluginBuilder(Func<PluginObject> create)
@@ -77,25 +88,73 @@ namespace BEditor.Plugin
         }
 
         /// <summary>
-        /// Configure the options for the services to be provided.
+        /// Add an encoding.
         /// </summary>
-        /// <param name="decoderBuilder"></param>
+        /// <param name="decoding">The decoding to be added.</param>
         /// <returns>The same instance of the <see cref="PluginBuilder"/> for chaining.</returns>
-        public PluginBuilder With(IDecoderBuilder decoderBuilder)
+        public PluginBuilder With(IRegisterdDecoding decoding)
         {
-            DecoderFactory.Register(decoderBuilder);
+            DecodingRegistory.Register(decoding);
 
             return this;
         }
 
         /// <summary>
-        /// Configure the options for the services to be provided.
+        /// Add an encoding.
         /// </summary>
-        /// <param name="encoderBuilder"></param>
+        /// <param name="encoding">The encoding to be added.</param>
         /// <returns>The same instance of the <see cref="PluginBuilder"/> for chaining.</returns>
-        public PluginBuilder With(IEncoderBuilder encoderBuilder)
+        public PluginBuilder With(IRegisterdEncoding encoding)
         {
-            EncoderFactory.Register(encoderBuilder);
+            EncodingRegistory.Register(encoding);
+
+            return this;
+        }
+
+        /// <summary>
+        /// Add a task to be executed when the application is launched.
+        /// </summary>
+        /// <param name="task">The background task to run.</param>
+        /// <returns>The same instance of the <see cref="PluginBuilder"/> for chaining.</returns>
+        public PluginBuilder Task(PluginTask task)
+        {
+            if (!_task.Contains(task))
+            {
+                _task.Add(task);
+            }
+
+            return this;
+        }
+
+        /// <summary>
+        /// Add a task to be executed when the application is launched.
+        /// </summary>
+        /// <param name="func">The function to run.</param>
+        /// <param name="name">The name of the <see cref="PluginTask"/>.</param>
+        /// <returns>The same instance of the <see cref="PluginBuilder"/> for chaining.</returns>
+        public PluginBuilder Task(Func<IProgressDialog, ValueTask> func, string name)
+        {
+            var task = new PluginTask(func, name);
+            if (!_task.Contains(task))
+            {
+                _task.Add(task);
+            }
+
+            return this;
+        }
+
+        /// <summary>
+        /// Add a task to be executed when the application is launched.
+        /// </summary>
+        /// <param name="func">The function to run.</param>
+        /// <returns>The same instance of the <see cref="PluginBuilder"/> for chaining.</returns>
+        [Obsolete("Use PluginBuilder.Task(Func{IProgressDialog, ValueTask}, BackgroundTaskCompleteType, string)")]
+        public PluginBuilder Task(Func<IProgress<int>, ValueTask> func)
+        {
+            if (!_task.Any(i => i._task == func))
+            {
+                _task.Add(new(func, (_task.Count + 1).ToString()));
+            }
 
             return this;
         }
@@ -154,7 +213,13 @@ namespace BEditor.Plugin
                 manager._menus.Add(_menus!);
             }
 
-            manager._loaded.Add(_plugin());
+            var instance = _plugin();
+            if (_task.Count is not 0)
+            {
+                manager._tasks.Add((instance, _task));
+            }
+
+            manager._loaded.Add(instance);
         }
 
         /// <summary>

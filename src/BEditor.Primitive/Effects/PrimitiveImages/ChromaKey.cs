@@ -1,4 +1,11 @@
-﻿using System.Collections.Generic;
+﻿// ChromaKey.cs
+//
+// Copyright (C) BEditor
+//
+// This software may be modified and distributed under the terms
+// of the MIT license. See the LICENSE file for details.
+
+using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 
 using BEditor.Data;
@@ -18,11 +25,11 @@ namespace BEditor.Primitive.Effects
         /// <summary>
         /// Defines the <see cref="ThresholdValue"/> property.
         /// </summary>
-        public static readonly DirectEditingProperty<ChromaKey, EaseProperty> TopProperty = EditingProperty.RegisterSerializeDirect<EaseProperty, ChromaKey>(
+        public static readonly DirectEditingProperty<ChromaKey, EaseProperty> TopProperty = EditingProperty.RegisterDirect<EaseProperty, ChromaKey>(
             nameof(ThresholdValue),
             owner => owner.ThresholdValue,
             (owner, obj) => owner.ThresholdValue = obj,
-            new EasePropertyMetadata(Strings.ThresholdValue, 256));
+            EditingPropertyOptions<EaseProperty>.Create(new EasePropertyMetadata(Strings.ThresholdValue, 256)).Serialize());
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ChromaKey"/> class.

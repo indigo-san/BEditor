@@ -7,8 +7,11 @@ using System.Linq;
 using System.Runtime.Serialization;
 using System.Threading.Tasks;
 
+using BEditor.Packaging;
+
 namespace BEditor
 {
+
     [DataContract]
     public class Settings : INotifyPropertyChanged, IExtensibleDataObject
     {
@@ -20,7 +23,6 @@ namespace BEditor
         private static readonly PropertyChangedEventArgs backUpIntervalArgs = new(nameof(BackUpInterval));
         private static readonly PropertyChangedEventArgs lastTimeFolderArgs = new(nameof(LastTimeFolder));
         private static readonly PropertyChangedEventArgs widthOf1FrameArgs = new(nameof(WidthOf1Frame));
-        private static readonly PropertyChangedEventArgs enableErrorLogArgs = new(nameof(EnableErrorLog));
         private static readonly PropertyChangedEventArgs langArgs = new(nameof(Language));
         private static readonly PropertyChangedEventArgs showStartWindowArgs = new(nameof(ShowStartWindow));
         private static readonly PropertyChangedEventArgs prioritizeGPUArgs = new(nameof(PrioritizeGPU));
@@ -31,11 +33,9 @@ namespace BEditor
         private uint? backUpInterval = 10;
         private string lastTimeFolder = "";
         private uint widthOf1Frame = 5;
-        private bool enableErrorLog = false;
-        private ObservableCollection<string>? enablePlugins;
-        private ObservableCollection<string>? disablePlugins;
         private ObservableCollection<string>? includeFonts;
         private ObservableCollection<string>? recentFiles;
+        private ObservableCollection<PackageSourceInfo>? packageSources;
         private string? language;
         private bool prioritizeGPU = true;
 
@@ -99,24 +99,6 @@ namespace BEditor
             set => SetValue(value, ref widthOf1Frame, widthOf1FrameArgs);
         }
         [DataMember]
-        public bool EnableErrorLog
-        {
-            get => enableErrorLog;
-            set => SetValue(value, ref enableErrorLog, enableErrorLogArgs);
-        }
-        [DataMember]
-        public ObservableCollection<string> EnablePlugins
-        {
-            get => enablePlugins ??= new();
-            set => enablePlugins = value;
-        }
-        [DataMember]
-        public ObservableCollection<string> DisablePlugins
-        {
-            get => disablePlugins ??= new();
-            set => disablePlugins = value;
-        }
-        [DataMember]
         public ObservableCollection<string> RecentFiles
         {
             get => recentFiles ??= new();
@@ -177,6 +159,15 @@ namespace BEditor
             set => includeFonts = value;
         }
         [DataMember]
+        public ObservableCollection<PackageSourceInfo> PackageSources
+        {
+            get => packageSources ??= new()
+            {
+                new() { Name = "BEditor", Url = new("https://beditor.net/api/packages") }
+            };
+            private set => packageSources = value;
+        }
+        [DataMember]
         public string Language
         {
             get => language ??= CultureInfo.CurrentCulture.Name;
@@ -188,8 +179,6 @@ namespace BEditor
             get => showStartWindow;
             set => SetValue(value, ref showStartWindow, showStartWindowArgs);
         }
-        [DataMember]
-        public bool SetupFlag { get; set; }
         [DataMember]
         public bool PrioritizeGPU
         {

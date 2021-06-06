@@ -140,6 +140,26 @@
                     </MenuItem.Icon>
                 </MenuItem>
 
+                <Separator/>
+
+                <!--シーンを作成-->
+                <MenuItem
+                    Click="CreateScene"
+                    Header="{x:Static prop:Strings.CreateScene}"
+                    IsEnabled="{CompiledBinding IsOpened.Value, Mode=OneWay}"/>
+                
+                <!--Clipを作成-->
+                <MenuItem
+                    Click="CreateClip"
+                    Header="{x:Static prop:Strings.AddClip}"
+                    IsEnabled="{CompiledBinding IsOpened.Value, Mode=OneWay}"/>
+                
+                <!--Effectを追加-->
+                <MenuItem
+                    Click="AddEffect"
+                    Header="{x:Static prop:Strings.AddEffect}"
+                    IsEnabled="{CompiledBinding IsOpened.Value, Mode=OneWay}"/>
+                
             </MenuItem>
             <MenuItem Header="{x:Static prop:Strings.View}">
 
@@ -154,7 +174,16 @@
                 </MenuItem>
 
             </MenuItem>
-            <MenuItem Header="{x:Static prop:Strings.Plugin}">
+            <MenuItem Header="{x:Static prop:Strings.Plugins}">
+
+                <!--プラグインを管理-->
+                <MenuItem
+                    Header="{x:Static prop:Strings.ManagePlugins}"
+                    Click="ManagePlugins_Click">
+                    <MenuItem.Icon>
+                        <PathIcon Data="{StaticResource Extension24Regular}" />
+                    </MenuItem.Icon>
+                </MenuItem>
 
             </MenuItem>
             <MenuItem Header="{x:Static prop:Strings.Out}">

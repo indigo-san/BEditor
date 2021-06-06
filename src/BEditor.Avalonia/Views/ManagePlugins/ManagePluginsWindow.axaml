@@ -1,0 +1,135 @@
+<Window
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:local="using:BEditor.Views.ManagePlugins"
+    xmlns:titlebar="using:BEditor.Views.CustomTitlebars"
+    xmlns:prop="using:BEditor.Properties"
+    xmlns:vm="using:BEditor.ViewModels"
+    mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+    Height="450" Width="800"
+    ExtendClientAreaToDecorationsHint="True"
+    ExtendClientAreaChromeHints="NoChrome"
+    ExtendClientAreaTitleBarHeightHint="-1"
+    TransparencyLevelHint="AcrylicBlur"
+    Background="Transparent"
+    WindowStartupLocation="CenterScreen"
+    x:Class="BEditor.Views.ManagePlugins.ManagePluginsWindow">
+    <Grid RowDefinitions="Auto,*">
+        <DockPanel HorizontalAlignment="Stretch" Grid.RowSpan="2">
+            <ExperimentalAcrylicBorder IsHitTestVisible="False" DockPanel.Dock="Left" Width="240">
+                <ExperimentalAcrylicBorder.Material>
+                    <ExperimentalAcrylicMaterial
+                      TintColor="#222222"
+                      TintOpacity="{StaticResource AcrylicTintOpacity1}"
+                      MaterialOpacity="{StaticResource AcrylicMaterialOpacity1}" />
+                </ExperimentalAcrylicBorder.Material>
+            </ExperimentalAcrylicBorder>
+            <ExperimentalAcrylicBorder IsHitTestVisible="False">
+                <ExperimentalAcrylicBorder.Material>
+                    <ExperimentalAcrylicMaterial
+                      TintColor="Black"
+                      TintOpacity="{StaticResource AcrylicTintOpacity2}"
+                      MaterialOpacity="{StaticResource AcrylicMaterialOpacity2}" />
+                </ExperimentalAcrylicBorder.Material>
+            </ExperimentalAcrylicBorder>
+        </DockPanel>
+
+        <titlebar:WindowsTitlebarButtons/>
+
+        <TabControl Classes="sidebar" Grid.Row="1">
+            <TabControl.Template>
+                <ControlTemplate>
+                    <Border
+                        Margin="{TemplateBinding Margin}"
+                        BorderBrush="{TemplateBinding BorderBrush}"
+                        BorderThickness="{TemplateBinding BorderThickness}">
+                        <DockPanel>
+                            <ScrollViewer
+                                Name="PART_ScrollViewer"
+                                Width="240"
+                                Background="{TemplateBinding Background}"
+                                DockPanel.Dock="Left"
+                                HorizontalScrollBarVisibility="{TemplateBinding (ScrollViewer.HorizontalScrollBarVisibility)}"
+                                VerticalScrollBarVisibility="{TemplateBinding (ScrollViewer.VerticalScrollBarVisibility)}">
+                                <ItemsPresenter
+                                    Name="PART_ItemsPresenter"
+                                    ItemTemplate="{TemplateBinding ItemTemplate}"
+                                    Items="{TemplateBinding Items}"
+                                    ItemsPanel="{TemplateBinding ItemsPanel}" />
+                            </ScrollViewer>
+                            <ContentControl
+                                HorizontalContentAlignment="Right"
+                                Content="{TemplateBinding Tag}"
+                                DockPanel.Dock="Bottom" />
+                            <ContentPresenter
+                                Name="PART_SelectedContentHost"
+                                Margin="{TemplateBinding Padding}"
+                                HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}"
+                                Content="{TemplateBinding SelectedContent}"
+                                ContentTemplate="{TemplateBinding SelectedContentTemplate}" />
+                        </DockPanel>
+                    </Border>
+                </ControlTemplate>
+            </TabControl.Template>
+            <TabControl.Styles>
+                <Style Selector="StackPanel">
+                    <Setter Property="Spacing" Value="16" />
+                    <Setter Property="Orientation" Value="Horizontal" />
+                </Style>
+
+                <Style Selector="PathIcon">
+                    <Setter Property="Width" Value="16" />
+                    <Setter Property="Height" Value="16" />
+                </Style>
+            </TabControl.Styles>
+            <TabItem>
+                <TabItem.Header>
+                    <StackPanel>
+                        <PathIcon Data="{StaticResource Extension20Regular}"/>
+                        <TextBlock Text="{x:Static prop:Strings.Installed}" />
+                    </StackPanel>
+                </TabItem.Header>
+                <local:LoadedPlugins/>
+            </TabItem>
+            <TabItem>
+                <TabItem.Header>
+                    <StackPanel>
+                        <PathIcon Data="{StaticResource BookDatabase24Regular}"/>
+                        <TextBlock Text="{x:Static prop:Strings.Library}" />
+                    </StackPanel>
+                </TabItem.Header>
+                <local:Library/>
+            </TabItem>
+            <TabItem>
+                <TabItem.Header>
+                    <StackPanel>
+                        <PathIcon Data="{StaticResource CalendarLtr24Regular}"/>
+                        <TextBlock Text="{x:Static prop:Strings.Changes}" />
+                    </StackPanel>
+                </TabItem.Header>
+                <local:ScheduleChanges/>
+            </TabItem>
+            <TabItem>
+                <TabItem.Header>
+                    <StackPanel>
+                        <PathIcon Data="{StaticResource ArrowClockwise24Regular}"/>
+                        <TextBlock Text="{x:Static prop:Strings.Update}" />
+                    </StackPanel>
+                </TabItem.Header>
+                <local:Update/>
+            </TabItem>
+            <TabItem>
+                <TabItem.Header>
+                    <StackPanel>
+                        <PathIcon Data="{StaticResource FolderZip24Regular}"/>
+                        <TextBlock Text="{x:Static prop:Strings.CreatePluginPackage}" />
+                    </StackPanel>
+                </TabItem.Header>
+                <local:CreatePluginPackage/>
+            </TabItem>
+        </TabControl>
+    </Grid>
+</Window>

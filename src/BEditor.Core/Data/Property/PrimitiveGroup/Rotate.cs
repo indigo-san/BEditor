@@ -1,6 +1,15 @@
-﻿using System;
+﻿// Rotate.cs
+//
+// Copyright (C) BEditor
+//
+// This software may be modified and distributed under the terms
+// of the MIT license. See the LICENSE file for details.
+
+using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+
+using BEditor.Data;
 
 using BEditor.Resources;
 
@@ -14,36 +23,37 @@ namespace BEditor.Data.Property.PrimitiveGroup
         /// <summary>
         /// Defines the <see cref="RotateX"/> property.
         /// </summary>
-        public static readonly DirectEditingProperty<Rotate, EaseProperty> RotateXProperty = EditingProperty.RegisterSerializeDirect<EaseProperty, Rotate>(
+        public static readonly DirectEditingProperty<Rotate, EaseProperty> RotateXProperty = EditingProperty.RegisterDirect<EaseProperty, Rotate>(
             nameof(RotateX),
             owner => owner.RotateX,
             (owner, obj) => owner.RotateX = obj,
-            new EasePropertyMetadata(Strings.RotateX, UseOptional: true));
+            EditingPropertyOptions<EaseProperty>.Create(new EasePropertyMetadata(Strings.RotateX, useOptional: true)).Serialize());
 
         /// <summary>
         /// Defines the <see cref="RotateY"/> property.
         /// </summary>
-        public static readonly DirectEditingProperty<Rotate, EaseProperty> RotateYProperty = EditingProperty.RegisterSerializeDirect<EaseProperty, Rotate>(
+        public static readonly DirectEditingProperty<Rotate, EaseProperty> RotateYProperty = EditingProperty.RegisterDirect<EaseProperty, Rotate>(
             nameof(RotateY),
             owner => owner.RotateY,
             (owner, obj) => owner.RotateY = obj,
-            new EasePropertyMetadata(Strings.RotateY, UseOptional: true));
+            EditingPropertyOptions<EaseProperty>.Create(new EasePropertyMetadata(Strings.RotateY, useOptional: true)).Serialize());
 
         /// <summary>
         /// Defines the <see cref="RotateZ"/> property.
         /// </summary>
-        public static readonly DirectEditingProperty<Rotate, EaseProperty> RotateZProperty = EditingProperty.RegisterSerializeDirect<EaseProperty, Rotate>(
+        public static readonly DirectEditingProperty<Rotate, EaseProperty> RotateZProperty = EditingProperty.RegisterDirect<EaseProperty, Rotate>(
             nameof(RotateZ),
             owner => owner.RotateZ,
             (owner, obj) => owner.RotateZ = obj,
-            new EasePropertyMetadata(Strings.RotateZ, UseOptional: true));
+            EditingPropertyOptions<EaseProperty>.Create(new EasePropertyMetadata(Strings.RotateZ, useOptional: true)).Serialize());
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Rotate"/> class.
         /// </summary>
         /// <param name="metadata">Metadata of this property.</param>
         /// <exception cref="ArgumentNullException"><paramref name="metadata"/> is <see langword="null"/>.</exception>
-        public Rotate(RotateMetadata metadata) : base(metadata)
+        public Rotate(RotateMetadata metadata)
+            : base(metadata)
         {
         }
 

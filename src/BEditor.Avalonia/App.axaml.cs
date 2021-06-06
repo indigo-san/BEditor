@@ -1,8 +1,9 @@
 using System;
-using System.Globalization;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -10,17 +11,18 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
+using Avalonia.Markup.Xaml.Styling;
 using Avalonia.Platform;
 using Avalonia.Styling;
-using Avalonia.Themes.Fluent;
 using Avalonia.Threading;
 
 using BEditor.Data;
 using BEditor.Models;
+using BEditor.Models.ManagePlugins;
 using BEditor.Plugin;
 using BEditor.Primitive;
 using BEditor.Properties;
-using BEditor.ViewModels.DialogContent;
+using BEditor.Views;
 using BEditor.Views.DialogContent;
 
 using Microsoft.Extensions.DependencyInjection;
@@ -30,8 +32,7 @@ namespace BEditor
 {
     public class App : Application
     {
-        public static readonly string FFmpegDir = Path.Combine(AppContext.BaseDirectory, "ffmpeg");
-        public static readonly ILogger? Logger = AppModel.Current.LoggingFactory.CreateLogger<App>();
+        public static readonly ILogger Logger = AppModel.Current.LoggingFactory.CreateLogger<App>();
         public static readonly DispatcherTimer BackupTimer = new()
         {
             Interval = TimeSpan.FromMinutes(Settings.Default.BackUpInterval)
@@ -55,6 +56,14 @@ namespace BEditor
             throw new Exception();
         }
 
+        public static void SetMainWindow(Window window)
+        {
+            if (Current.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
+            {
+                desktop.MainWindow = window;
+            }
+        }
+
         public override void RegisterServices()
         {
             if (OperatingSystem.IsLinux())
@@ -66,15 +75,14 @@ namespace BEditor
 
         public override void Initialize()
         {
-            CultureInfo.CurrentCulture = new(Settings.Default.Language);
-            CultureInfo.CurrentUICulture = CultureInfo.CurrentCulture;
-
             AvaloniaXamlLoader.Load(this);
-
-            Styles.Insert(0, new FluentTheme(new Uri("avares://beditor/App.axaml"))
+            var baseuri = new Uri("avares://beditor/App.axaml");
+            var style = new StyleInclude(baseuri)
             {
-                Mode = Settings.Default.UseDarkMode ? FluentThemeMode.Dark : FluentThemeMode.Light
-            });
+                Source = Settings.Default.UseDarkMode ? new("avares://beditor/Controls/DarkTheme.axaml") : new("avares://beditor/Controls/LightTheme.axaml")
+            };
+
+            Styles.Insert(0, style);
         }
 
         public override async void OnFrameworkInitializationCompleted()
@@ -83,7 +91,7 @@ namespace BEditor
             {
                 RegisterPrimitive();
 
-                desktop.MainWindow = new MainWindow();
+                desktop.MainWindow = Settings.Default.ShowStartWindow ? new StartWindow() : new MainWindow();
                 AppModel.Current.UIThread = SynchronizationContext.Current;
 
                 CreateDirectory();
@@ -106,21 +114,41 @@ namespace BEditor
 
             DirectoryManager.Default.Stop();
 
-            App.BackupTimer.Stop();
+            BackupTimer.Stop();
 
             var app = AppModel.Current;
 
+            app.RaiseExit();
             app.ServiceProvider.GetService<HttpClient>()?.Dispose();
 
             app.Project?.Unload();
             app.Project = null;
+
+            if (PluginChangeSchedule.Uninstall.Count is not 0 || PluginChangeSchedule.UpdateOrInstall.Count is not 0)
+            {
+                var jsonfile = Path.Combine(AppContext.BaseDirectory, "package-install.json");
+                PluginChangeSchedule.CreateJsonFile(jsonfile);
+
+                if (OperatingSystem.IsWindows())
+                {
+                    Process.Start(new ProcessStartInfo(Path.Combine(AppContext.BaseDirectory, "BEditor.PackageInstaller.exe"), jsonfile)
+                    {
+                        UseShellExecute = true
+                    });
+                }
+                else if (OperatingSystem.IsLinux())
+                {
+                    Process.Start(new ProcessStartInfo(Path.Combine(AppContext.BaseDirectory, "BEditor.PackageInstaller"), jsonfile)
+                    {
+                        UseShellExecute = true
+                    });
+                }
+            }
         }
 
-        private async void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)
+        private void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)
         {
-            await using var provider = AppModel.Current.Services.BuildServiceProvider();
-            provider.GetService<IMessage>()!
-                .Snackbar(string.Format(Strings.ExceptionWasThrown, e.ExceptionObject.ToString()));
+            AppModel.Current.Message.Snackbar(string.Format(Strings.ExceptionWasThrown, e.ExceptionObject.ToString()));
 
             Logger?.LogError(e.ExceptionObject as Exception, "UnhandledException was thrown.");
         }
@@ -130,7 +158,6 @@ namespace BEditor
             DirectoryManager.Default.Directories.Add(colorsDir);
             DirectoryManager.Default.Directories.Add(backupDir);
             DirectoryManager.Default.Directories.Add(pluginsDir);
-            DirectoryManager.Default.Directories.Add(FFmpegDir);
 
             DirectoryManager.Default.Run();
         }
@@ -189,48 +216,53 @@ namespace BEditor
         private static async ValueTask InitialPluginsAsync()
         {
             PluginBuilder.Config = new PluginConfig(AppModel.Current);
-
             // すべて
             var all = PluginManager.Default.GetNames();
-            // 未知なプラグイン
-            var unknown = all.Except(Settings.Default.EnablePlugins)
-                .Except(Settings.Default.DisablePlugins)
-                .ToArray();
+            var app = AppModel.Current;
 
-            if (unknown.Length != 0)
+            try
             {
-                await Dispatcher.UIThread.InvokeAsync(async () =>
+                PluginManager.Default.Load(all);
+            }
+            catch (AggregateException e)
+            {
+                var msg = string.Format(Strings.FailedToLoad, Strings.Plugins);
+                Logger.LogError(e, msg);
+                var sb = new StringBuilder(msg);
+
+                foreach (var item in e.InnerExceptions)
                 {
-                    var viewmodel = new PluginsToLoadViewModel
+                    if (item is PluginException ex)
                     {
-                        Plugins = new(unknown.Select(name => new PluginToLoad { Name = { Value = name } }))
-                    };
-                    var dialog = new PluginsToLoad
-                    {
-                        DataContext = viewmodel
-                    };
-
-                    await dialog.ShowDialog(GetMainWindow());
-
-                    foreach (var vm in viewmodel.Plugins)
-                    {
-                        if (vm.IsEnabled.Value)
-                        {
-                            Settings.Default.EnablePlugins.Add(vm.Name.Value);
-                        }
-                        else
-                        {
-                            Settings.Default.DisablePlugins.Add(vm.Name.Value);
-                        }
+                        sb.Append('\n');
+                        sb.Append("* ");
+                        sb.Append(ex.PluginName);
                     }
+                }
 
-                    Settings.Default.Save();
-                });
+                await app.Message.DialogAsync(sb.ToString());
             }
 
-            PluginManager.Default.Load(Settings.Default.EnablePlugins);
+            if (PluginManager.Default._tasks.Count is not 0)
+            {
+                var dialog = new ProgressDialog();
+                dialog.Maximum.Value = 100;
+                _ = dialog.ShowDialog(GetMainWindow());
+                foreach (var (plugin, tasks) in PluginManager.Default._tasks)
+                {
+                    for (var i = 0; i < tasks.Count; i++)
+                    {
+                        var task = tasks[i];
+                        dialog.Text.Value = string.Format(Strings.IsLoading, plugin.PluginName) + $"  :{task.Name}";
 
-            AppModel.Current.ServiceProvider = AppModel.Current.Services.BuildServiceProvider();
+                        await task.RunTask(dialog);
+                        dialog.Report(0);
+                    }
+                }
+
+                dialog.Close();
+            }
+            app.ServiceProvider = app.Services.BuildServiceProvider();
         }
     }
 }

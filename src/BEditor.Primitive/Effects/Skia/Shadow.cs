@@ -1,4 +1,11 @@
-﻿using System.Collections.Generic;
+﻿// Shadow.cs
+//
+// Copyright (C) BEditor
+//
+// This software may be modified and distributed under the terms
+// of the MIT license. See the LICENSE file for details.
+
+using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 
 using BEditor.Data;
@@ -18,47 +25,47 @@ namespace BEditor.Primitive.Effects
         /// <summary>
         /// Defines the <see cref="X"/> property.
         /// </summary>
-        public static readonly DirectEditingProperty<Shadow, EaseProperty> XProperty = EditingProperty.RegisterSerializeDirect<EaseProperty, Shadow>(
+        public static readonly DirectEditingProperty<Shadow, EaseProperty> XProperty = EditingProperty.RegisterDirect<EaseProperty, Shadow>(
             nameof(X),
             owner => owner.X,
             (owner, obj) => owner.X = obj,
-            new EasePropertyMetadata(Strings.X, 10));
+            EditingPropertyOptions<EaseProperty>.Create(new EasePropertyMetadata(Strings.X, 10)).Serialize());
 
         /// <summary>
         /// Defines the <see cref="Y"/> property.
         /// </summary>
-        public static readonly DirectEditingProperty<Shadow, EaseProperty> YProperty = EditingProperty.RegisterSerializeDirect<EaseProperty, Shadow>(
+        public static readonly DirectEditingProperty<Shadow, EaseProperty> YProperty = EditingProperty.RegisterDirect<EaseProperty, Shadow>(
             nameof(Y),
             owner => owner.Y,
             (owner, obj) => owner.Y = obj,
-            new EasePropertyMetadata(Strings.Y, 10));
+            EditingPropertyOptions<EaseProperty>.Create(new EasePropertyMetadata(Strings.Y, 10)).Serialize());
 
         /// <summary>
         /// Defines the <see cref="Blur"/> property.
         /// </summary>
-        public static readonly DirectEditingProperty<Shadow, EaseProperty> BlurProperty = EditingProperty.RegisterSerializeDirect<EaseProperty, Shadow>(
+        public static readonly DirectEditingProperty<Shadow, EaseProperty> BlurProperty = EditingProperty.RegisterDirect<EaseProperty, Shadow>(
             nameof(Blur),
             owner => owner.Blur,
             (owner, obj) => owner.Blur = obj,
-            new EasePropertyMetadata(Strings.Blur, 10, Min: 0));
+            EditingPropertyOptions<EaseProperty>.Create(new EasePropertyMetadata(Strings.Blur, 10, min: 0)).Serialize());
 
         /// <summary>
         /// Defines the <see cref="Opacity"/> property.
         /// </summary>
-        public static readonly DirectEditingProperty<Shadow, EaseProperty> OpacityProperty = EditingProperty.RegisterSerializeDirect<EaseProperty, Shadow>(
+        public static readonly DirectEditingProperty<Shadow, EaseProperty> OpacityProperty = EditingProperty.RegisterDirect<EaseProperty, Shadow>(
             nameof(Opacity),
             owner => owner.Opacity,
             (owner, obj) => owner.Opacity = obj,
-            new EasePropertyMetadata(Strings.Opacity, 75, 100, 0));
+            EditingPropertyOptions<EaseProperty>.Create(new EasePropertyMetadata(Strings.Opacity, 75, 100, 0)).Serialize());
 
         /// <summary>
         /// Defines the <see cref="Color"/> property.
         /// </summary>
-        public static readonly DirectEditingProperty<Shadow, ColorProperty> ColorProperty = EditingProperty.RegisterSerializeDirect<ColorProperty, Shadow>(
+        public static readonly DirectEditingProperty<Shadow, ColorProperty> ColorProperty = EditingProperty.RegisterDirect<ColorProperty, Shadow>(
             nameof(Color),
             owner => owner.Color,
             (owner, obj) => owner.Color = obj,
-            new ColorPropertyMetadata(Strings.Color, Drawing.Color.Dark));
+            EditingPropertyOptions<ColorProperty>.Create(new ColorPropertyMetadata(Strings.Color, Colors.Black)).Serialize());
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Shadow"/> class.

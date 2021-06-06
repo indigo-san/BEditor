@@ -1,4 +1,11 @@
-﻿using System.Collections.Generic;
+﻿// Dilate.cs
+//
+// Copyright (C) BEditor
+//
+// This software may be modified and distributed under the terms
+// of the MIT license. See the LICENSE file for details.
+
+using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 
 using BEditor.Data;
@@ -18,20 +25,20 @@ namespace BEditor.Primitive.Effects
         /// <summary>
         /// Defines the <see cref="Radius"/> property.
         /// </summary>
-        public static readonly DirectEditingProperty<Dilate, EaseProperty> RadiusProperty = EditingProperty.RegisterSerializeDirect<EaseProperty, Dilate>(
+        public static readonly DirectEditingProperty<Dilate, EaseProperty> RadiusProperty = EditingProperty.RegisterDirect<EaseProperty, Dilate>(
             nameof(Radius),
             owner => owner.Radius,
             (owner, obj) => owner.Radius = obj,
-            new EasePropertyMetadata(Strings.Radius, 1, float.NaN, 0));
+            EditingPropertyOptions<EaseProperty>.Create(new EasePropertyMetadata(Strings.Radius, 1, float.NaN, 0)).Serialize());
 
         /// <summary>
         /// Defines the <see cref="Resize"/> property.
         /// </summary>
-        public static readonly DirectEditingProperty<Dilate, CheckProperty> ResizeProperty = EditingProperty.RegisterSerializeDirect<CheckProperty, Dilate>(
+        public static readonly DirectEditingProperty<Dilate, CheckProperty> ResizeProperty = EditingProperty.RegisterDirect<CheckProperty, Dilate>(
             nameof(Resize),
             owner => owner.Resize,
             (owner, obj) => owner.Resize = obj,
-            new CheckPropertyMetadata(Strings.Resize));
+            EditingPropertyOptions<CheckProperty>.Create(new CheckPropertyMetadata(Strings.Resize)).Serialize());
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Dilate"/> class.
@@ -62,8 +69,8 @@ namespace BEditor.Primitive.Effects
             var size = (int)Radius.GetValue(args.Frame);
             if (Resize.Value)
             {
-                int nwidth = img.Width + (size + 5) * 2;
-                int nheight = img.Height + (size + 5) * 2;
+                int nwidth = img.Width + ((size + 5) * 2);
+                int nheight = img.Height + ((size + 5) * 2);
 
                 args.Value = img.MakeBorder(nwidth, nheight);
                 args.Value.Dilate(size);

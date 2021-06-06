@@ -1,4 +1,11 @@
-﻿using System;
+﻿// Scale.cs
+//
+// Copyright (C) BEditor
+//
+// This software may be modified and distributed under the terms
+// of the MIT license. See the LICENSE file for details.
+
+using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 
@@ -14,48 +21,48 @@ namespace BEditor.Data.Property.PrimitiveGroup
         /// <summary>
         /// Defines the <see cref="Scale1"/> property.
         /// </summary>
-        public static readonly DirectEditingProperty<Scale, EaseProperty> ScaleProperty = EditingProperty.RegisterSerializeDirect<EaseProperty, Scale>(
+        public static readonly DirectEditingProperty<Scale, EaseProperty> ScaleProperty = EditingProperty.RegisterDirect<EaseProperty, Scale>(
             nameof(Scale1),
             owner => owner.Scale1,
             (owner, obj) => owner.Scale1 = obj,
-            new EasePropertyMetadata(Strings.Scale, 100, UseOptional: true));
+            EditingPropertyOptions<EaseProperty>.Create(new EasePropertyMetadata(Strings.Scale, 100, useOptional: true)).Serialize());
 
         /// <summary>
         /// Defines the <see cref="ScaleX"/> property.
         /// </summary>
-        public static readonly DirectEditingProperty<Scale, EaseProperty> ScaleXProperty = EditingProperty.RegisterSerializeDirect<EaseProperty, Scale>(
+        public static readonly DirectEditingProperty<Scale, EaseProperty> ScaleXProperty = EditingProperty.RegisterDirect<EaseProperty, Scale>(
             nameof(ScaleX),
             owner => owner.ScaleX,
             (owner, obj) => owner.ScaleX = obj,
-            new EasePropertyMetadata(Strings.X, 100, UseOptional: true));
+            EditingPropertyOptions<EaseProperty>.Create(new EasePropertyMetadata(Strings.X, 100, useOptional: true)).Serialize());
 
         /// <summary>
         /// Defines the <see cref="ScaleY"/> property.
         /// </summary>
-        public static readonly DirectEditingProperty<Scale, EaseProperty> ScaleYProperty = EditingProperty.RegisterSerializeDirect<EaseProperty, Scale>(
+        public static readonly DirectEditingProperty<Scale, EaseProperty> ScaleYProperty = EditingProperty.RegisterDirect<EaseProperty, Scale>(
             nameof(ScaleY),
             owner => owner.ScaleY,
             (owner, obj) => owner.ScaleY = obj,
-            new EasePropertyMetadata(Strings.Y, 100, UseOptional: true));
+            EditingPropertyOptions<EaseProperty>.Create(new EasePropertyMetadata(Strings.Y, 100, useOptional: true)).Serialize());
 
         /// <summary>
         /// Defines the <see cref="ScaleZ"/> property.
         /// </summary>
-        public static readonly DirectEditingProperty<Scale, EaseProperty> ScaleZProperty = EditingProperty.RegisterSerializeDirect<EaseProperty, Scale>(
+        public static readonly DirectEditingProperty<Scale, EaseProperty> ScaleZProperty = EditingProperty.RegisterDirect<EaseProperty, Scale>(
             nameof(ScaleZ),
             owner => owner.ScaleZ,
             (owner, obj) => owner.ScaleZ = obj,
-            new EasePropertyMetadata(Strings.Z, 100, UseOptional: true));
+            EditingPropertyOptions<EaseProperty>.Create(new EasePropertyMetadata(Strings.Z, 100, useOptional: true)).Serialize());
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="Coordinate"/> class.
+        /// Initializes a new instance of the <see cref="Scale"/> class.
         /// </summary>
         /// <param name="metadata">Metadata of this property.</param>
         /// <exception cref="ArgumentNullException"><paramref name="metadata"/> is <see langword="null"/>.</exception>
-        public Scale(ScaleMetadata metadata) : base(metadata)
+        public Scale(ScaleMetadata metadata)
+            : base(metadata)
         {
         }
-
 
         /// <summary>
         /// Gets the EaseProperty representing the scale.

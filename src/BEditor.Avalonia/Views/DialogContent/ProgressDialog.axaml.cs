@@ -13,7 +13,7 @@ using static BEditor.IMessage;
 
 namespace BEditor.Views.DialogContent
 {
-    public sealed class ProgressDialog : Window
+    public sealed class ProgressDialog : Window, IProgressDialog
     {
         public ProgressDialog()
         {
@@ -67,13 +67,49 @@ namespace BEditor.Views.DialogContent
 
         public ReactiveProperty<bool> IsIndeterminate { get; } = new() { Value = false };
 
-        public ReactiveProperty<int> Maximum { get; } = new() { Value = 0 };
+        public ReactiveProperty<int> Maximum { get; } = new() { Value = 100 };
 
         public ReactiveProperty<int> Minimum { get; } = new() { Value = 0 };
 
         public ReactiveProperty<int> NowValue { get; } = new() { Value = 0 };
 
         public ButtonType DialogResult { get; private set; }
+
+        double IProgressDialog.Value
+        {
+            get => NowValue.Value;
+            set => NowValue.Value = (int)value;
+        }
+
+        double IProgressDialog.Maximum
+        {
+            get => Maximum.Value;
+            set => Maximum.Value = (int)value;
+        }
+
+        double IProgressDialog.Minimum
+        {
+            get => Minimum.Value;
+            set => Minimum.Value = (int)value;
+        }
+
+        string IProgressDialog.Text
+        {
+            get => Text.Value;
+            set => Text.Value = value;
+        }
+
+        bool IProgressDialog.IsIndeterminate
+        {
+            get => IsIndeterminate.Value;
+            set => IsIndeterminate.Value = value;
+        }
+
+        public void Report(int value)
+        {
+            var per = value / 100f;
+            NowValue.Value = (int)(Maximum.Value * per);
+        }
 
         protected override void OnInitialized()
         {

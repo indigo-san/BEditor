@@ -12,7 +12,7 @@
 
 Windows, Linux, macOSで動作する動画編集ソフトウェアです。
 
-![](https://raw.githubusercontent.com/b-editor/BEditor/main/docs/imgs/header.png)
+![](https://beditor.net/api/header/?version=0.1.3)
 
 ## Feature
 
@@ -23,12 +23,12 @@ Windows, Linux, macOSで動作する動画編集ソフトウェアです。
 * クロスプラットフォーム (0.1.0から)
 * キーフレーム機能
 * 100個のレイヤー
-* [多数の対応フォーマット](https://ja.wikipedia.org/wiki/FFmpeg#サポートしているファイル形式)
-* [編集データの値を同期](https://beditor.net/Document?page=how_to_use/DataBinding)
-* [シーン機能](https://beditor.net/Document?page=keywords/Scene)
+* プラグイン機能
+* [編集データの値を同期](https://beditor.net/Document?page=how-to-use/data-binding)
+* [シーン機能](https://beditor.net/Document?page=keywords/scene)
 * [30種類以上のエフェクト](https://beditor.net/Document?page=effects/overview)
 * 12種類のオブジェクト
-    * フレームバッファ, 画像ファイル, 多角形, 角丸四角形, シーン, 図形, テキスト, 動画ファイル, カメラ, 3Dオブジェクト, リスナー
+    * フレームバッファ, 画像ファイル, 多角形, 角丸四角形, シーン, 図形, テキスト, 動画ファイル, カメラ, 3Dオブジェクト
 
 ## Requirements
 * [OpenAL](https://www.openal.org/)
@@ -36,6 +36,7 @@ Windows, Linux, macOSで動作する動画編集ソフトウェアです。
 ## License
 
 * [MIT License](https://github.com/b-editor/BEditor/blob/main/LICENSE)
+* 一部の拡張機能は __GPL version 2__ です。
 * このソフトウェアは、[Apache 2.0 ライセンス](http://www.apache.org/licenses/LICENSE-2.0)で配布されている製作物が含まれています。
 
 ## Building BEditor

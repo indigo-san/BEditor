@@ -1,4 +1,11 @@
-﻿using System.Collections.Generic;
+﻿// DepthTest.cs
+//
+// Copyright (C) BEditor
+//
+// This software may be modified and distributed under the terms
+// of the MIT license. See the LICENSE file for details.
+
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics.CodeAnalysis;
 
@@ -18,20 +25,20 @@ namespace BEditor.Primitive.Effects
         /// <summary>
         /// Defines the <see cref="Enabled"/> property.
         /// </summary>
-        public static readonly DirectEditingProperty<DepthTest, CheckProperty> EnabledProperty = EditingProperty.RegisterSerializeDirect<CheckProperty, DepthTest>(
+        public static readonly DirectEditingProperty<DepthTest, CheckProperty> EnabledProperty = EditingProperty.RegisterDirect<CheckProperty, DepthTest>(
             nameof(Enabled),
             owner => owner.Enabled,
             (owner, obj) => owner.Enabled = obj,
-            new CheckPropertyMetadata(Strings.DepthTestEnable, true));
+            EditingPropertyOptions<CheckProperty>.Create(new CheckPropertyMetadata(Strings.DepthTestEnable, true)).Serialize());
 
         /// <summary>
         /// Defines the <see cref="Function"/> property.
         /// </summary>
-        public static readonly DirectEditingProperty<DepthTest, SelectorProperty> FunctionProperty = EditingProperty.RegisterSerializeDirect<SelectorProperty, DepthTest>(
+        public static readonly DirectEditingProperty<DepthTest, SelectorProperty> FunctionProperty = EditingProperty.RegisterDirect<SelectorProperty, DepthTest>(
             nameof(Function),
             owner => owner.Function,
             (owner, obj) => owner.Function = obj,
-            new SelectorPropertyMetadata(Strings.DepthFunction, new[]
+            EditingPropertyOptions<SelectorProperty>.Create(new SelectorPropertyMetadata(Strings.DepthFunction, new[]
             {
                 "Never",
                 "Less",
@@ -40,35 +47,35 @@ namespace BEditor.Primitive.Effects
                 "Greater",
                 "Notequal",
                 "Gequal",
-                "Always"
-            }, 1));
+                "Always",
+            }, 1)).Serialize());
 
         /// <summary>
         /// Defines the <see cref="Mask"/> property.
         /// </summary>
-        public static readonly DirectEditingProperty<DepthTest, CheckProperty> MaskProperty = EditingProperty.RegisterSerializeDirect<CheckProperty, DepthTest>(
+        public static readonly DirectEditingProperty<DepthTest, CheckProperty> MaskProperty = EditingProperty.RegisterDirect<CheckProperty, DepthTest>(
             nameof(Mask),
             owner => owner.Mask,
             (owner, obj) => owner.Mask = obj,
-            new CheckPropertyMetadata("Mask", true));
+            EditingPropertyOptions<CheckProperty>.Create(new CheckPropertyMetadata("Mask", true)).Serialize());
 
         /// <summary>
         /// Defines the <see cref="Near"/> property.
         /// </summary>
-        public static readonly DirectEditingProperty<DepthTest, EaseProperty> NearProperty = EditingProperty.RegisterSerializeDirect<EaseProperty, DepthTest>(
+        public static readonly DirectEditingProperty<DepthTest, EaseProperty> NearProperty = EditingProperty.RegisterDirect<EaseProperty, DepthTest>(
             nameof(Near),
             owner => owner.Near,
             (owner, obj) => owner.Near = obj,
-            new EasePropertyMetadata("Near", 0, 100, 0));
+            EditingPropertyOptions<EaseProperty>.Create(new EasePropertyMetadata("Near", 0, 100, 0)).Serialize());
 
         /// <summary>
         /// Defines the <see cref="Far"/> property.
         /// </summary>
-        public static readonly DirectEditingProperty<DepthTest, EaseProperty> FarProperty = EditingProperty.RegisterSerializeDirect<EaseProperty, DepthTest>(
+        public static readonly DirectEditingProperty<DepthTest, EaseProperty> FarProperty = EditingProperty.RegisterDirect<EaseProperty, DepthTest>(
             nameof(Far),
             owner => owner.Far,
             (owner, obj) => owner.Far = obj,
-            new EasePropertyMetadata("Far", 100, 100, 0));
+            EditingPropertyOptions<EaseProperty>.Create(new EasePropertyMetadata("Far", 100, 100, 0)).Serialize());
 
         private static readonly ReadOnlyCollection<DepthFunction> DepthFunctions = new(new DepthFunction[]
         {
@@ -79,7 +86,7 @@ namespace BEditor.Primitive.Effects
             DepthFunction.Greater,
             DepthFunction.Notequal,
             DepthFunction.Gequal,
-            DepthFunction.Always
+            DepthFunction.Always,
         });
 
         /// <summary>

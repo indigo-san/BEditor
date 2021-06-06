@@ -1,4 +1,11 @@
-﻿using System.Collections.Generic;
+﻿// Border.cs
+//
+// Copyright (C) BEditor
+//
+// This software may be modified and distributed under the terms
+// of the MIT license. See the LICENSE file for details.
+
+using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 
 using BEditor.Data;
@@ -18,14 +25,20 @@ namespace BEditor.Primitive.Effects
         /// <summary>
         /// Defines the <see cref="Size"/> property.
         /// </summary>
-        public static readonly DirectEditingProperty<Border, EaseProperty> SizeProperty = EditingProperty.RegisterSerializeDirect<EaseProperty, Border>(
-            nameof(Size), owner => owner.Size, (owner, obj) => owner.Size = obj, new EasePropertyMetadata(Strings.Size, 10, float.NaN, 1));
+        public static readonly DirectEditingProperty<Border, EaseProperty> SizeProperty = EditingProperty.RegisterDirect<EaseProperty, Border>(
+            nameof(Size),
+            owner => owner.Size,
+            (owner, obj) => owner.Size = obj,
+            EditingPropertyOptions<EaseProperty>.Create(new EasePropertyMetadata(Strings.Size, 10, float.NaN, 1)).Serialize());
 
         /// <summary>
         /// Defines the <see cref="Color"/> property.
         /// </summary>
-        public static readonly DirectEditingProperty<Border, ColorProperty> ColorProperty = EditingProperty.RegisterSerializeDirect<ColorProperty, Border>(
-            nameof(Color), owner => owner.Color, (owner, obj) => owner.Color = obj, new ColorPropertyMetadata(Strings.Color, Drawing.Color.Light));
+        public static readonly DirectEditingProperty<Border, ColorProperty> ColorProperty = EditingProperty.RegisterDirect<ColorProperty, Border>(
+            nameof(Color),
+            owner => owner.Color,
+            (owner, obj) => owner.Color = obj,
+            EditingPropertyOptions<ColorProperty>.Create(new ColorPropertyMetadata(Strings.Color, Colors.White)).Serialize());
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Border"/> class.

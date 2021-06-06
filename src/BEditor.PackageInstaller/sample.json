@@ -1,0 +1,12 @@
+[
+  {
+    "main-assembly": "BEditor.Extensions.FFmpeg.dll",
+    "name": "BEditor.Extensions.FFmpeg",
+    "author": "b-editor",
+    "version": "0.1.3",
+    "type": "install",
+    "id": "6c7ea15c-b6c2-46a3-ad11-22eb5253c346",
+    "license": "MIT License",
+    "url": "https://beditor.net/repo/BEditor.Extensions.FFmpeg.zip"
+  }
+]

@@ -256,9 +256,6 @@
   <data name="DeleteCommand" xml:space="preserve">
     <value>記録したコマンドの消去</value>
   </data>
-  <data name="DisabledPlugins" xml:space="preserve">
-    <value>無効なプラグイン</value>
-  </data>
   <data name="Disconnect" xml:space="preserve">
     <value>切断</value>
   </data>
@@ -304,8 +301,8 @@
   <data name="Infomation" xml:space="preserve">
     <value>情報</value>
   </data>
-  <data name="LoadedPlugins" xml:space="preserve">
-    <value>読み込まれているプラグイン</value>
+  <data name="Installed" xml:space="preserve">
+    <value>インストール済み</value>
   </data>
   <data name="Language" xml:space="preserve">
     <value>言語</value>
@@ -324,9 +321,6 @@
   </data>
   <data name="License" xml:space="preserve">
     <value>ライセンス</value>
-  </data>
-  <data name="LoadPlugin" xml:space="preserve">
-    <value>次回からこのプラグインを読み込む</value>
   </data>
   <data name="Log" xml:space="preserve">
     <value>ログ</value>
@@ -354,9 +348,6 @@
   </data>
   <data name="No" xml:space="preserve">
     <value>いいえ</value>
-  </data>
-  <data name="ObjectViewer" xml:space="preserve">
-    <value>オブジェクトビューアー</value>
   </data>
   <data name="OK" xml:space="preserve">
     <value>OK</value>
@@ -485,9 +476,6 @@
   <data name="Undo" xml:space="preserve">
     <value>やり直す</value>
   </data>
-  <data name="UnloadPlugin" xml:space="preserve">
-    <value>次回からこのプラグインを読み込まない</value>
-  </data>
   <data name="Update" xml:space="preserve">
     <value>アップデート</value>
   </data>
@@ -598,5 +586,115 @@
   </data>
   <data name="CreateScene" xml:space="preserve">
     <value>シーンを作成</value>
+  </data>
+  <data name="Repositories" xml:space="preserve">
+    <value>リポジトリ</value>
+  </data>
+  <data name="PleaseEnter" xml:space="preserve">
+    <value>{0}を入力してください。</value>
+  </data>
+  <data name="ThisItemCannotBeChanged" xml:space="preserve">
+    <value>この項目は変更できません。</value>
+  </data>
+  <data name="FailedTo" xml:space="preserve">
+    <value>{0}に失敗しました。</value>
+  </data>
+  <data name="Operate" xml:space="preserve">
+    <value>操作</value>
+  </data>
+  <data name="ManagePlugins" xml:space="preserve">
+    <value>プラグインを管理</value>
+  </data>
+  <data name="Author" xml:space="preserve">
+    <value>著者</value>
+  </data>
+  <data name="Tag" xml:space="preserve">
+    <value>タグ</value>
+  </data>
+  <data name="Install" xml:space="preserve">
+    <value>インストール</value>
+  </data>
+  <data name="Uninstall" xml:space="preserve">
+    <value>アンインストール</value>
+  </data>
+  <data name="WhenYouCloseTheApplicationTheChangesWillBegin" xml:space="preserve">
+    <value>アプリケーションを終了すると、変更が開始されます。</value>
+  </data>
+  <data name="Changes" xml:space="preserve">
+    <value>変更</value>
+  </data>
+  <data name="CreatePluginPackage" xml:space="preserve">
+    <value>プラグインのパッケージを作成</value>
+  </data>
+  <data name="WebSite" xml:space="preserve">
+    <value>ウェブサイト</value>
+  </data>
+  <data name="Description" xml:space="preserve">
+    <value>説明</value>
+  </data>
+  <data name="OutputDirectory" xml:space="preserve">
+    <value>出力先のディレクトリ</value>
+  </data>
+  <data name="AssemblyFile" xml:space="preserve">
+    <value>アセンブリファイル</value>
+  </data>
+  <data name="FileNotFound" xml:space="preserve">
+    <value>ファイルが見つかりません。</value>
+  </data>
+  <data name="InvalidIdCanUseGUIDAndUUID" xml:space="preserve">
+    <value>無効なIdです。
+IdにはGUID, UUIDが使えます。</value>
+  </data>
+  <data name="CouldNotCreatePackage" xml:space="preserve">
+    <value>パッケージを作成できませんでした。</value>
+  </data>
+  <data name="ClipId" xml:space="preserve">
+    <value>クリップのId</value>
+  </data>
+  <data name="SpecifiedClipIsNotFound" xml:space="preserve">
+    <value>指定されたクリップが見つかりません。</value>
+  </data>
+  <data name="NoClipIsSelected" xml:space="preserve">
+    <value>クリップが選択されていません。</value>
+  </data>
+  <data name="Objects" xml:space="preserve">
+    <value>オブジェクト</value>
+  </data>
+  <data name="Projects" xml:space="preserve">
+    <value>プロジェクト</value>
+  </data>
+  <data name="GoToMainWindow" xml:space="preserve">
+    <value>メインウィンドウへ移動</value>
+  </data>
+  <data name="AddToList" xml:space="preserve">
+    <value>リストに追加</value>
+  </data>
+  <data name="NotSupportedFormats" xml:space="preserve">
+    <value>対応していないフォーマットです。</value>
+  </data>
+  <data name="AlreadyCancelled" xml:space="preserve">
+    <value>すでにキャンセルされています。</value>
+  </data>
+  <data name="UpdateNote" xml:space="preserve">
+    <value>更新ノート</value>
+  </data>
+  <data name="ShortDescription" xml:space="preserve">
+    <value>短い説明</value>
+  </data>
+  <data name="ShortUpdateNote" xml:space="preserve">
+    <value>短い更新ノート</value>
+  </data>
+  <data name="EncoderNotFound" xml:space="preserve">
+    <value>エンコーダーが見つかりません。</value>
+  </data>
+  <data name="Encoder" xml:space="preserve">
+    <value>エンコーダー</value>
+  </data>
+  <data name="EncoderSettings" xml:space="preserve">
+    <value>エンコーダーの設定</value>
+  </data>
+  <data name="EncoderIsNotSet" xml:space="preserve">
+    <value>エンコーダが設定されていません。
+エンコーダが設定されると、詳細設定が表示されます。</value>
   </data>
 </root>

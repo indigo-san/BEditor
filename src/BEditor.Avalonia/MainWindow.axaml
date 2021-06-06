@@ -39,8 +39,8 @@
             <ExperimentalAcrylicBorder.Material>
                 <ExperimentalAcrylicMaterial
                     TintColor="#222222"
-                    TintOpacity="{CompiledBinding AcrylicTintOpacity1, Mode=OneTime}"
-                    MaterialOpacity="{CompiledBinding AcrylicMaterialOpacity1, Mode=OneTime}" />
+                    TintOpacity="{StaticResource AcrylicTintOpacity1}"
+                    MaterialOpacity="{StaticResource AcrylicMaterialOpacity1}" />
             </ExperimentalAcrylicBorder.Material>
         </ExperimentalAcrylicBorder>
 
@@ -208,8 +208,8 @@
                     <ExperimentalAcrylicBorder.Material>
                         <ExperimentalAcrylicMaterial
                             TintColor="Black"
-                            TintOpacity="{CompiledBinding AcrylicTintOpacity1, Mode=OneTime}"
-                            MaterialOpacity="{CompiledBinding AcrylicMaterialOpacity1, Mode=OneTime}" />
+                            TintOpacity="{StaticResource AcrylicTintOpacity1}"
+                            MaterialOpacity="{StaticResource AcrylicMaterialOpacity1}" />
                     </ExperimentalAcrylicBorder.Material>
 
                     <ItemsControl Items="{Binding Source={x:Static data:ObjectMetadata.LoadedObjects}}">
@@ -278,8 +278,8 @@
             <ExperimentalAcrylicBorder.Material>
                 <ExperimentalAcrylicMaterial
                     TintColor="Black"
-                    TintOpacity="{CompiledBinding AcrylicTintOpacity2, Mode=OneTime}"
-                    MaterialOpacity="{CompiledBinding AcrylicMaterialOpacity2, Mode=OneTime}" />
+                    TintOpacity="{StaticResource AcrylicTintOpacity2}"
+                    MaterialOpacity="{StaticResource AcrylicMaterialOpacity2}" />
             </ExperimentalAcrylicBorder.Material>
         </ExperimentalAcrylicBorder>
 
@@ -304,13 +304,14 @@
             <ExperimentalAcrylicBorder.Material>
                 <ExperimentalAcrylicMaterial
                     TintColor="Black"
-                    TintOpacity="{CompiledBinding AcrylicTintOpacity2, Mode=OneTime}"
-                    MaterialOpacity="{CompiledBinding AcrylicMaterialOpacity2, Mode=OneTime}" />
+                    TintOpacity="{StaticResource AcrylicTintOpacity2}"
+                    MaterialOpacity="{StaticResource AcrylicMaterialOpacity2}" />
             </ExperimentalAcrylicBorder.Material>
         </ExperimentalAcrylicBorder>
 
         <GridSplitter Background="Transparent" Grid.Row="3" Grid.Column="2" Grid.ColumnSpan="3"/>
 
+        <!--—áŠO‚ªƒXƒ[‚³‚ê‚é-->
         <views:Previewer
             x:Name="previewer"
             DataContext="{CompiledBinding Previewer, Mode=OneTime}"
@@ -346,7 +347,7 @@
                 <views:Library />
             </TabItem>
             <TabItem
-                Header="{x:Static prop:Strings.ObjectViewer}"
+                Header="{x:Static prop:Strings.Objects}"
                 FontSize="16"
                 Padding="8" >
                 <views:ObjectViewer />

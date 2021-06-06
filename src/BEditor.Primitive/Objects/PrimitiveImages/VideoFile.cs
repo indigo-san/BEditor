@@ -1,4 +1,11 @@
-﻿using System;
+﻿// VideoFile.cs
+//
+// Copyright (C) BEditor
+//
+// This software may be modified and distributed under the terms
+// of the MIT license. See the LICENSE file for details.
+
+using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Reactive.Linq;
@@ -13,6 +20,7 @@ using BEditor.Media.Decoding;
 using BEditor.Primitive.Resources;
 
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 
 namespace BEditor.Primitive.Objects
 {
@@ -24,42 +32,47 @@ namespace BEditor.Primitive.Objects
         /// <summary>
         /// Defines the <see cref="Speed"/> property.
         /// </summary>
-        public static readonly DirectEditingProperty<VideoFile, EaseProperty> SpeedProperty = EditingProperty.RegisterSerializeDirect<EaseProperty, VideoFile>(
+        public static readonly DirectEditingProperty<VideoFile, EaseProperty> SpeedProperty = EditingProperty.RegisterDirect<EaseProperty, VideoFile>(
             nameof(Speed),
             owner => owner.Speed,
             (owner, obj) => owner.Speed = obj,
-            new EasePropertyMetadata(Strings.Speed, 100));
+            EditingPropertyOptions<EaseProperty>.Create(new EasePropertyMetadata(Strings.Speed, 100)).Serialize());
 
         /// <summary>
         /// Defines the <see cref="Start"/> property.
         /// </summary>
-        public static readonly DirectEditingProperty<VideoFile, EaseProperty> StartProperty = EditingProperty.RegisterSerializeDirect<EaseProperty, VideoFile>(
+        public static readonly DirectEditingProperty<VideoFile, EaseProperty> StartProperty = EditingProperty.RegisterDirect<EaseProperty, VideoFile>(
             nameof(Start),
             owner => owner.Start,
             (owner, obj) => owner.Start = obj,
-            new EasePropertyMetadata(Strings.Start, 1, float.NaN, 0));
+            EditingPropertyOptions<EaseProperty>.Create(new EasePropertyMetadata(Strings.Start, 1, float.NaN, 0)).Serialize());
 
         /// <summary>
         /// Defines the <see cref="File"/> property.
         /// </summary>
-        public static readonly DirectEditingProperty<VideoFile, FileProperty> FileProperty = EditingProperty.RegisterSerializeDirect<FileProperty, VideoFile>(
+        public static readonly DirectEditingProperty<VideoFile, FileProperty> FileProperty = EditingProperty.RegisterDirect<FileProperty, VideoFile>(
             nameof(File),
             owner => owner.File,
             (owner, obj) => owner.File = obj,
-            new FilePropertyMetadata(Strings.File, "", new(Strings.VideoFile, new FileExtension[]
+            EditingPropertyOptions<FileProperty>.Create(new FilePropertyMetadata(Strings.File, string.Empty, new(Strings.VideoFile, new FileExtension[]
             {
                 new("mp4"),
                 new("avi"),
                 new("wmv"),
-                new("mov")
-            })));
+                new("mov"),
+            }))).Serialize());
 
         /// <summary>
         /// Defines the <see cref="SetLength"/> property.
         /// </summary>
         public static readonly EditingProperty<ButtonComponent> SetLengthProperty = EditingProperty.Register<ButtonComponent, VideoFile>(
             nameof(SetLength),
-            new ButtonComponentMetadata(Strings.ClipLengthAsVideoLength));
+            EditingPropertyOptions<ButtonComponent>.Create(new ButtonComponentMetadata(Strings.ClipLengthAsVideoLength)).Serialize());
+
+        private static readonly MediaOptions _options = new()
+        {
+            StreamsToLoad = MediaMode.Video,
+        };
 
         private MediaFile? _mediaFile;
 
@@ -96,7 +109,7 @@ namespace BEditor.Primitive.Objects
         public FileProperty File { get; private set; }
 
         /// <summary>
-        /// 
+        /// Gets the command to set the length of the clip.
         /// </summary>
         [AllowNull]
         public ButtonComponent SetLength => GetValue(SetLengthProperty);
@@ -132,29 +145,36 @@ namespace BEditor.Primitive.Objects
         {
             base.OnLoad();
 
-            if (System.IO.File.Exists(File.Value))
-            {
-                _mediaFile = MediaFile.Open(File.Value);
-            }
-
             _disposable1 = File.Subscribe(filename =>
             {
                 _mediaFile?.Dispose();
 
-                try
+                if (System.IO.File.Exists(File.Value))
                 {
-                    _mediaFile = MediaFile.Open(filename);
+                    try
+                    {
+                        _mediaFile = MediaFile.Open(filename, _options);
+                    }
+                    catch (Exception e)
+                    {
+                        var mes = ServiceProvider?.GetService<IMessage>();
+                        var msg = string.Format(Strings.FailedToLoad, filename);
+                        mes?.Snackbar(msg);
+                        LogManager.Logger?.LogError(e, msg);
+                    }
                 }
-                catch (Exception)
+                else
                 {
-                    var mes = ServiceProvider?.GetService<IMessage>();
-                    mes?.Snackbar(string.Format(Strings.FailedToLoad, filename));
+                    _mediaFile = null;
                 }
             });
 
             _disposable2 = SetLength.Subscribe(_ =>
             {
-                Parent.ChangeLength(Parent.Start, Parent.Start + _mediaFile!.Video!.Info.NumberOfFrames).Execute();
+                if (_mediaFile?.Video is not null)
+                {
+                    Parent.ChangeLength(Parent.Start, Parent.Start + _mediaFile.Video.Info.NumberOfFrames).Execute();
+                }
             });
         }
 

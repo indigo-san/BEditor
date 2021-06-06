@@ -1,39 +1,39 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-    <Import Project="..\..\props\common.props" />
-    <Import Project="..\..\props\analyzer.props" />
-
     <PropertyGroup>
         <OutputType>WinExe</OutputType>
-        <TargetFramework>net5.0</TargetFramework>
-        <Nullable>enable</Nullable>
         <RootNamespace>BEditor</RootNamespace>
         <RuntimeIdentifiers>win-x64;linux-x64;osx-x64</RuntimeIdentifiers>
         <ApplicationIcon>Assets\Images\icon.ico</ApplicationIcon>
         <AssemblyName>beditor</AssemblyName>
+        <CodeAnalysisRuleSet>$(SolutionDir)\roslynator.ruleset</CodeAnalysisRuleSet>
     </PropertyGroup>
 
     <ItemGroup>
+        <EmbeddedResource Include="Assets\Fonts\*.otf" />
         <AvaloniaResource Include="Assets\**" />
     </ItemGroup>
 
+    <!--PackageReferences-->
     <ItemGroup>
-        <PackageReference Include="Avalonia" Version="0.10.4" />
-        <PackageReference Include="Avalonia.Desktop" Version="0.10.4" />
-        <PackageReference Include="Avalonia.Diagnostics" Version="0.10.4" />
+        <PackageReference Include="Avalonia" Version="0.10.5" />
+        <PackageReference Include="Avalonia.Desktop" Version="0.10.5" />
+        <PackageReference Include="Avalonia.Diagnostics" Version="0.10.5" />
         <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="5.0.0" />
-        <PackageReference Include="ReactiveProperty" Version="7.10.0" />
+        <PackageReference Include="ReactiveProperty" Version="7.11.0" />
         <PackageReference Include="Serilog.Extensions.Logging" Version="3.0.1" />
         <PackageReference Include="Serilog.Sinks.File" Version="5.0.0-dev-00909" />
+        <PackageReference Include="Roslynator.Analyzers" Version="3.2.0-rc" PrivateAssets="all" />
     </ItemGroup>
 
+    <!--ProjectReferences-->
     <ItemGroup>
         <ProjectReference Include="..\BEditor.Core\BEditor.Core.csproj" />
         <ProjectReference Include="..\BEditor.Primitive\BEditor.Primitive.csproj" />
     </ItemGroup>
 
-    <ItemGroup>
-        <EmbeddedResource Include="Assets\Fonts\*.otf" />
+    <ItemGroup Condition="'$(Configuration)'=='Debug'">
+        <ProjectReference Include="..\BEditor.PackageInstaller\BEditor.PackageInstaller.csproj" />
     </ItemGroup>
 
     <ItemGroup>

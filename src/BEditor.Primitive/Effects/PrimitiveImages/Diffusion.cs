@@ -1,4 +1,11 @@
-﻿using System.Collections.Generic;
+﻿// Diffusion.cs
+//
+// Copyright (C) BEditor
+//
+// This software may be modified and distributed under the terms
+// of the MIT license. See the LICENSE file for details.
+
+using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 
 using BEditor.Data;
@@ -11,18 +18,18 @@ using BEditor.Primitive.Resources;
 namespace BEditor.Primitive.Effects
 {
     /// <summary>
-    /// 
+    /// Represents an effect that diffuses an image.
     /// </summary>
     public sealed class Diffusion : ImageEffect
     {
         /// <summary>
         /// Defines the <see cref="Value"/> property.
         /// </summary>
-        public static readonly DirectEditingProperty<Diffusion, EaseProperty> ValueProperty = EditingProperty.RegisterSerializeDirect<EaseProperty, Diffusion>(
+        public static readonly DirectEditingProperty<Diffusion, EaseProperty> ValueProperty = EditingProperty.RegisterDirect<EaseProperty, Diffusion>(
             nameof(Value),
             owner => owner.Value,
             (owner, obj) => owner.Value = obj,
-            new EasePropertyMetadata(Strings.ThresholdValue, 7, 30, 0));
+            EditingPropertyOptions<EaseProperty>.Create(new EasePropertyMetadata(Strings.ThresholdValue, 7, 30, 0)).Serialize());
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Diffusion"/> class.

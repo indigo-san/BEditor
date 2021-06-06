@@ -1,4 +1,11 @@
-﻿using System.Collections.Generic;
+﻿// BrightnessCorrection.cs
+//
+// Copyright (C) BEditor
+//
+// This software may be modified and distributed under the terms
+// of the MIT license. See the LICENSE file for details.
+
+using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 
 using BEditor.Data;
@@ -18,11 +25,11 @@ namespace BEditor.Primitive.Effects
         /// <summary>
         /// Dedines the <see cref="Brightness"/> property.
         /// </summary>
-        public static readonly EditingProperty<EaseProperty> BrightnessProperty = EditingProperty.RegisterSerializeDirect<EaseProperty, BrightnessCorrection>(
+        public static readonly DirectEditingProperty<BrightnessCorrection, EaseProperty> BrightnessProperty = EditingProperty.RegisterDirect<EaseProperty, BrightnessCorrection>(
             nameof(Brightness),
             owner => owner.Brightness,
             (owner, obj) => owner.Brightness = obj,
-            new EasePropertyMetadata(Strings.Brightness, 0, 255, -255));
+            EditingPropertyOptions<EaseProperty>.Create(new EasePropertyMetadata(Strings.Brightness, 0, 255, -255)).Serialize());
 
         /// <summary>
         /// Initializes a new instance of the <see cref="BrightnessCorrection"/> class.

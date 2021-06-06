@@ -312,7 +312,7 @@ namespace BEditor.Extensions.AviUtl
             // col="" 対策
             if (Value is "\"\"")
             {
-                return Color.Light;
+                return Colors.White;
             }
 
             // 0x000000 など
@@ -360,29 +360,41 @@ namespace BEditor.Extensions.AviUtl
     public class Plugin : PluginObject
     {
         [AllowNull]
-        internal static ScriptLoader _loader;
+        internal static ScriptLoader Loader;
+
+        [AllowNull]
+        internal static Plugin Default;
+
+        private SettingRecord? settings;
 
         public Plugin(PluginConfig config) : base(config)
         {
+            Default = this;
         }
 
         public override string PluginName => "BEditor.Extensions.AviUtl";
 
         public override string Description => string.Empty;
 
-        public override SettingRecord Settings { get; set; } = new CustomSettings();
+        public override SettingRecord Settings
+        {
+            get => settings ??= SettingRecord.LoadFrom<CustomSettings>(Path.Combine(BaseDirectory, "settings.json")) ?? new CustomSettings();
+            set => (settings = value).Save(Path.Combine(BaseDirectory, "settings.json"));
+        }
 
-        public static void Register(string[] args)
+        public override Guid Id { get; } = Guid.Parse("138CE66C-3E1D-4BF8-A879-F3272C8FFE05");
+
+        public static void Register()
         {
             var dir = Path.Combine(Directory.GetParent(Assembly.GetExecutingAssembly().Location)!.FullName, "script");
             if (!Directory.Exists(dir)) Directory.CreateDirectory(dir);
-            _loader = new(dir);
-            var items = _loader.Load();
+            Loader = new(dir);
+            var items = Loader.Load();
 
             PluginBuilder.Configure<Plugin>()
                 .ConfigureServices(s => s
-                    .AddSingleton(_ => LuaScript.LuaGlobal)
-                    .AddSingleton(_ => _loader))
+                    .AddSingleton(_ => Loader.Global)
+                    .AddSingleton(_ => Loader))
                 .With(CreateEffectMetadata(items.Where(i => i.Type is ScriptType.Animation)))
                 .Register();
         }
@@ -426,6 +438,6 @@ namespace BEditor.Extensions.AviUtl
     }
 
     public record CustomSettings(
-        [property: DisplayName("Y軸の値を反転する")]
+        [property: DisplayName("Y軸の値を反転する (左手座標系を使用)")]
         bool ReverseYAsis = true) : SettingRecord;
 }

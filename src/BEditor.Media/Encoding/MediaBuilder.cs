@@ -1,5 +1,11 @@
-﻿using System;
-using System.IO;
+﻿// MediaBuilder.cs
+//
+// Copyright (C) BEditor
+//
+// This software may be modified and distributed under the terms
+// of the MIT license. See the LICENSE file for details.
+
+using System;
 
 namespace BEditor.Media.Encoding
 {
@@ -9,22 +15,40 @@ namespace BEditor.Media.Encoding
     public sealed class MediaBuilder
     {
         private readonly IOutputContainer _container;
+        private readonly IRegisterdEncoding _encoding;
 
-        private MediaBuilder(IOutputContainer container)
+        private MediaBuilder(IOutputContainer container, IRegisterdEncoding encoding)
         {
             _container = container;
+            _encoding = encoding;
         }
 
         /// <summary>
         /// Sets up a multimedia container with the format guessed from the file extension.
         /// </summary>
         /// <param name="path">A path to create the output file.</param>
+        /// <exception cref="NotSupportedException">Not supported format.</exception>
         /// <returns>The <see cref="MediaBuilder"/> instance.</returns>
         public static MediaBuilder CreateContainer(string path)
         {
-            var container = EncoderFactory.Create(path) ?? throw new NotSupportedException("Not supported format.");
+            EncodingRegistory.Create(path, out var container, out var encoding);
+            if (container is null) throw new NotSupportedException("Not supported format.");
 
-            return new(container);
+            return new(container, encoding!);
+        }
+
+        /// <summary>
+        /// Sets the multimedia container from an instance of <see cref="IRegisterdEncoding"/>.
+        /// </summary>
+        /// <param name="path">A path to create the output file.</param>
+        /// <param name="encoding">The encoding.</param>
+        /// <exception cref="NotSupportedException">Not supported format.</exception>
+        /// <returns>The <see cref="MediaBuilder"/> instance.</returns>
+        public static MediaBuilder CreateContainer(string path, IRegisterdEncoding encoding)
+        {
+            var container = encoding.Create(path) ?? throw new NotSupportedException("Not supported format.");
+
+            return new(container, encoding);
         }
 
         /// <summary>
@@ -45,7 +69,7 @@ namespace BEditor.Media.Encoding
         /// <returns>This <see cref="MediaBuilder"/> object.</returns>
         public MediaBuilder WithVideo(Action<VideoEncoderSettings> settings)
         {
-            var config = _container.GetDefaultVideoSettings();
+            var config = _encoding.GetDefaultVideoSettings();
             settings.Invoke(config);
 
             _container.AddVideoStream(config);
@@ -59,7 +83,7 @@ namespace BEditor.Media.Encoding
         /// <returns>This <see cref="MediaBuilder"/> object.</returns>
         public MediaBuilder WithAudio(Action<AudioEncoderSettings> settings)
         {
-            var config = _container.GetDefaultAudioSettings();
+            var config = _encoding.GetDefaultAudioSettings();
             settings.Invoke(config);
 
             _container.AddAudioStream(config);

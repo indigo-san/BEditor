@@ -19,6 +19,7 @@
         <convert:EnumerableTakeConverter x:Key="EnumerableTakeConverter" />
         <convert:EffectToKeyframeConverter x:Key="EffectToKeyframeConverter" />
         <convert:GetNameConverter x:Key="GetNameConverter" />
+        <convert:PathToImageSourceConverter x:Key="PathToImageSourceConverter" />
     </Application.Resources>
     <Application.Styles>
         <StyleInclude Source="avares://beditor/Controls/SeekSlider.axaml" />
@@ -31,6 +32,7 @@
         <StyleInclude Source="avares://beditor/Controls/FluentUiIcons_Regular.axaml" />
         <StyleInclude Source="avares://beditor/Views/Settings/SettingsResources.axaml" />
         <StyleInclude Source="avares://beditor/Views/NotifyBar.axaml" />
+        <StyleInclude Source="avares://beditor/Controls/HyperLink.axaml" />
 
         <Style Selector="Expander.expandkeyframe /template/ ToggleButton#PART_toggle">
             <Setter Property="Margin" Value="32.5,0,0,0" />
@@ -44,8 +46,11 @@
             <Setter Property="Height" Value="40" />
         </Style>
 
+        <Style Selector="TextBox">
+            <Setter Property="FontFamily" Value="Yu Gothic UI, Segoe UI, Hiragino Sans, Helvetica Neue, Ubuntu" />
+        </Style>
         <Style Selector="TemplatedControl">
-            <Setter Property="FontFamily" Value="Meiryo UI, Osaka, Ubuntu" />
+            <Setter Property="FontFamily" Value="Yu Gothic UI, Segoe UI, Hiragino Sans, Helvetica Neue, Ubuntu" />
         </Style>
     </Application.Styles>
 </Application>

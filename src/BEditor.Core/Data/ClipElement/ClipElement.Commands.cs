@@ -1,4 +1,11 @@
-﻿using System;
+﻿// ClipElement.Commands.cs
+//
+// Copyright (C) BEditor
+//
+// This software may be modified and distributed under the terms
+// of the MIT license. See the LICENSE file for details.
+
+using System;
 
 using BEditor.Command;
 using BEditor.Media;
@@ -169,6 +176,7 @@ namespace BEditor.Data
 
             /// <inheritdoc/>
             public string Name => Strings.MoveClip;
+
             private Scene Scene => _clip.Parent;
 
             /// <inheritdoc/>
@@ -293,9 +301,9 @@ namespace BEditor.Data
                 Before.Load();
 
                 new RemoveCommand(_source).Do();
-                After.SetID(Guid.NewGuid());
+                After.UpdateId();
                 _scene.Add(After);
-                Before.SetID(Guid.NewGuid());
+                Before.UpdateId();
                 _scene.Add(Before);
             }
 

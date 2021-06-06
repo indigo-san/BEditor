@@ -1,9 +1,17 @@
-﻿using System;
+﻿// Scene.Properties.cs
+//
+// Copyright (C) BEditor
+//
+// This software may be modified and distributed under the terms
+// of the MIT license. See the LICENSE file for details.
+
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 
 using BEditor.Audio;
+using BEditor.Data.Internals;
 using BEditor.Drawing;
 using BEditor.Graphics;
 using BEditor.Media;
@@ -123,8 +131,6 @@ namespace BEditor.Data
             set => SetValue(value, ref _previewframe, _PrevireFrameArgs);
         }
 
-        #region TimeLineの状態
-
         /// <summary>
         /// Gets or sets the scale of the timeline.
         /// </summary>
@@ -151,8 +157,6 @@ namespace BEditor.Data
             get => _timeLineVerticalOffset;
             set => SetValue(value, ref _timeLineVerticalOffset, _VoffsetArgs);
         }
-
-        #endregion
 
         /// <inheritdoc/>
         public IEnumerable<ClipElement> Children => Datas;
