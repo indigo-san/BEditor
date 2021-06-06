@@ -1,10 +1,10 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <TargetFramework>net5.0</TargetFramework>
-        <Nullable>enable</Nullable>
-        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
         <OutputPath>..\..\src\BEditor.Avalonia\bin\$(Configuration)\net5.0\user\plugins\BEditor.Extensions.MediaFoundation</OutputPath>
+        <Company>b-editor</Company>
+        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+        <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
     </PropertyGroup>
 
     <Import Project="..\..\props\plugin.props" />
@@ -14,8 +14,8 @@
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\..\src\BEditor.Media\BEditor.Media.csproj" />
         <ProjectReference Include="..\..\src\BEditor.Core\BEditor.Core.csproj" />
+        <ProjectReference Include="..\..\src\BEditor.Media\BEditor.Media.csproj" />
     </ItemGroup>
 
 </Project>

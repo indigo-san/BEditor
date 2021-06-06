@@ -16,6 +16,7 @@ namespace BEditor.Extensions.MediaFoundation
     {
         public Plugin(PluginConfig config) : base(config)
         {
+            config.Application.Exit += Application_Exit;
         }
 
         public override string PluginName => "BEditor.Extensions.MediaFoundation";
@@ -24,14 +25,22 @@ namespace BEditor.Extensions.MediaFoundation
 
         public override SettingRecord Settings { get; set; } = new();
 
-        public static void Register(string[] args)
+        public override Guid Id { get; } = Guid.Parse("7B5EBA32-A582-4333-A920-FD8F68015432");
+
+        public static void Register()
         {
             MediaManager.Startup();
 
             PluginBuilder.Configure<Plugin>()
+                .With(new MFDecoding())
                 //.With(new EncoderBuilder())
                 //.With(new DecoderBuilder())
                 .Register();
+        }
+
+        private void Application_Exit(object? sender, EventArgs e)
+        {
+            MediaManager.Shutdown();
         }
     }
 }
