@@ -2,12 +2,10 @@
 
 ## Description
 
-編集データやそのデータの描画などをするライブラリ
+BEditor.Audio, Base, Compute, Drawing, Graphics, Media, Packagingなどをプロジェクトと結べ付けます。1
 
 ## Dependent libraries
 * [.NET Runtime](https://github.com/dotnet/runtime)
-* [Microsoft.Extensions.DependencyInjection](https://github.com/dotnet/runtime)
-* [System.Reactive](https://github.com/dotnet/reactive)
 
 ## License
 

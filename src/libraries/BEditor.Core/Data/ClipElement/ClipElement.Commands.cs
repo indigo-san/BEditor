@@ -11,6 +11,8 @@ using BEditor.Command;
 using BEditor.Media;
 using BEditor.Resources;
 
+using Microsoft.Extensions.DependencyInjection;
+
 namespace BEditor.Data
 {
     /// <summary>
@@ -44,9 +46,27 @@ namespace BEditor.Data
             }
 
             /// <summary>
+            /// Initializes a new instance of the <see cref="AddCommand"/> class.
+            /// </summary>
+            /// <param name="scene">新しいクリップを追加するシーンです.</param>
+            /// <param name="startFrame">新しいクリップの開始フレームです.</param>
+            /// <param name="layer">新しいクリップの配置レイヤーです.</param>
+            /// <param name="obj">新しいクリップのオブジェクトです.</param>
+            public AddCommand(Scene scene, Frame startFrame, int layer, ObjectElement obj)
+            {
+                _scene = scene ?? throw new ArgumentNullException(nameof(scene));
+                if (startFrame < Frame.Zero) throw new ArgumentOutOfRangeException(nameof(startFrame));
+                if (layer < 0) throw new ArgumentOutOfRangeException(nameof(layer));
+                if (obj is null) throw new ArgumentNullException(nameof(obj));
+
+                // オブジェクトの情報
+                Clip = new ClipElement(startFrame, startFrame + 180, layer, scene, obj);
+            }
+
+            /// <summary>
             /// Gets the clip to add.
             /// </summary>
-            public ClipElement Clip { get; private set; }
+            public ClipElement Clip { get; }
 
             /// <inheritdoc/>
             public string Name => Strings.AddClip;
@@ -56,7 +76,12 @@ namespace BEditor.Data
             {
                 Clip.Load();
                 _scene.Add(Clip);
-                _scene.SetCurrentClip(Clip);
+                _scene.SelectItem = Clip;
+
+                if (_scene.TotalFrame < Clip.End)
+                {
+                    _scene.TotalFrame = Clip.End;
+                }
             }
 
             /// <inheritdoc/>
@@ -71,15 +96,9 @@ namespace BEditor.Data
                 _scene.Remove(Clip);
                 Clip.Unload();
 
-                // 存在する場合
-                if (_scene.SelectItems.Contains(Clip))
+                if (_scene.SelectItem == Clip)
                 {
-                    _scene.SelectItems.Remove(Clip);
-
-                    if (_scene.SelectItem == Clip)
-                    {
-                        _scene.SelectItem = null;
-                    }
+                    _scene.SelectItem = null;
                 }
             }
         }
@@ -108,28 +127,16 @@ namespace BEditor.Data
             {
                 if (!_clip.Parent.Remove(_clip))
                 {
-                    // Message.Snackbar("削除できませんでした");
+                    _clip.ServiceProvider?.GetService<IMessage>()?.Snackbar(Strings.FailedToRemove);
                 }
                 else
                 {
                     _clip.Unload();
 
                     // 存在する場合
-                    if (_clip.Parent.SelectItems.Contains(_clip))
+                    if (_clip.Parent.SelectItem == _clip)
                     {
-                        _clip.Parent.SelectItems.Remove(_clip);
-
-                        if (_clip.Parent.SelectItem == _clip)
-                        {
-                            if (_clip.Parent.SelectItems.Count == 0)
-                            {
-                                _clip.Parent.SelectItem = null;
-                            }
-                            else
-                            {
-                                _clip.Parent.SelectItem = _clip.Parent.SelectItems[0];
-                            }
-                        }
+                        _clip.Parent.SelectItem = null;
                     }
                 }
             }
@@ -143,8 +150,14 @@ namespace BEditor.Data
             /// <inheritdoc/>
             public void Undo()
             {
+                var scene = _clip.Parent;
                 _clip.Load();
-                _clip.Parent.Add(_clip);
+                scene.Add(_clip);
+
+                if (scene.TotalFrame < _clip.End)
+                {
+                    scene.TotalFrame = _clip.End;
+                }
             }
         }
 
@@ -186,7 +199,7 @@ namespace BEditor.Data
 
                 _clip.Layer = _newLayer;
 
-                if (_clip.End > Scene.TotalFrame)
+                if (Scene.TotalFrame < _clip.End)
                 {
                     Scene.TotalFrame = _clip.End;
                 }
@@ -204,6 +217,11 @@ namespace BEditor.Data
                 _clip.MoveTo(_oldFrame);
 
                 _clip.Layer = _oldLayer;
+
+                if (Scene.TotalFrame < _clip.End)
+                {
+                    Scene.TotalFrame = _clip.End;
+                }
             }
         }
 
@@ -239,8 +257,14 @@ namespace BEditor.Data
             /// <inheritdoc/>
             public void Do()
             {
+                var scene = _clip.Parent;
                 _clip.Start = _newStart;
                 _clip.End = _newEnd;
+
+                if (scene.TotalFrame < _clip.End)
+                {
+                    scene.TotalFrame = _clip.End;
+                }
             }
 
             /// <inheritdoc/>
@@ -252,8 +276,14 @@ namespace BEditor.Data
             /// <inheritdoc/>
             public void Undo()
             {
+                var scene = _clip.Parent;
                 _clip.Start = _oldStart;
                 _clip.End = _oldEnd;
+
+                if (scene.TotalFrame < _clip.End)
+                {
+                    scene.TotalFrame = _clip.End;
+                }
             }
         }
 

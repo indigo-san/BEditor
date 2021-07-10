@@ -4,9 +4,13 @@ using System.Reactive.Linq;
 
 using Avalonia.Media.Imaging;
 
+using BEditor.Media;
+using BEditor.Media.PCM;
 using BEditor.Models;
 
 using Reactive.Bindings;
+
+using static BEditor.ViewModels.ConfigurationViewModel;
 
 namespace BEditor.ViewModels
 {
@@ -15,13 +19,17 @@ namespace BEditor.ViewModels
         public PreviewerViewModel(IReadOnlyReactiveProperty<bool> isopened)
         {
             IsOpened = isopened;
-            isopened.Subscribe(_ => PreviewImage.Value = null);
+            isopened.Subscribe(_ =>
+            {
+                PreviewImage.Value = null;
+                PreviewAudio.Value = null;
+            });
 
-            MoveToTop.Select(_ => AppModel.Current.Project?.PreviewScene)
+            MoveToTop.Select(_ => AppModel.Current.Project?.CurrentScene)
                 .Where(s => s is not null)
                 .Subscribe(s => s!.PreviewFrame = 0);
 
-            MoveToPrevious.Select(_ => AppModel.Current.Project?.PreviewScene)
+            MoveToPrevious.Select(_ => AppModel.Current.Project?.CurrentScene)
                 .Where(s => s is not null)
                 .Subscribe(s => s!.PreviewFrame--);
 
@@ -33,26 +41,30 @@ namespace BEditor.ViewModels
                     {
                         app.AppStatus = Status.Edit;
 
-                        app.Project!.PreviewScene.Player.Stop();
+                        app.Project!.CurrentScene.Player.Stop();
                     }
                     else
                     {
                         app.AppStatus = Status.Playing;
 
-                        app.Project!.PreviewScene.Player.Play();
+                        app.Project!.CurrentScene.Player.Play();
                     }
                 });
 
-            MoveToNext.Select(_ => AppModel.Current.Project?.PreviewScene)
+            MoveToNext.Select(_ => AppModel.Current.Project?.CurrentScene)
                 .Where(s => s is not null)
                 .Subscribe(s => s!.PreviewFrame++);
 
-            MoveToEnd.Select(_ => AppModel.Current.Project?.PreviewScene)
+            MoveToEnd.Select(_ => AppModel.Current.Project?.CurrentScene)
                 .Where(s => s is not null)
                 .Subscribe(s => s!.PreviewFrame = s.TotalFrame);
         }
 
         public ReactiveProperty<WriteableBitmap?> PreviewImage { get; } = new();
+
+        public ReactiveProperty<Sound<StereoPCMFloat>?> PreviewAudio { get; } = new();
+
+        public ReactiveProperty<BackgroundType> Background { get; } = new();
 
         public IReadOnlyReactiveProperty<bool> IsOpened { get; }
 

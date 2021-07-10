@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using System.Numerics;
 
 using BEditor.Data;
 using BEditor.Data.Primitive;
@@ -221,7 +222,7 @@ namespace BEditor.Extensions.AviUtl
         public void draw(float ox = 0, float oy = 0, float oz = 0, float zoom = 1, float alpha = 1, float rx = 0, float ry = 0, float rz = 0)
         {
             var ctxt = GetContext();
-            ctxt.MakeCurrentAndBindFbo();
+            ctxt.PlatformImpl.MakeCurrent();
             using var texture = Texture.FromImage(_img);
             if (_settings.ReverseYAsis)
             {
@@ -236,7 +237,7 @@ namespace BEditor.Extensions.AviUtl
                     new(new(ox, oy, oz), default, new(rx, ry, rz), new(zoom, zoom, zoom));
             }
 
-            texture.Color = Color.FromARGB((byte)(255 * alpha), 255, 255, 255);
+            texture.Color = Color.FromArgb((byte)(255 * alpha), 255, 255, 255);
             ctxt.DrawTexture(texture);
         }
 
@@ -266,36 +267,40 @@ namespace BEditor.Extensions.AviUtl
             float x3, float y3, float z3)
         {
             var ctxt = GetContext();
-            ctxt.MakeCurrentAndBindFbo();
+            ctxt.PlatformImpl.MakeCurrent();
             Texture texture;
 
             if (_settings.ReverseYAsis)
             {
-                texture = Texture.FromImage(_img, new[]
-                {
-                    x0, -y0, -z0,  0, 0,
-                    x1, -y1, -z1,  1, 0,
-                    x2, -y2, -z2,  1, 1,
-                    x3, -y3, -z3,  0, 1,
-                });
+                texture = Texture.FromImage(
+                    _img,
+                    new VertexPositionTexture[]
+                    {
+                        new(new(x0, -y0, -z0), new(0, 0)),
+                        new(new(x1, -y1, -z1), new(1, 0)),
+                        new(new(x2, -y2, -z2), new(1, 1)),
+                        new(new(x3, -y3, -z3), new(0, 1)),
+                    });
                 texture.Transform = _drawTarget is DrawTarget.FrameBuffer ?
                     new(new(x, -y, -z), default, new(rx, ry, rz), new(zoom, zoom, zoom)) :
                     new(default, default, new(0, 0, 0), new(1, 1, 1));
             }
             else
             {
-                texture = Texture.FromImage(_img, new[]
-                {
-                    x0, y0, z0,  0, 0,
-                    x1, y1, z1,  1, 0,
-                    x2, y2, z2,  1, 1,
-                    x3, y3, z3,  0, 1,
-                });
+                texture = Texture.FromImage(
+                    _img,
+                    new VertexPositionTexture[]
+                    {
+                        new(new(x0, y0, z0), new(0, 0)),
+                        new(new(x1, y1, z1), new(1, 0)),
+                        new(new(x2, y2, z2), new(1, 1)),
+                        new(new(x3, y3, z3), new(0, 1)),
+                    });
                 texture.Transform = _drawTarget is DrawTarget.FrameBuffer ?
                     new(new(x, y, z), default, new(rx, ry, rz), new(zoom, zoom, zoom)) :
                     new(default, default, new(0, 0, 0), new(1, 1, 1));
             }
-            texture.Color = Color.FromARGB((byte)(255 * alpha), 255, 255, 255);
+            texture.Color = Color.FromArgb((byte)(255 * alpha), 255, 255, 255);
 
             ctxt.DrawTexture(texture);
         }
@@ -336,39 +341,43 @@ namespace BEditor.Extensions.AviUtl
             float alpha)
         {
             var ctxt = GetContext();
-            ctxt.MakeCurrentAndBindFbo();
+            ctxt.PlatformImpl.MakeCurrent();
             var w = _img.Width;
             var h = _img.Height;
             Texture texture;
 
             if (_settings.ReverseYAsis)
             {
-                texture = Texture.FromImage(_img, new[]
-                {
-                    x0, -y0, -z0,  u0 / w, v0 / h,
-                    x1, -y1, -z1,  u1 / w, v1 / h,
-                    x2, -y2, -z2,  u2 / w, v2 / h,
-                    x3, -y3, -z3,  u3 / w, v3 / h,
-                });
+                texture = Texture.FromImage(
+                    _img,
+                    new VertexPositionTexture[]
+                    {
+                        new(new(x0, -y0, -z0), new(u0 / w, v0 / h)),
+                        new(new(x1, -y1, -z1), new(u1 / w, v1 / h)),
+                        new(new(x2, -y2, -z2), new(u2 / w, v2 / h)),
+                        new(new(x3, -y3, -z3), new(u3 / w, v3 / h)),
+                    });
                 texture.Transform = _drawTarget is DrawTarget.FrameBuffer ?
                     new(new(x, -y, -z), default, new(rx, ry, rz), new(zoom, zoom, zoom)) :
                     new(default, default, new(0, 0, 0), new(1, 1, 1));
             }
             else
             {
-                texture = Texture.FromImage(_img, new[]
-                {
-                    x0, y0, z0,  u0 / w, v0 / h,
-                    x1, y1, z1,  u1 / w, v1 / h,
-                    x2, y2, z2,  u2 / w, v2 / h,
-                    x3, y3, z3,  u3 / w, v3 / h,
-                });
+                texture = Texture.FromImage(
+                    _img,
+                    new VertexPositionTexture[]
+                    {
+                        new(new(x0, y0, z0), new(u0 / w, v0 / h)),
+                        new(new(x1, y1, z1), new(u1 / w, v1 / h)),
+                        new(new(x2, y2, z2), new(u2 / w, v2 / h)),
+                        new(new(x3, y3, z3), new(u3 / w, v3 / h)),
+                    });
                 texture.Transform = _drawTarget is DrawTarget.FrameBuffer ?
                     new(new(x, y, z), default, new(rx, ry, rz), new(zoom, zoom, zoom)) :
                     new(default, default, new(0, 0, 0), new(1, 1, 1));
             }
 
-            texture.Color = Color.FromARGB((byte)(255 * alpha), 255, 255, 255);
+            texture.Color = Color.FromArgb((byte)(255 * alpha), 255, 255, 255);
 
             ctxt.DrawTexture(texture);
         }
@@ -399,8 +408,8 @@ namespace BEditor.Extensions.AviUtl
                     break;
                 case "figure":
                     var name = GetArgValue(args, 0, "円");
-                    var color = Color.FromARGB(GetArgValue(args, 1, 0xffffff));
-                    color = Color.FromARGB(255, color.R, color.G, color.B);
+                    var color = Color.FromInt32(GetArgValue(args, 1, 0xffffff));
+                    color = Color.FromArgb(255, color.R, color.G, color.B);
                     var size = GetArgValue(args, 2, 100);
                     var line = GetArgValue(args, 3, size);
 
@@ -449,7 +458,7 @@ namespace BEditor.Extensions.AviUtl
         {
             _font = FontManager.Default.Find(f => f.FamilyName == name) ?? _font;
             _fontsize = size;
-            _fontcolor = Color.FromARGB(col1);
+            _fontcolor = Color.FromInt32(col1);
         }
 
         public int rand(int st_num, int ed_num, int? seed = null, int? frame = null)

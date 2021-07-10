@@ -139,12 +139,6 @@
   <data name="IsChecking" xml:space="preserve">
     <value>{0}を確認中。</value>
   </data>
-  <data name="ThisSoftwareIsLatest" xml:space="preserve">
-    <value>このソフトは最新のものです。</value>
-  </data>
-  <data name="NewVersionIsAvailable" xml:space="preserve">
-    <value>新バージョンが登場!</value>
-  </data>
   <data name="Download" xml:space="preserve">
     <value>ダウンロード</value>
   </data>
@@ -355,12 +349,6 @@
   <data name="Open" xml:space="preserve">
     <value>開く</value>
   </data>
-  <data name="OpenProjectDirectory" xml:space="preserve">
-    <value>このプロジェクトファイルがあるディレクトリを開く</value>
-  </data>
-  <data name="OpenThisRepository" xml:space="preserve">
-    <value>このソフトウェアのリポジトリを開く</value>
-  </data>
   <data name="Optimization" xml:space="preserve">
     <value>最適化</value>
   </data>
@@ -381,10 +369,6 @@
   </data>
   <data name="Plugins" xml:space="preserve">
     <value>プラグイン</value>
-  </data>
-  <data name="PluginsAddedMessage" xml:space="preserve">
-    <value>{0} 個のプラグインが追加されています。
-読み込むプラグインを選択してください</value>
   </data>
   <data name="Project" xml:space="preserve">
     <value>プロジェクト</value>
@@ -430,9 +414,6 @@
   </data>
   <data name="Search" xml:space="preserve">
     <value>検索</value>
-  </data>
-  <data name="SendFeedback" xml:space="preserve">
-    <value>フィードバックを送信(GitHubのIssueを開きます)</value>
   </data>
   <data name="Separate" xml:space="preserve">
     <value>分割</value>
@@ -499,12 +480,6 @@
   </data>
   <data name="WidthOf1Frame" xml:space="preserve">
     <value>1フレームあたりの横幅</value>
-  </data>
-  <data name="SetupComplete" xml:space="preserve">
-    <value>セットアップが完了しました。</value>
-  </data>
-  <data name="RunFollowingCommandToInstallFFmpeg" xml:space="preserve">
-    <value>以下のコマンドを実行してFFmpegをインストールしてください。</value>
   </data>
   <data name="Path" xml:space="preserve">
     <value>パス</value>
@@ -702,5 +677,139 @@ IdにはGUID, UUIDが使えます。</value>
   </data>
   <data name="PackageSource" xml:space="preserve">
     <value>パッケージソース</value>
+  </data>
+  <data name="UserName" xml:space="preserve">
+    <value>ユーザー名</value>
+  </data>
+  <data name="Password" xml:space="preserve">
+    <value>パスワード</value>
+  </data>
+  <data name="Signin" xml:space="preserve">
+    <value>サインイン</value>
+  </data>
+  <data name="Signup" xml:space="preserve">
+    <value>サインアップ</value>
+  </data>
+  <data name="ForgotYourPassword" xml:space="preserve">
+    <value>パスワードをお忘れですか?</value>
+  </data>
+  <data name="User" xml:space="preserve">
+    <value>ユーザー</value>
+  </data>
+  <data name="Email" xml:space="preserve">
+    <value>メールアドレス</value>
+  </data>
+  <data name="ChangeSucceeded" xml:space="preserve">
+    <value>変更しました。</value>
+  </data>
+  <data name="ChangeFailed" xml:space="preserve">
+    <value>変更できませんでした。</value>
+  </data>
+  <data name="Publish" xml:space="preserve">
+    <value>公開</value>
+  </data>
+  <data name="Signout" xml:space="preserve">
+    <value>サインアウト</value>
+  </data>
+  <data name="ChangePassword" xml:space="preserve">
+    <value>パスワードを変更</value>
+  </data>
+  <data name="NewPassword" xml:space="preserve">
+    <value>新しいパスワード</value>
+  </data>
+  <data name="ConfirmNewPassword" xml:space="preserve">
+    <value>新しいパスワードの確認</value>
+  </data>
+  <data name="UpdatePassword" xml:space="preserve">
+    <value>パスワードを更新</value>
+  </data>
+  <data name="PasswordAreNotMatching" xml:space="preserve">
+    <value>パスワードが一致しません</value>
+  </data>
+  <data name="LatestVersion" xml:space="preserve">
+    <value>最新バージョン</value>
+  </data>
+  <data name="AdjustLengthOfClip" xml:space="preserve">
+    <value>長さを調整</value>
+  </data>
+  <data name="SetMaximumFrame" xml:space="preserve">
+    <value>最大フレームを設定</value>
+  </data>
+  <data name="UseCurrentFrame" xml:space="preserve">
+    <value>現在のフレームを使用</value>
+  </data>
+  <data name="GraphicsProfile" xml:space="preserve">
+    <value>グラフィックプロファイル</value>
+  </data>
+  <data name="TheChangesWillBeAppliedAfterRestarting" xml:space="preserve">
+    <value>変更内容は、再起動後に適用されます。</value>
+  </data>
+  <data name="GraphicsProfileDescription" xml:space="preserve">
+    <value>OpenGL: 
+- "OpenGL" を利用してレンダリングします。
+
+Skia:
+- "Skia" を利用してレンダリングします。
+- 3D描画には対応していません。
+- マテリアル、ライト、カメラは使えません。
+
+Direct3D 11:
+- "Direct3D 11" を利用してレンダリングします。
+- Windows向け
+- ライティングが未実装です。
+
+Metal:
+- "Metal" を利用してレンダリングします。
+- macOS向け
+- ライティングが未実装です。
+
+Vulkan:
+- "Vulkan" を利用してレンダリングします。
+- ライティングが未実装です。</value>
+  </data>
+  <data name="EffectFile" xml:space="preserve">
+    <value>エフェクトファイル</value>
+  </data>
+  <data name="ObjectFile" xml:space="preserve">
+    <value>オブジェクトファイル</value>
+  </data>
+  <data name="ConvertVideo" xml:space="preserve">
+    <value>動画を変換</value>
+  </data>
+  <data name="ThisFileCannotBeConverted" xml:space="preserve">
+    <value>このファイルは変換できません。</value>
+  </data>
+  <data name="Configuration" xml:space="preserve">
+    <value>構成</value>
+  </data>
+  <data name="Background" xml:space="preserve">
+    <value>背景</value>
+  </data>
+  <data name="CheckDark" xml:space="preserve">
+    <value>チェック柄 (ダーク)</value>
+  </data>
+  <data name="CheckLight" xml:space="preserve">
+    <value>チェック柄 (ライト)</value>
+  </data>
+  <data name="Transparent" xml:space="preserve">
+    <value>透明</value>
+  </data>
+  <data name="Black" xml:space="preserve">
+    <value>黒</value>
+  </data>
+  <data name="White" xml:space="preserve">
+    <value>白</value>
+  </data>
+  <data name="TimeRemaining" xml:space="preserve">
+    <value>残り時間</value>
+  </data>
+  <data name="Setup" xml:space="preserve">
+    <value>セットアップ</value>
+  </data>
+  <data name="MachineTranslation" xml:space="preserve">
+    <value>機械翻訳</value>
+  </data>
+  <data name="ZoomIn" xml:space="preserve">
+    <value>拡大表示</value>
   </data>
 </root>

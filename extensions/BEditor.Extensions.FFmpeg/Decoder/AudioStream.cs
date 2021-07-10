@@ -20,12 +20,15 @@ namespace BEditor.Extensions.FFmpeg.Decoder
         public AudioStream(string file, MediaOptions options)
         {
             _tmpfile = Path.ChangeExtension(Path.GetTempFileName(), "mp3");
-            var process = Process.Start(FFmpegExecutable.GetExecutable(), $"-i \"{file}\" -vcodec copy -ar {options.SampleRate} \"{_tmpfile}\"");
+            var process = Process.Start(new ProcessStartInfo(FFmpegExecutable.GetExecutable(), $"-i \"{file}\" -vcodec copy -ar {options.SampleRate} \"{_tmpfile}\"")
+            {
+                CreateNoWindow = true,
+            })!;
             process.WaitForExit();
 
             _media = FFMediaToolkit.Decoding.MediaFile.Open(_tmpfile, new() { StreamsToLoad = FFMediaToolkit.Decoding.MediaMode.Audio });
             _stream = _media.Audio;
-            Info = new(_stream.Info.CodecName, MediaType.Audio, _stream.Info.Duration, _stream.Info.SampleRate, _stream.Info.NumChannels);
+            Info = new(_stream.Info.CodecName, MediaType.Audio, _stream.Info.Duration - _stream.Info.StartTime ?? default, _stream.Info.SampleRate, _stream.Info.NumChannels);
         }
 
         public AudioStreamInfo Info { get; }

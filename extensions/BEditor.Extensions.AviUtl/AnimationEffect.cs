@@ -19,13 +19,13 @@ namespace BEditor.Extensions.AviUtl
 {
     public class AnimationEffect : ImageEffect
     {
-        public static readonly DirectEditingProperty<AnimationEffect, string> ScriptNameProperty = EditingProperty.RegisterDirect<string, AnimationEffect>(
+        public static readonly DirectProperty<AnimationEffect, string> ScriptNameProperty = EditingProperty.RegisterDirect<string, AnimationEffect>(
             nameof(ScriptName),
             owner => owner.ScriptName,
             (owner, obj) => owner.ScriptName = obj,
             EditingPropertyOptions<string>.Create()!.Serialize()!);
 
-        public static readonly DirectEditingProperty<AnimationEffect, string?> GroupNameProperty = EditingProperty.RegisterDirect<string?, AnimationEffect>(
+        public static readonly DirectProperty<AnimationEffect, string?> GroupNameProperty = EditingProperty.RegisterDirect<string?, AnimationEffect>(
             nameof(GroupName),
             owner => owner.GroupName,
             (owner, obj) => owner.GroupName = obj,
@@ -69,11 +69,11 @@ namespace BEditor.Extensions.AviUtl
                 }
                 catch (Exception e)
                 {
-                    LogManager.Logger.LogError(e, Strings.FailedToExecuteScript);
+                    ServicesLocator.Current.Logger.LogError(e, Strings.FailedToExecuteScript);
                     ServiceProvider?.GetService<IMessage>()?.Snackbar(Strings.FailedToExecuteScript);
                 }
             }
-            Parent.Parent.GraphicsContext!.MakeCurrentAndBindFbo();
+            Parent.Parent.GraphicsContext!.PlatformImpl.MakeCurrent();
         }
 
         public override IEnumerable<PropertyElement> GetProperties()

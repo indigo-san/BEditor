@@ -29,7 +29,7 @@ namespace BEditor.Primitive.Effects
         /// <summary>
         /// Defines the <see cref="HSplit"/> property.
         /// </summary>
-        public static readonly DirectEditingProperty<ImageSplit, EaseProperty> HSplitProperty = EditingProperty.RegisterDirect<EaseProperty, ImageSplit>(
+        public static readonly DirectProperty<ImageSplit, EaseProperty> HSplitProperty = EditingProperty.RegisterDirect<EaseProperty, ImageSplit>(
             nameof(HSplit),
             owner => owner.HSplit,
             (owner, obj) => owner.HSplit = obj,
@@ -38,7 +38,7 @@ namespace BEditor.Primitive.Effects
         /// <summary>
         /// Defines the <see cref="VSplit"/> property.
         /// </summary>
-        public static readonly DirectEditingProperty<ImageSplit, EaseProperty> VSplitProperty = EditingProperty.RegisterDirect<EaseProperty, ImageSplit>(
+        public static readonly DirectProperty<ImageSplit, EaseProperty> VSplitProperty = EditingProperty.RegisterDirect<EaseProperty, ImageSplit>(
             nameof(VSplit),
             owner => owner.VSplit,
             (owner, obj) => owner.VSplit = obj,
@@ -99,9 +99,9 @@ namespace BEditor.Primitive.Effects
                 var result = new ImageInfo[(int)(hsplt * vsplt)];
                 var count = 0;
 
-                for (int v = 0; v < vsplt; v++)
+                for (var v = 0; v < vsplt; v++)
                 {
-                    for (int h = 0; h < hsplt; h++, count++)
+                    for (var h = 0; h < hsplt; h++, count++)
                     {
                         result[count] = new(
                             img.Source[new Rectangle((int)(sw * h), (int)(sh * v), (int)sw, (int)sh)],

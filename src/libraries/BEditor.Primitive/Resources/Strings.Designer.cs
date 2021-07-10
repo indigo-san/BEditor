@@ -106,11 +106,38 @@ namespace BEditor.Primitive.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Attenuation rate.
+        /// </summary>
+        internal static string AttenuationRate {
+            get {
+                return ResourceManager.GetString("AttenuationRate", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Audio.
         /// </summary>
         internal static string Audio {
             get {
                 return ResourceManager.GetString("Audio", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Audio effect.
+        /// </summary>
+        internal static string AudioEffect {
+            get {
+                return ResourceManager.GetString("AudioEffect", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Audio file.
+        /// </summary>
+        internal static string AudioFile {
+            get {
+                return ResourceManager.GetString("AudioFile", resourceCulture);
             }
         }
         
@@ -147,6 +174,15 @@ namespace BEditor.Primitive.Resources {
         internal static string Blur {
             get {
                 return ResourceManager.GetString("Blur", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Blurs the borders of transparency.
+        /// </summary>
+        internal static string BlurBorderOfTransparency {
+            get {
+                return ResourceManager.GetString("BlurBorderOfTransparency", resourceCulture);
             }
         }
         
@@ -277,24 +313,6 @@ namespace BEditor.Primitive.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Set the clip length to the same as the audio length..
-        /// </summary>
-        internal static string ClipLengthAsAudioLength {
-            get {
-                return ResourceManager.GetString("ClipLengthAsAudioLength", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Set the clip length to the same as the video length..
-        /// </summary>
-        internal static string ClipLengthAsVideoLength {
-            get {
-                return ResourceManager.GetString("ClipLengthAsVideoLength", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Clipping.
         /// </summary>
         internal static string Clipping {
@@ -309,6 +327,15 @@ namespace BEditor.Primitive.Resources {
         internal static string Color {
             get {
                 return ResourceManager.GetString("Color", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Color difference range.
+        /// </summary>
+        internal static string ColorDifferenceRange {
+            get {
+                return ResourceManager.GetString("ColorDifferenceRange", resourceCulture);
             }
         }
         
@@ -394,6 +421,33 @@ namespace BEditor.Primitive.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Decoder not found..
+        /// </summary>
+        internal static string DecoderNotFound {
+            get {
+                return ResourceManager.GetString("DecoderNotFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Delay.
+        /// </summary>
+        internal static string Delay {
+            get {
+                return ResourceManager.GetString("Delay", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Delay time.
+        /// </summary>
+        internal static string DelayTime {
+            get {
+                return ResourceManager.GetString("DelayTime", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Depth.
         /// </summary>
         internal static string Depth {
@@ -448,11 +502,29 @@ namespace BEditor.Primitive.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Do not invert the mask.
+        /// </summary>
+        internal static string DoNotInvertMask {
+            get {
+                return ResourceManager.GetString("DoNotInvertMask", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Drop shadow.
         /// </summary>
         internal static string DropShadow {
             get {
                 return ResourceManager.GetString("DropShadow", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Edge blur.
+        /// </summary>
+        internal static string EdgeBlur {
+            get {
+                return ResourceManager.GetString("EdgeBlur", resourceCulture);
             }
         }
         
@@ -516,6 +588,15 @@ namespace BEditor.Primitive.Resources {
         internal static string FitToOriginalSize {
             get {
                 return ResourceManager.GetString("FitToOriginalSize", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Fix the size.
+        /// </summary>
+        internal static string FixSize {
+            get {
+                return ResourceManager.GetString("FixSize", resourceCulture);
             }
         }
         
@@ -619,6 +700,15 @@ namespace BEditor.Primitive.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Hue range.
+        /// </summary>
+        internal static string HueRange {
+            get {
+                return ResourceManager.GetString("HueRange", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Image.
         /// </summary>
         internal static string Image {
@@ -669,6 +759,24 @@ namespace BEditor.Primitive.Resources {
         internal static string InvertMask {
             get {
                 return ResourceManager.GetString("InvertMask", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Kernel height.
+        /// </summary>
+        internal static string KernelHeight {
+            get {
+                return ResourceManager.GetString("KernelHeight", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Kernel width.
+        /// </summary>
+        internal static string KernelWidth {
+            get {
+                return ResourceManager.GetString("KernelWidth", resourceCulture);
             }
         }
         
@@ -732,6 +840,15 @@ namespace BEditor.Primitive.Resources {
         internal static string Mask {
             get {
                 return ResourceManager.GetString("Mask", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Mask type.
+        /// </summary>
+        internal static string MaskType {
+            get {
+                return ResourceManager.GetString("MaskType", resourceCulture);
             }
         }
         
@@ -804,6 +921,15 @@ namespace BEditor.Primitive.Resources {
         internal static string NumberOfHorizontalDivisions {
             get {
                 return ResourceManager.GetString("NumberOfHorizontalDivisions", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Number of repetitions.
+        /// </summary>
+        internal static string NumberOfRepetitions {
+            get {
+                return ResourceManager.GetString("NumberOfRepetitions", resourceCulture);
             }
         }
         
@@ -970,6 +1096,15 @@ namespace BEditor.Primitive.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Saturation range.
+        /// </summary>
+        internal static string SaturationRange {
+            get {
+                return ResourceManager.GetString("SaturationRange", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Scene.
         /// </summary>
         internal static string Scene {
@@ -1011,6 +1146,24 @@ namespace BEditor.Primitive.Resources {
         internal static string Shape {
             get {
                 return ResourceManager.GetString("Shape", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Sigma x.
+        /// </summary>
+        internal static string SigmaX {
+            get {
+                return ResourceManager.GetString("SigmaX", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Sigma y.
+        /// </summary>
+        internal static string SigmaY {
+            get {
+                return ResourceManager.GetString("SigmaY", resourceCulture);
             }
         }
         
@@ -1146,6 +1299,15 @@ namespace BEditor.Primitive.Resources {
         internal static string Type {
             get {
                 return ResourceManager.GetString("Type", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Unspecified.
+        /// </summary>
+        internal static string Unspecified {
+            get {
+                return ResourceManager.GetString("Unspecified", resourceCulture);
             }
         }
         

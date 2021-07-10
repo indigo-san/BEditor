@@ -99,6 +99,11 @@ namespace BEditor.Drawing
         {
             if (!IsDisposed)
             {
+                foreach (var item in Programs)
+                {
+                    item.Value.Dispose();
+                }
+
                 CommandQueue.Dispose();
                 Context.Dispose();
 

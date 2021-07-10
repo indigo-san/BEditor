@@ -17,16 +17,23 @@ using Avalonia.Styling;
 using Avalonia.Threading;
 
 using BEditor.Data;
+using BEditor.Extensions;
+using BEditor.Graphics.Platform;
 using BEditor.Models;
 using BEditor.Models.ManagePlugins;
+using BEditor.Packaging;
 using BEditor.Plugin;
 using BEditor.Primitive;
 using BEditor.Properties;
+using BEditor.ViewModels.Settings;
 using BEditor.Views;
 using BEditor.Views.DialogContent;
+using BEditor.Views.Setup;
 
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+
+using Reactive.Bindings;
 
 namespace BEditor
 {
@@ -37,7 +44,8 @@ namespace BEditor
         {
             Interval = TimeSpan.FromMinutes(Settings.Default.BackUpInterval)
         };
-        private static readonly string pluginsDir = Path.Combine(AppContext.BaseDirectory, "user", "plugins");
+
+        public static ValueTask StartupTask { get; set; }
 
         public static void Shutdown(int exitCode)
         {
@@ -68,12 +76,24 @@ namespace BEditor
             {
                 AvaloniaLocator.CurrentMutable.Bind<IFontManagerImpl>().ToConstant(new CustomFontManagerImpl());
             }
+
+            IPlatform.Current = Settings.Default.GraphicsProfile switch
+            {
+                ProjectViewModel.OPENGL => new Graphics.OpenGL.OpenGLPlatform(),
+                ProjectViewModel.SKIA => new Graphics.Skia.SkiaPlatform(),
+                ProjectViewModel.METAL => new Graphics.Veldrid.VeldridMetalPlatform(),
+                ProjectViewModel.DIRECT3D11 => new Graphics.Veldrid.VeldridDirectXPlatform(),
+                ProjectViewModel.VULKAN => new Graphics.Veldrid.VeldridVulkanPlatform(),
+                _ => new Graphics.OpenGL.OpenGLPlatform(),
+            };
+
             base.RegisterServices();
         }
 
         public override void Initialize()
         {
             AvaloniaXamlLoader.Load(this);
+            UIDispatcherScheduler.Initialize();
             var baseuri = new Uri("avares://beditor/App.axaml");
             var style = new StyleInclude(baseuri)
             {
@@ -83,7 +103,7 @@ namespace BEditor
             Styles.Insert(0, style);
         }
 
-        public override async void OnFrameworkInitializationCompleted()
+        public override void OnFrameworkInitializationCompleted()
         {
             if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
             {
@@ -92,10 +112,19 @@ namespace BEditor
                 desktop.MainWindow = Settings.Default.ShowStartWindow ? new StartWindow() : new MainWindow();
                 AppModel.Current.UIThread = SynchronizationContext.Current;
 
-                CreateDirectory();
+                StartupTask = new(Task.Run(async () =>
+                {
+                    await InitialPluginsAsync();
+                    ServicesLocator.Current = new(AppModel.Current.ServiceProvider);
 
-                await InitialPluginsAsync();
+                    AppModel.Current.User = await Tool.LoadFromAsync(
+                        Path.Combine(ServicesLocator.GetUserFolder(), "token"),
+                        AppModel.Current.ServiceProvider.GetRequiredService<IAuthenticationProvider>());
 
+                    await CheckOpenALAsync();
+                    await SetupAsync();
+                    await ArgumentsContext.ExecuteAsync();
+                }));
                 AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
 
                 RunBackup();
@@ -111,8 +140,6 @@ namespace BEditor
             Settings.Default.Save();
             KeyBindingModel.Save();
 
-            DirectoryManager.Default.Stop();
-
             BackupTimer.Stop();
 
             var app = AppModel.Current;
@@ -122,41 +149,38 @@ namespace BEditor
 
             app.Project?.Unload();
             app.Project = null;
+            AppModel.Current.User?.Save(Path.Combine(ServicesLocator.GetUserFolder(), "token"));
 
             if (PluginChangeSchedule.Uninstall.Count is not 0 || PluginChangeSchedule.UpdateOrInstall.Count is not 0)
             {
-                var jsonfile = Path.Combine(AppContext.BaseDirectory, "package-install.json");
+                var jsonfile = Path.Combine(ServicesLocator.GetUserFolder(), "package-install.json");
                 PluginChangeSchedule.CreateJsonFile(jsonfile);
 
                 if (OperatingSystem.IsWindows())
                 {
-                    Process.Start(new ProcessStartInfo(Path.Combine(AppContext.BaseDirectory, "BEditor.PackageInstaller.exe"), jsonfile)
+                    Process.Start(new ProcessStartInfo(Path.Combine(AppContext.BaseDirectory, "beditor.exe"), $"package-install {jsonfile}")
                     {
                         UseShellExecute = true
                     });
                 }
                 else if (OperatingSystem.IsLinux())
                 {
-                    Process.Start(new ProcessStartInfo(Path.Combine(AppContext.BaseDirectory, "BEditor.PackageInstaller"), jsonfile)
+                    Process.Start(new ProcessStartInfo(Path.Combine(AppContext.BaseDirectory, "beditor"), $"package-install {jsonfile}")
                     {
                         UseShellExecute = true
                     });
                 }
             }
+
+            AppModel.Current.AudioContext?.Dispose();
         }
 
         private void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)
         {
             AppModel.Current.Message.Snackbar(string.Format(Strings.ExceptionWasThrown, e.ExceptionObject.ToString()));
 
+            AppModel.Current.User?.Save(Path.Combine(ServicesLocator.GetUserFolder(), "token"));
             Logger?.LogError(e.ExceptionObject as Exception, "UnhandledException was thrown.");
-        }
-
-        private static void CreateDirectory()
-        {
-            DirectoryManager.Default.Directories.Add(pluginsDir);
-
-            DirectoryManager.Default.Run();
         }
 
         private static void RunBackup()
@@ -242,24 +266,52 @@ namespace BEditor
 
             if (PluginManager.Default._tasks.Count is not 0)
             {
-                var dialog = new ProgressDialog();
-                dialog.Maximum.Value = 100;
-                _ = dialog.ShowDialog(GetMainWindow());
-                foreach (var (plugin, tasks) in PluginManager.Default._tasks)
+                await Dispatcher.UIThread.InvokeAsync(async () =>
                 {
-                    for (var i = 0; i < tasks.Count; i++)
+                    var dialog = new ProgressDialog();
+                    dialog.Maximum.Value = 100;
+                    _ = dialog.ShowDialog(GetMainWindow());
+                    foreach (var (plugin, tasks) in PluginManager.Default._tasks)
                     {
-                        var task = tasks[i];
-                        dialog.Text.Value = string.Format(Strings.IsLoading, plugin.PluginName) + $"  :{task.Name}";
+                        for (var i = 0; i < tasks.Count; i++)
+                        {
+                            var task = tasks[i];
+                            dialog.Text.Value = string.Format(Strings.IsLoading, plugin.PluginName) + $"  :{task.Name}";
 
-                        await task.RunTask(dialog);
-                        dialog.Report(0);
+                            await task.RunTaskAsync(dialog);
+                            dialog.Report(0);
+                        }
                     }
-                }
 
-                dialog.Close();
+                    dialog.Close();
+                });
             }
             app.ServiceProvider = app.Services.BuildServiceProvider();
+        }
+
+        private static async Task CheckOpenALAsync()
+        {
+            try
+            {
+                AppModel.Current.AudioContext ??= new();
+            }
+            catch
+            {
+                await AppModel.Current.Message.DialogAsync(Strings.OpenALNotFound);
+                App.Shutdown(1);
+            }
+        }
+
+        private static async Task SetupAsync()
+        {
+            var flagPath = Path.Combine(ServicesLocator.GetUserFolder(), "SETUP_FLAG");
+            if (!File.Exists(flagPath))
+            {
+                await Dispatcher.UIThread.InvokeAsync(async () => await new SetupWindow().ShowDialog(GetMainWindow()));
+                using (new FileStream(flagPath, FileMode.Create))
+                {
+                }
+            }
         }
     }
 }

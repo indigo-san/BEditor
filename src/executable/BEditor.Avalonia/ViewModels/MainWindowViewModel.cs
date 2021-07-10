@@ -38,8 +38,8 @@ namespace BEditor.ViewModels
                 {
                     Filters =
                     {
-                        new(Strings.ProjectFile, new FileExtension[] { new("bedit") }),
-                        new(Strings.BackupFile, new FileExtension[] { new("backup") }),
+                        new(Strings.ProjectFile, new[] { "bedit" }),
+                        new(Strings.BackupFile, new[] { "backup" }),
                     }
                 };
                 var service = App.FileDialog;
@@ -86,7 +86,7 @@ namespace BEditor.ViewModels
                         DefaultFileName = (p!.Name is not null) ? p.Name + ".bedit" : "新しいプロジェクト.bedit",
                         Filters =
                         {
-                            new(Strings.ProjectFile, new FileExtension[] { new("bedit") }),
+                            new(Strings.ProjectFile, new[] { "bedit" }),
                         }
                     };
 
@@ -106,30 +106,30 @@ namespace BEditor.ViewModels
                 });
 
             Undo.Where(_ => CommandManager.Default.CanUndo)
-                .Subscribe(_ =>
+                .Subscribe(async _ =>
                 {
                     CommandManager.Default.Undo();
 
-                    AppModel.Current.Project!.PreviewUpdate();
+                    await AppModel.Current.Project!.PreviewUpdateAsync();
                     AppModel.Current.AppStatus = Status.Edit;
                 });
 
             Redo.Where(_ => CommandManager.Default.CanRedo)
-                .Subscribe(_ =>
+                .Subscribe(async _ =>
                 {
                     CommandManager.Default.Redo();
 
-                    AppModel.Current.Project!.PreviewUpdate();
+                    await AppModel.Current.Project!.PreviewUpdateAsync();
                     AppModel.Current.AppStatus = Status.Edit;
                 });
 
             Remove.Where(_ => App.Project is not null)
-                .Select(_ => App.Project!.PreviewScene.SelectItem)
+                .Select(_ => App.Project!.CurrentScene.SelectItem)
                 .Where(c => c is not null)
                 .Subscribe(clip => clip!.Parent.RemoveClip(clip).Execute());
 
             Copy.Where(_ => App.Project is not null)
-                .Select(_ => App.Project!.PreviewScene.SelectItem)
+                .Select(_ => App.Project!.CurrentScene.SelectItem)
                 .Where(clip => clip is not null)
                 .Subscribe(async clip =>
                 {
@@ -141,7 +141,7 @@ namespace BEditor.ViewModels
                 });
 
             Cut.Where(_ => App.Project is not null)
-                .Select(_ => App.Project!.PreviewScene.SelectItem)
+                .Select(_ => App.Project!.CurrentScene.SelectItem)
                 .Where(clip => clip is not null)
                 .Subscribe(async clip =>
                 {
@@ -155,32 +155,9 @@ namespace BEditor.ViewModels
                 });
 
             Paste.Where(_ => App.Project is not null)
-                .Select(_ => App.Project!.PreviewScene.GetCreateTimelineViewModel())
+                .Select(_ => App.Project!.CurrentScene.GetCreateTimelineViewModel())
                 .Subscribe(async timeline =>
                 {
-                    static ObjectMetadata FileTypeConvert(string file)
-                    {
-                        var ex = Path.GetExtension(file);
-                        if (ex is ".avi" or ".mp4")
-                        {
-                            return PrimitiveTypes.VideoMetadata;
-                        }
-                        else if (ex is ".jpg" or ".jpeg" or ".png" or ".bmp")
-                        {
-                            return PrimitiveTypes.ImageMetadata;
-                        }
-                        else if (ex is ".mp3" or ".wav")
-                        {
-                            return PrimitiveTypes.AudioMetadata;
-                        }
-                        else if (ex is ".txt")
-                        {
-                            return PrimitiveTypes.TextMetadata;
-                        }
-
-                        return PrimitiveTypes.ShapeMetadata;
-                    }
-
                     var mes = AppModel.Current.Message;
                     var clipboard = Application.Current.Clipboard;
                     var text = await clipboard.GetTextAsync();
@@ -210,35 +187,49 @@ namespace BEditor.ViewModels
                         var start = timeline.ClickedFrame;
                         var end = timeline.ClickedFrame + 180;
                         var layer = timeline.ClickedLayer;
+                        var ext = Path.GetExtension(text);
 
                         if (!timeline.Scene.InRange(start, end, layer))
                         {
                             mes?.Snackbar(Strings.ClipExistsInTheSpecifiedLocation);
-                            BEditor.App.Logger.LogInformation("{0} Start: {0} End: {1} Layer: {2}", Strings.ClipExistsInTheSpecifiedLocation, start, end, layer);
-
                             return;
                         }
 
-                        var meta = FileTypeConvert(text);
-                        timeline.Scene.AddClip(start, layer, meta, out var c).Execute();
+                        if (ext is ".bobj")
+                        {
+                            var efct = await Serialize.LoadFromFileAsync<EffectWrapper>(text);
+                            if (efct?.Effect is not ObjectElement obj)
+                            {
+                                mes?.Snackbar(Strings.FailedToLoad);
+                                return;
+                            }
 
-                        var obj = c.Effect[0];
-                        if (obj is VideoFile video)
-                        {
-                            video.File.Value = text;
+                            obj.Load();
+                            obj.UpdateId();
+                            timeline.Scene.AddClip(start, layer, obj, out _).Execute();
                         }
-                        else if (obj is ImageFile image)
+                        else
                         {
-                            image.File.Value = text;
-                        }
-                        else if (obj is AudioObject audio)
-                        {
-                            audio.File.Value = text;
-                        }
-                        else if (obj is Text txt)
-                        {
-                            using var reader = new StreamReader(text);
-                            txt.Document.Value = await reader.ReadToEndAsync();
+                            var supportedObjects = ObjectMetadata.LoadedObjects
+                                .Where(i => i.IsSupported is not null && i.CreateFromFile is not null && i.IsSupported(text))
+                                .ToArray();
+                            var result = supportedObjects.FirstOrDefault();
+
+                            if (supportedObjects.Length > 1)
+                            {
+                                var dialog = new SelectObjectMetadata
+                                {
+                                    Metadatas = supportedObjects,
+                                    Selected = result,
+                                };
+
+                                result = await dialog.ShowDialog<ObjectMetadata?>(BEditor.App.GetMainWindow());
+                            }
+
+                            if (result is not null)
+                            {
+                                timeline.Scene.AddClip(start, layer, result.CreateFromFile!.Invoke(text), out _).Execute();
+                            }
                         }
                     }
                 });
@@ -255,24 +246,19 @@ namespace BEditor.ViewModels
 
             ImageOutput.Where(_ => App.Project is not null).Subscribe(async _ =>
             {
-                var scene = AppModel.Current.Project.PreviewScene!;
+                var scene = AppModel.Current.Project.CurrentScene!;
 
                 var record = new SaveFileRecord
                 {
                     Filters =
                     {
-                        new(Strings.ImageFile, new FileExtension[]
-                        {
-                            new("png"),
-                            new("jpg"),
-                            new("jpeg")
-                        })
+                        new(Strings.ImageFile, ImageFile.SupportExtensions)
                     }
                 };
 
                 if (await AppModel.Current.FileDialog.ShowSaveFileDialogAsync(record))
                 {
-                    using var img = scene.Render(RenderType.ImageOutput);
+                    using var img = scene.Render(ApplyType.Image);
 
                     img.Encode(record.FileName);
                 }
@@ -329,7 +315,6 @@ namespace BEditor.ViewModels
             var app = AppModel.Current;
             app.Project?.Unload();
             var project = Project.FromFile(filename, app);
-            await TypeEarlyInitializer.AllInitializeAsync();
 
             if (project is null) return;
 

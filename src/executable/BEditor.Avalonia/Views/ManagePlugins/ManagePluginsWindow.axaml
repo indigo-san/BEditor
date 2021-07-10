@@ -1,4 +1,4 @@
-<Window
+<views:FluentWindow
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
@@ -6,39 +6,26 @@
     xmlns:local="using:BEditor.Views.ManagePlugins"
     xmlns:titlebar="using:BEditor.Views.CustomTitlebars"
     xmlns:prop="using:BEditor.Properties"
+    xmlns:views="using:BEditor.Views"
     xmlns:vm="using:BEditor.ViewModels"
     mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
     Height="450" Width="800"
-    ExtendClientAreaToDecorationsHint="True"
-    ExtendClientAreaChromeHints="NoChrome"
-    ExtendClientAreaTitleBarHeightHint="-1"
-    TransparencyLevelHint="AcrylicBlur"
-    Background="Transparent"
+    Classes="fluent_setter"
     WindowStartupLocation="CenterScreen"
     x:Class="BEditor.Views.ManagePlugins.ManagePluginsWindow">
     <Grid RowDefinitions="Auto,*">
         <DockPanel HorizontalAlignment="Stretch" Grid.RowSpan="2">
-            <ExperimentalAcrylicBorder IsHitTestVisible="False" DockPanel.Dock="Left" Width="240">
-                <ExperimentalAcrylicBorder.Material>
-                    <ExperimentalAcrylicMaterial
-                      TintColor="#222222"
-                      TintOpacity="{StaticResource AcrylicTintOpacity1}"
-                      MaterialOpacity="{StaticResource AcrylicMaterialOpacity1}" />
-                </ExperimentalAcrylicBorder.Material>
-            </ExperimentalAcrylicBorder>
-            <ExperimentalAcrylicBorder IsHitTestVisible="False">
-                <ExperimentalAcrylicBorder.Material>
-                    <ExperimentalAcrylicMaterial
-                      TintColor="Black"
-                      TintOpacity="{StaticResource AcrylicTintOpacity2}"
-                      MaterialOpacity="{StaticResource AcrylicMaterialOpacity2}" />
-                </ExperimentalAcrylicBorder.Material>
-            </ExperimentalAcrylicBorder>
+            <Border
+                Background="{StaticResource AcrylicColor1}"
+                IsHitTestVisible="False"
+                DockPanel.Dock="Left"
+                Width="240" />
+            <Border Background="{StaticResource AcrylicColor2}" IsHitTestVisible="False" />
         </DockPanel>
 
         <titlebar:WindowsTitlebarButtons/>
 
-        <TabControl Classes="sidebar" Grid.Row="1">
+        <TabControl Classes="sidebar" Grid.Row="1" x:Name="tabControl">
             <TabControl.Template>
                 <ControlTemplate>
                     <Border
@@ -130,6 +117,15 @@
                 </TabItem.Header>
                 <local:CreatePluginPackage/>
             </TabItem>
+            <TabItem>
+                <TabItem.Header>
+                    <StackPanel>
+                        <PathIcon Data="{StaticResource Person24Regular}"/>
+                        <TextBlock Text="{x:Static prop:Strings.User}" />
+                    </StackPanel>
+                </TabItem.Header>
+                <local:User/>
+            </TabItem>
         </TabControl>
     </Grid>
-</Window>
+</views:FluentWindow>

@@ -12,8 +12,6 @@ using System.Diagnostics.CodeAnalysis;
 using BEditor.Drawing;
 using BEditor.Resources;
 
-using OpenTK.Graphics.OpenGL4;
-
 namespace BEditor.Data.Property.PrimitiveGroup
 {
     /// <summary>
@@ -24,7 +22,7 @@ namespace BEditor.Data.Property.PrimitiveGroup
         /// <summary>
         /// Defines the <see cref="Opacity"/> property.
         /// </summary>
-        public static readonly DirectEditingProperty<Blend, EaseProperty> OpacityProperty = EditingProperty.RegisterDirect<EaseProperty, Blend>(
+        public static readonly DirectProperty<Blend, EaseProperty> OpacityProperty = EditingProperty.RegisterDirect<EaseProperty, Blend>(
             nameof(Opacity),
             owner => owner.Opacity,
             (owner, obj) => owner.Opacity = obj,
@@ -33,7 +31,7 @@ namespace BEditor.Data.Property.PrimitiveGroup
         /// <summary>
         /// Defines the <see cref="Color"/> property.
         /// </summary>
-        public static readonly DirectEditingProperty<Blend, ColorAnimationProperty> ColorProperty = EditingProperty.RegisterDirect<ColorAnimationProperty, Blend>(
+        public static readonly DirectProperty<Blend, ColorAnimationProperty> ColorProperty = EditingProperty.RegisterDirect<ColorAnimationProperty, Blend>(
             nameof(Color),
             owner => owner.Color,
             (owner, obj) => owner.Color = obj,
@@ -42,38 +40,11 @@ namespace BEditor.Data.Property.PrimitiveGroup
         /// <summary>
         /// Defines the <see cref="BlendType"/> property.
         /// </summary>
-        public static readonly DirectEditingProperty<Blend, SelectorProperty> BlendTypeProperty = EditingProperty.RegisterDirect<SelectorProperty, Blend>(
+        public static readonly DirectProperty<Blend, SelectorProperty> BlendTypeProperty = EditingProperty.RegisterDirect<SelectorProperty, Blend>(
             nameof(BlendType),
             owner => owner.BlendType,
             (owner, obj) => owner.BlendType = obj,
-            EditingPropertyOptions<SelectorProperty>.Create(new SelectorPropertyMetadata(Strings.Blend, new[] { "通常", "加算", "減算", "乗算" })).Serialize());
-
-        /// <summary>
-        /// OpenGLの合成方法を設定する <see cref="Action"/> です.
-        /// </summary>
-        internal static readonly Action[] BlentFunc = new Action[]
-        {
-            () =>
-            {
-                GL.BlendFuncSeparate(BlendingFactorSrc.SrcAlpha, BlendingFactorDest.OneMinusSrcAlpha, BlendingFactorSrc.One, BlendingFactorDest.OneMinusSrcAlpha);
-                GL.BlendEquation(BlendEquationMode.FuncAdd);
-            },
-            () =>
-            {
-                GL.BlendEquationSeparate(BlendEquationMode.FuncAdd, BlendEquationMode.FuncAdd);
-                GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.One);
-            },
-            () =>
-            {
-                GL.BlendEquationSeparate(BlendEquationMode.FuncReverseSubtract, BlendEquationMode.FuncReverseSubtract);
-                GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.One);
-            },
-            () =>
-            {
-                GL.BlendEquationSeparate(BlendEquationMode.FuncAdd, BlendEquationMode.FuncAdd);
-                GL.BlendFunc(BlendingFactor.Zero, BlendingFactor.SrcColor);
-            },
-        };
+            EditingPropertyOptions<SelectorProperty>.Create(new SelectorPropertyMetadata(Strings.Blend, new[] { Strings.AlphaBlend, Strings.Additive, Strings.Subtract, Strings.Multiplication })).Serialize());
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Blend"/> class.

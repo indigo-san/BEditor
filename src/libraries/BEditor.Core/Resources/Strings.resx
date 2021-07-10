@@ -262,4 +262,28 @@
   <data name="TheOwnerTypeDoesNotMatch" xml:space="preserve">
     <value>The type of the owner of the property does not match the type of this object.</value>
   </data>
+  <data name="Volume" xml:space="preserve">
+    <value>Volume</value>
+  </data>
+  <data name="Pitch" xml:space="preserve">
+    <value>Pitch</value>
+  </data>
+  <data name="Start" xml:space="preserve">
+    <value>Start</value>
+  </data>
+  <data name="FailedToRemove" xml:space="preserve">
+    <value>Failed to remove.</value>
+  </data>
+  <data name="AlphaBlend" xml:space="preserve">
+    <value>Alpha blend</value>
+  </data>
+  <data name="Additive" xml:space="preserve">
+    <value>Additive</value>
+  </data>
+  <data name="Subtract" xml:space="preserve">
+    <value>Subtract</value>
+  </data>
+  <data name="Multiplication" xml:space="preserve">
+    <value>Multiplication</value>
+  </data>
 </root>

@@ -262,4 +262,28 @@
   <data name="TheOwnerTypeDoesNotMatch" xml:space="preserve">
     <value>プロパティのオーナーの型とこのオブジェクトの型が一致しません。</value>
   </data>
+  <data name="Volume" xml:space="preserve">
+    <value>音量</value>
+  </data>
+  <data name="Pitch" xml:space="preserve">
+    <value>ピッチ</value>
+  </data>
+  <data name="Start" xml:space="preserve">
+    <value>開始フレーム</value>
+  </data>
+  <data name="FailedToRemove" xml:space="preserve">
+    <value>削除に失敗しました。</value>
+  </data>
+  <data name="AlphaBlend" xml:space="preserve">
+    <value>アルファブレンド</value>
+  </data>
+  <data name="Additive" xml:space="preserve">
+    <value>加算</value>
+  </data>
+  <data name="Subtract" xml:space="preserve">
+    <value>減算</value>
+  </data>
+  <data name="Multiplication" xml:space="preserve">
+    <value>乗算</value>
+  </data>
 </root>

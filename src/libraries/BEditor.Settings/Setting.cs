@@ -5,6 +5,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Runtime.Serialization;
+using System.Text;
 using System.Threading.Tasks;
 
 using BEditor.Packaging;
@@ -26,12 +27,14 @@ namespace BEditor
         private static readonly PropertyChangedEventArgs langArgs = new(nameof(Language));
         private static readonly PropertyChangedEventArgs showStartWindowArgs = new(nameof(ShowStartWindow));
         private static readonly PropertyChangedEventArgs prioritizeGPUArgs = new(nameof(PrioritizeGPU));
+        private static readonly PropertyChangedEventArgs graphicsProfileArgs = new(nameof(GraphicsProfile));
         private uint clipHeight = 25;
         private bool darkMode = true;
         private bool showStartWindow = true;
         private bool autoBackUp = true;
         private uint? backUpInterval = 10;
         private string lastTimeFolder = "";
+        private string graphicsProfile = "OpenGL";
         private uint widthOf1Frame = 5;
         private ObservableCollection<string>? includeFonts;
         private ObservableCollection<string>? recentFiles;
@@ -44,7 +47,7 @@ namespace BEditor
 
         static Settings()
         {
-            var path = Path.Combine(AppContext.BaseDirectory, "user", "settings.json");
+            var path = Path.Combine(ServicesLocator.GetUserFolder(), "settings.json");
             if (!File.Exists(path))
             {
                 Default = new Settings();
@@ -185,6 +188,12 @@ namespace BEditor
             get => prioritizeGPU;
             set => SetValue(value, ref prioritizeGPU, prioritizeGPUArgs);
         }
+        [DataMember]
+        public string GraphicsProfile
+        {
+            get => graphicsProfile ??= "";
+            set => SetValue(value, ref graphicsProfile, graphicsProfileArgs);
+        }
         public ExtensionDataObject? ExtensionData { get; set; }
 
         #endregion
@@ -201,7 +210,7 @@ namespace BEditor
                 RaisePropertyChanged(args);
             }
         }
-        public void Save() => Serialize.SaveToFile(this, Path.Combine(AppContext.BaseDirectory, "user", "settings.json"));
-        public Task SaveAsync() => Task.Run(() => Serialize.SaveToFile(this, Path.Combine(AppContext.BaseDirectory, "user", "settings.json")));
+        public void Save() => Serialize.SaveToFile(this, Path.Combine(ServicesLocator.GetUserFolder(), "settings.json"));
+        public Task SaveAsync() => Task.Run(() => Serialize.SaveToFile(this, Path.Combine(ServicesLocator.GetUserFolder(), "settings.json")));
     }
 }

@@ -127,7 +127,7 @@ namespace BEditor.Extensions.AviUtl
         {
             var match = _color.Match(line);
 
-            var color = Color.FromHTML("#" + match.Groups["color"].Value);
+            var color = Color.Parse("#" + match.Groups["color"].Value);
             color.A = 255;
 
             return new(color);
@@ -316,7 +316,7 @@ namespace BEditor.Extensions.AviUtl
             }
 
             // 0x000000 など
-            var color = Color.FromHTML("#" + Value.Replace("0x", ""));
+            var color = Color.Parse("#" + Value.Replace("0x", ""));
             color.A = 255;
 
             return color;
@@ -402,6 +402,7 @@ namespace BEditor.Extensions.AviUtl
         private static EffectMetadata CreateEffectMetadata(IEnumerable<ScriptEntry> anm)
         {
             var list = new List<EffectMetadata> { EffectMetadata.Create<LuaScript>("スクリプト制御") };
+
             var metadata = new EffectMetadata("AviUtl")
             {
                 Children = list

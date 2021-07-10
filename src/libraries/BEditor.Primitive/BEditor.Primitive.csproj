@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
         <AssemblyName>BEditor.Primitive</AssemblyName>
@@ -6,7 +6,7 @@
         <RootNamespace>BEditor.Primitive</RootNamespace>
     </PropertyGroup>
 
-    <Import Project="$(SolutionDir)\props\analyzer.props" />
+    <Import Project="..\..\..\props\analyzer.props" />
     <Import Project="..\Shared\Shared.projitems" Label="Shared" />
 
     <ItemGroup>
@@ -15,6 +15,7 @@
 
     <ItemGroup>
         <ProjectReference Include="..\BEditor.Core\BEditor.Core.csproj" />
+        <ProjectReference Include="..\BEditor.Graphics\BEditor.Graphics.csproj" />
     </ItemGroup>
 
     <ItemGroup>

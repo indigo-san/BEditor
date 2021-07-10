@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
@@ -7,6 +8,7 @@ using System.Threading.Tasks;
 using Avalonia.Threading;
 
 using BEditor.Data;
+using BEditor.Extensions;
 using BEditor.Media;
 using BEditor.Media.Encoding;
 using BEditor.Media.PCM;
@@ -27,8 +29,8 @@ namespace BEditor.ViewModels
     {
         public VideoOutputViewModel()
         {
-            SelectedScene.Value = Project.PreviewScene;
-            LengthFrame.Value = Project.PreviewScene.TotalFrame;
+            SelectedScene.Value = Project.CurrentScene;
+            LengthFrame.Value = Project.CurrentScene.TotalFrame;
             SelectedScene.Where(s => s.TotalFrame < LengthFrame.Value)
                 .Subscribe(s => LengthFrame.Value = s.TotalFrame);
             StartTime = StartFrame.Select(i => ((Frame)i).ToTimeSpan(Project.Framerate))
@@ -46,7 +48,7 @@ namespace BEditor.ViewModels
                         new(Strings.VideoFile, EncodingRegistory.EnumerateEncodings()
                             .SelectMany(i => i.SupportExtensions())
                             .Distinct()
-                            .Select(i => new FileExtension(i.Trim('.')))
+                            .Select(i => i.Trim('.'))
                             .ToArray())
                     }
                 };
@@ -73,10 +75,10 @@ namespace BEditor.ViewModels
             OutputIsEnabled = SelectedEncoder.Select(i => i is not null)
                 .ToReadOnlyReactivePropertySlim();
 
-            AudioEncoderSettings = SelectedEncoder.Select(i => i?.GetDefaultAudioSettings()?.CodecOptions)
+            AudioEncoderSettings = SelectedEncoder.Select(i => i?.GetAudioSettings()?.CodecOptions)
                 .ToReadOnlyReactivePropertySlim();
 
-            VideoEncoderSettings = SelectedEncoder.Select(i => i?.GetDefaultVideoSettings()?.CodecOptions)
+            VideoEncoderSettings = SelectedEncoder.Select(i => i?.GetVideoSettings()?.CodecOptions)
                 .ToReadOnlyReactivePropertySlim();
 
             Output.Subscribe(async () =>
@@ -91,6 +93,7 @@ namespace BEditor.ViewModels
 
                 await Task.Run(async () =>
                 {
+                    Stopwatch? sw = null;
                     try
                     {
                         var scene = SelectedScene.Value;
@@ -136,6 +139,13 @@ namespace BEditor.ViewModels
                             })
                             .Create();
 
+                        // 繰り返す要素数
+                        var totalElements = (LengthFrame.Value - StartFrame.Value) * 2;
+                        // 処理した要素
+                        var processed = 0;
+                        sw = new Stopwatch();
+                        sw.Start();
+
                         // 動画
                         for (Frame frame = StartFrame.Value; frame < LengthFrame.Value; frame++)
                         {
@@ -145,40 +155,34 @@ namespace BEditor.ViewModels
                                 return;
                             }
 
+                            var eta = GetEta(sw, processed, totalElements);
                             dialog.NowValue.Value = frame;
+                            dialog.Text.Value = $"{Strings.Video} {frame.Value}/{LengthFrame.Value}   {Strings.TimeRemaining} {eta:hh\\:mm\\:ss}";
 
-                            // UIスレッドだけでレンダリングできる
-                            var img = await Dispatcher.UIThread.InvokeAsync(() => scene.Render(frame, RenderType.VideoOutput));
+                            using var img = scene.Render(frame, ApplyType.Video);
                             output.Video?.AddFrame(img);
-                            img.Dispose();
+                            processed++;
                         }
 
                         // Audio
-                        // Sample per frame
-                        var spf = proj.Samplingrate / proj.Framerate;
-                        var spf_time = TimeSpan.FromSeconds(spf / (double)proj.Samplingrate);
                         for (Frame frame = StartFrame.Value; frame < LengthFrame.Value; frame++)
                         {
-                            using var buffer = new Sound<StereoPCMFloat>(proj.Samplingrate, spf);
-
-                            foreach (var item in scene.GetFrame(frame).Select(i => i.Effect[0]).OfType<AudioObject>())
+                            if (t)
                             {
-                                var rel_start = new Frame(frame - item.Parent.Start).ToTimeSpan(proj.Framerate);
-
-                                if (item.Loaded is null) continue;
-
-                                if (item.Loaded.Duration >= rel_start + spf_time)
-                                {
-                                    using var sliced = item.Loaded.Slice(rel_start, spf_time);
-                                    sliced.Gain(item.Volume[frame] / 100);
-                                    using var resampled = sliced.Resamples(proj.Samplingrate);
-
-                                    buffer.Add(resampled);
-                                }
+                                output.Dispose();
+                                return;
                             }
 
-                            output.Audio?.AddFrame(buffer);
+                            var eta = GetEta(sw, processed, totalElements);
+                            dialog.NowValue.Value = frame;
+                            dialog.Text.Value = $"{Strings.Audio} {frame.Value}/{LengthFrame.Value}   {Strings.TimeRemaining} {eta:hh\\:mm\\:ss}";
+
+                            using var sound = scene.Sample(frame);
+                            output.Audio?.AddFrame(sound);
+                            processed++;
                         }
+
+                        dialog.IsIndeterminate.Value = true;
 
                         output.Dispose();
 
@@ -200,6 +204,7 @@ namespace BEditor.ViewModels
                     }
                     finally
                     {
+                        sw?.Stop();
                         AppModel.Current.AppStatus = Status.Edit;
                     }
                 });
@@ -248,6 +253,12 @@ namespace BEditor.ViewModels
         public Func<Task<Dictionary<string, object>?>>? GetAudioSettings { get; set; }
         public Func<Task<Dictionary<string, object>?>>? GetVideoSettings { get; set; }
 
-        public record EnumTupple<T>(string Name, T Value);
+        public static TimeSpan GetEta(Stopwatch sw, int counter, int counterGoal)
+        {
+            if (counter == 0) return TimeSpan.Zero;
+            var elapsedMin = (float)sw.ElapsedMilliseconds / 1000 / 60;
+            var minLeft = elapsedMin / counter * (counterGoal - counter);
+            return TimeSpan.FromMinutes(minLeft);
+        }
     }
 }

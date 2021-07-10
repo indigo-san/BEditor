@@ -24,49 +24,49 @@ namespace BEditor.Primitive.Objects
         /// <summary>
         /// Defines the <see cref="X"/> property.
         /// </summary>
-        public static readonly DirectEditingProperty<ListenerObject, EaseProperty> XProperty = CameraObject.XProperty.WithOwner<ListenerObject>(
+        public static readonly DirectProperty<ListenerObject, EaseProperty> XProperty = CameraObject.XProperty.WithOwner<ListenerObject>(
             owner => owner.X,
             (owner, obj) => owner.X = obj);
 
         /// <summary>
         /// Defines the <see cref="Y"/> property.
         /// </summary>
-        public static readonly DirectEditingProperty<ListenerObject, EaseProperty> YProperty = CameraObject.YProperty.WithOwner<ListenerObject>(
+        public static readonly DirectProperty<ListenerObject, EaseProperty> YProperty = CameraObject.YProperty.WithOwner<ListenerObject>(
             owner => owner.Y,
             (owner, obj) => owner.Y = obj);
 
         /// <summary>
         /// Defines the <see cref="Z"/> property.
         /// </summary>
-        public static readonly DirectEditingProperty<ListenerObject, EaseProperty> ZProperty = CameraObject.ZProperty.WithOwner<ListenerObject>(
+        public static readonly DirectProperty<ListenerObject, EaseProperty> ZProperty = CameraObject.ZProperty.WithOwner<ListenerObject>(
             owner => owner.Z,
             (owner, obj) => owner.Z = obj);
 
         /// <summary>
         /// Defines the <see cref="TargetX"/> property.
         /// </summary>
-        public static readonly DirectEditingProperty<ListenerObject, EaseProperty> TargetXProperty = CameraObject.TargetXProperty.WithOwner<ListenerObject>(
+        public static readonly DirectProperty<ListenerObject, EaseProperty> TargetXProperty = CameraObject.TargetXProperty.WithOwner<ListenerObject>(
             owner => owner.TargetX,
             (owner, obj) => owner.TargetX = obj);
 
         /// <summary>
         /// Defines the <see cref="TargetY"/> property.
         /// </summary>
-        public static readonly DirectEditingProperty<ListenerObject, EaseProperty> TargetYProperty = CameraObject.TargetYProperty.WithOwner<ListenerObject>(
+        public static readonly DirectProperty<ListenerObject, EaseProperty> TargetYProperty = CameraObject.TargetYProperty.WithOwner<ListenerObject>(
             owner => owner.TargetY,
             (owner, obj) => owner.TargetY = obj);
 
         /// <summary>
         /// Defines the <see cref="TargetZ"/> property.
         /// </summary>
-        public static readonly DirectEditingProperty<ListenerObject, EaseProperty> TargetZProperty = CameraObject.TargetZProperty.WithOwner<ListenerObject>(
+        public static readonly DirectProperty<ListenerObject, EaseProperty> TargetZProperty = CameraObject.TargetZProperty.WithOwner<ListenerObject>(
             owner => owner.TargetZ,
             (owner, obj) => owner.TargetZ = obj);
 
         /// <summary>
         /// Defines the <see cref="Gain"/> property.
         /// </summary>
-        public static readonly DirectEditingProperty<ListenerObject, EaseProperty> GainProperty = EditingProperty.RegisterDirect<EaseProperty, ListenerObject>(
+        public static readonly DirectProperty<ListenerObject, EaseProperty> GainProperty = EditingProperty.RegisterDirect<EaseProperty, ListenerObject>(
             nameof(Gain),
             owner => owner.Gain,
             (owner, obj) => owner.Gain = obj,
@@ -127,12 +127,6 @@ namespace BEditor.Primitive.Objects
         /// <inheritdoc/>
         public override void Apply(EffectApplyArgs args)
         {
-            var context = Parent.Parent.AudioContext;
-            var f = args.Frame;
-
-            context!.Position = new(X[f], Y[f], Z[f]);
-            context.Target = new(TargetX[f], TargetY[f], TargetZ[f]);
-            context.Gain = Gain[f] / 100f;
         }
 
         /// <inheritdoc/>

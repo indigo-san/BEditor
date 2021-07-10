@@ -47,9 +47,8 @@ namespace BEditor.ViewModels.Start
 
                 if (project is null) return;
 
-                await Task.Run(async () =>
+                await Task.Run(() =>
                 {
-                    await TypeEarlyInitializer.AllInitializeAsync();
                     project.Load();
 
                     app.Project = project;
@@ -68,9 +67,9 @@ namespace BEditor.ViewModels.Start
                 {
                     Filters =
                     {
-                        new(Strings.ProjectFile, new FileExtension[]
+                        new(Strings.ProjectFile, new[]
                         {
-                            new("bedit")
+                            "bedit"
                         })
                     }
                 };

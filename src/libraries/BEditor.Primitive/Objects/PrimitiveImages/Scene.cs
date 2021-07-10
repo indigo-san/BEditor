@@ -8,6 +8,8 @@
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using System.Runtime.Serialization;
+using System.Text.Json;
 
 using BEditor.Data;
 using BEditor.Data.Primitive;
@@ -26,7 +28,7 @@ namespace BEditor.Primitive.Objects
         /// <summary>
         /// Defines the <see cref="Start"/> property.
         /// </summary>
-        public static readonly DirectEditingProperty<SceneObject, EaseProperty> StartProperty = VideoFile.StartProperty.WithOwner<SceneObject>(
+        public static readonly DirectProperty<SceneObject, EaseProperty> StartProperty = VideoFile.StartProperty.WithOwner<SceneObject>(
             owner => owner.Start,
             (owner, obj) => owner.Start = obj);
 
@@ -67,6 +69,23 @@ namespace BEditor.Primitive.Objects
         }
 
         /// <inheritdoc/>
+        public override void SetObjectData(JsonElement element)
+        {
+            base.SetObjectData(element);
+            SelectScene = (SelectorProperty)FormatterServices.GetUninitializedObject(typeof(SelectorProperty));
+            SelectScene.SetObjectData(element.GetProperty(nameof(SelectScene)));
+        }
+
+        /// <inheritdoc/>
+        public override void GetObjectData(Utf8JsonWriter writer)
+        {
+            base.GetObjectData(writer);
+            writer.WriteStartObject(nameof(SelectScene));
+            SelectScene.GetObjectData(writer);
+            writer.WriteEndObject();
+        }
+
+        /// <inheritdoc/>
         protected override Image<BGRA32>? OnRender(EffectApplyArgs args)
         {
             var scene = this.GetParent<Project>()?.Children.First(i => i.SceneName == SelectScene.SelectItem!) ?? Parent!.Parent;
@@ -75,8 +94,8 @@ namespace BEditor.Primitive.Objects
             // Clipの相対的なフレーム
             var frame = args.Frame - Parent!.Start;
 
-            var img = scene.Render(frame + (int)Start[args.Frame], RenderType.ImageOutput);
-            Parent.Parent.GraphicsContext!.MakeCurrentAndBindFbo();
+            var img = scene.Render(frame + (int)Start[args.Frame], ApplyType.Image);
+            Parent.Parent.GraphicsContext!.PlatformImpl.MakeCurrent();
 
             return img;
         }

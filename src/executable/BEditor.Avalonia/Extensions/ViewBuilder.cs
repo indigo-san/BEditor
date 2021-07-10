@@ -23,7 +23,7 @@ using BEditor.Views.Timelines;
 
 namespace BEditor.Extensions
 {
-    public static class ViewBuilder
+    public static partial class ViewBuilder
     {
         public static readonly List<PropertyViewBuilder> PropertyViewBuilders = new()
         {
@@ -89,7 +89,7 @@ namespace BEditor.Extensions
                 {
                     Mode = BindingMode.OneWay,
                     Source = expander,
-                    Converter = ExpanderWidthConverter
+                    Converter = _expanderWidthConverter
                 };
                 var isExpandedbind = new Binding("IsExpanded") { Mode = BindingMode.TwoWay, Source = p };
 
@@ -154,7 +154,7 @@ namespace BEditor.Extensions
                 {
                     Mode = BindingMode.OneWay,
                     Source = expander,
-                    Converter = ExpanderWidthConverter
+                    Converter = _expanderWidthConverter
                 };
                 var isExpandedbind = new Binding("IsExpanded") { Mode = BindingMode.TwoWay, Source = p };
 
@@ -164,16 +164,6 @@ namespace BEditor.Extensions
                 return expander;
             })
         };
-        public static readonly EditingProperty<Timeline> TimelineProperty = EditingProperty.Register<Timeline, Scene>("GetTimeline", EditingPropertyOptions<Timeline>.Create(isDisposable: true));
-        public static readonly EditingProperty<TimelineViewModel> TimelineViewModelProperty = EditingProperty.Register<TimelineViewModel, Scene>("GetTimelineViewModel", EditingPropertyOptions<TimelineViewModel>.Create(isDisposable: true));
-        public static readonly EditingProperty<ClipView> ClipViewProperty = EditingProperty.Register<ClipView, ClipElement>("GetClipView", EditingPropertyOptions<ClipView>.Create(isDisposable: true));
-        public static readonly EditingProperty<ClipPropertyView> ClipPropertyViewProperty = EditingProperty.Register<ClipPropertyView, ClipElement>("GetClipPropertyView", EditingPropertyOptions<ClipPropertyView>.Create(isDisposable: true));
-        public static readonly EditingProperty<ClipViewModel> ClipViewModelProperty = EditingProperty.Register<ClipViewModel, ClipElement>("GetClipViewModel", EditingPropertyOptions<ClipViewModel>.Create(isDisposable: true));
-        public static readonly EditingProperty<Control> EffectElementViewProperty = EditingProperty.Register<Control, EffectElement>("GetPropertyView", EditingPropertyOptions<Control>.Create(isDisposable: true));
-        public static readonly EditingProperty<Control> PropertyElementViewProperty = EditingProperty.Register<Control, PropertyElement>("GetPropertyView", EditingPropertyOptions<Control>.Create(isDisposable: true));
-        public static readonly EditingProperty<Control> EasePropertyViewProperty = EditingProperty.Register<Control, EasingFunc>("GetPropertyView", EditingPropertyOptions<Control>.Create(isDisposable: true));
-        public static readonly EditingProperty<Control> KeyframeProperty = EditingProperty.Register<Control, EffectElement>("GetKeyframe", EditingPropertyOptions<Control>.Create(isDisposable: true));
-        public static readonly EditingProperty<Control> KeyframeViewProperty = EditingProperty.Register<Control, IKeyframeProperty>("GetKeyframeView", EditingPropertyOptions<Control>.Create(isDisposable: true));
 
         public static Timeline GetCreateTimeline(this Scene scene)
         {
@@ -390,7 +380,7 @@ namespace BEditor.Extensions
                     {
                         Mode = BindingMode.OneWay,
                         Source = header,
-                        Converter = ExpanderWidthConverter
+                        Converter = _expanderWidthConverter
                     });
                     header.Bind(ContentControl.ContentProperty, new Binding("Name") { Mode = BindingMode.OneTime, Source = effect });
                     keyFrame.Bind(Expander.IsExpandedProperty, new Binding("IsExpanded") { Mode = BindingMode.TwoWay, Source = effect });
@@ -405,7 +395,7 @@ namespace BEditor.Extensions
             return ctr;
         }
 
-        private static readonly IValueConverter ExpanderWidthConverter = new FuncValueConverter<double, double>(i => i - 38);
+        private static readonly IValueConverter _expanderWidthConverter = new FuncValueConverter<double, double>(i => i - 38);
 
         public static (Expander, StackPanel) CreateObjectExpander(ObjectElement obj)
         {
@@ -453,7 +443,7 @@ namespace BEditor.Extensions
                 {
                     Mode = BindingMode.OneWay,
                     Source = header,
-                    Converter = ExpanderWidthConverter
+                    Converter = _expanderWidthConverter
                 };
                 var isEnablebind = new Binding("IsEnabled")
                 {
@@ -471,8 +461,14 @@ namespace BEditor.Extensions
                     Header = Strings.CopyID,
                     DataContext = obj
                 };
+                var saveTo = new MenuItem
+                {
+                    Icon = new PathIcon { Data = (Geometry)Application.Current.FindResource("Save24Regular")! },
+                    Header = Strings.SaveAs,
+                    DataContext = obj
+                };
 
-                contextmenu.Items = new MenuItem[] { copyId };
+                contextmenu.Items = new MenuItem[] { copyId, saveTo };
 
                 // 作成したコンテキストメニューをListBox1に設定
                 header.ContextMenu = contextmenu;
@@ -482,6 +478,23 @@ namespace BEditor.Extensions
                     if (s is MenuItem menu && menu.DataContext is EffectElement effect)
                     {
                         await Application.Current.Clipboard.SetTextAsync(effect.Id.ToString());
+                    }
+                };
+                saveTo.Click += async (s, e) =>
+                {
+                    if (s is MenuItem menu && menu.DataContext is EffectElement efct)
+                    {
+                        var record = new SaveFileRecord
+                        {
+                            Filters =
+                            {
+                                new(Strings.ObjectFile, new string[]{ "bobj" })
+                            }
+                        };
+                        if (await AppModel.Current.FileDialog.ShowSaveFileDialogAsync(record) && !await Serialize.SaveToFileAsync(new EffectWrapper(efct), record.FileName))
+                        {
+                            AppModel.Current.Message.Snackbar(Strings.FailedToSave);
+                        }
                     }
                 };
             }
@@ -579,7 +592,7 @@ namespace BEditor.Extensions
                 {
                     Mode = BindingMode.OneWay,
                     Source = header,
-                    Converter = ExpanderWidthConverter
+                    Converter = _expanderWidthConverter
                 };
                 var isEnablebind = new Binding("IsEnabled")
                 {
@@ -603,8 +616,14 @@ namespace BEditor.Extensions
                     Header = Strings.CopyID,
                     DataContext = effect
                 };
+                var saveTo = new MenuItem
+                {
+                    Icon = new PathIcon { Data = (Geometry)Application.Current.FindResource("Save24Regular")! },
+                    Header = Strings.SaveAs,
+                    DataContext = effect
+                };
 
-                contextmenu.Items = new MenuItem[] { remove, copyId };
+                contextmenu.Items = new MenuItem[] { remove, copyId, saveTo };
 
                 // 作成したコンテキストメニューをListBox1に設定
                 header.ContextMenu = contextmenu;
@@ -621,6 +640,23 @@ namespace BEditor.Extensions
                     if (s is MenuItem menu && menu.DataContext is EffectElement effect)
                     {
                         await Application.Current.Clipboard.SetTextAsync(effect.Id.ToString());
+                    }
+                };
+                saveTo.Click += async (s, e) =>
+                {
+                    if (s is MenuItem menu && menu.DataContext is EffectElement efct)
+                    {
+                        var record = new SaveFileRecord
+                        {
+                            Filters =
+                            {
+                                new(Strings.EffectFile, new string[]{ "befct" })
+                            }
+                        };
+                        if (await AppModel.Current.FileDialog.ShowSaveFileDialogAsync(record) && !await Serialize.SaveToFileAsync(new EffectWrapper(efct), record.FileName))
+                        {
+                            AppModel.Current.Message.Snackbar(Strings.FailedToSave);
+                        }
                     }
                 };
             }

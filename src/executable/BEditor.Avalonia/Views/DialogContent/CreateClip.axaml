@@ -1,32 +1,24 @@
-<Window
+<views:FluentWindow
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:props="using:BEditor.Properties"
     xmlns:titlebar="using:BEditor.Views.CustomTitlebars"
+    xmlns:views="using:BEditor.Views"
     xmlns:vm="using:BEditor.ViewModels"
     xmlns:model="using:BEditor.Models"
     xmlns:dialogvm="using:BEditor.ViewModels.DialogContent"
-    mc:Ignorable="d"  Width="1000" Height="595"
-    ExtendClientAreaToDecorationsHint="True"
-    ExtendClientAreaChromeHints="NoChrome"
-    ExtendClientAreaTitleBarHeightHint="-1"
-    TransparencyLevelHint="AcrylicBlur"
-    Background="Transparent"
+    mc:Ignorable="d" Height="450" Width="800"
+    Classes="fluent_setter"
     WindowStartupLocation="CenterScreen"
     x:DataType="dialogvm:CreateClipViewModel"
     x:Class="BEditor.Views.DialogContent.CreateClip">
-    <ExperimentalAcrylicBorder>
-        <ExperimentalAcrylicBorder.Material>
-            <ExperimentalAcrylicMaterial
-                TintColor="#222222"
-                TintOpacity="{StaticResource AcrylicTintOpacity1}"
-                MaterialOpacity="{StaticResource AcrylicMaterialOpacity1}" />
-        </ExperimentalAcrylicBorder.Material>
+    <Border Background="{StaticResource AcrylicColor2}">
         <Grid RowDefinitions="Auto,*" ColumnDefinitions="*,2*">
 
             <ListBox
+                Background="{StaticResource AcrylicColor1}"
                 Padding="0,32,0,0"
                 Grid.RowSpan="2"
                 Items="{CompiledBinding TypeItems, Mode=OneTime}"
@@ -157,5 +149,5 @@
             </VirtualizingStackPanel>
 
         </Grid>
-    </ExperimentalAcrylicBorder>
-</Window>
+    </Border>
+</views:FluentWindow>

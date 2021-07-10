@@ -8,6 +8,8 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.IO;
+using System.Linq;
 using System.Reactive.Linq;
 
 using BEditor.Data;
@@ -27,12 +29,12 @@ namespace BEditor.Primitive.Objects
     /// <summary>
     /// Represents an <see cref="ImageObject"/> that references an video file.
     /// </summary>
-    public sealed class VideoFile : ImageObject
+    public sealed class VideoFile : ImageObject, IMediaObject
     {
         /// <summary>
         /// Defines the <see cref="Speed"/> property.
         /// </summary>
-        public static readonly DirectEditingProperty<VideoFile, EaseProperty> SpeedProperty = EditingProperty.RegisterDirect<EaseProperty, VideoFile>(
+        public static readonly DirectProperty<VideoFile, EaseProperty> SpeedProperty = EditingProperty.RegisterDirect<EaseProperty, VideoFile>(
             nameof(Speed),
             owner => owner.Speed,
             (owner, obj) => owner.Speed = obj,
@@ -41,7 +43,7 @@ namespace BEditor.Primitive.Objects
         /// <summary>
         /// Defines the <see cref="Start"/> property.
         /// </summary>
-        public static readonly DirectEditingProperty<VideoFile, EaseProperty> StartProperty = EditingProperty.RegisterDirect<EaseProperty, VideoFile>(
+        public static readonly DirectProperty<VideoFile, EaseProperty> StartProperty = EditingProperty.RegisterDirect<EaseProperty, VideoFile>(
             nameof(Start),
             owner => owner.Start,
             (owner, obj) => owner.Start = obj,
@@ -50,24 +52,15 @@ namespace BEditor.Primitive.Objects
         /// <summary>
         /// Defines the <see cref="File"/> property.
         /// </summary>
-        public static readonly DirectEditingProperty<VideoFile, FileProperty> FileProperty = EditingProperty.RegisterDirect<FileProperty, VideoFile>(
+        public static readonly DirectProperty<VideoFile, FileProperty> FileProperty = EditingProperty.RegisterDirect<FileProperty, VideoFile>(
             nameof(File),
             owner => owner.File,
             (owner, obj) => owner.File = obj,
-            EditingPropertyOptions<FileProperty>.Create(new FilePropertyMetadata(Strings.File, string.Empty, new(Strings.VideoFile, new FileExtension[]
-            {
-                new("mp4"),
-                new("avi"),
-                new("wmv"),
-                new("mov"),
-            }))).Serialize());
-
-        /// <summary>
-        /// Defines the <see cref="SetLength"/> property.
-        /// </summary>
-        public static readonly EditingProperty<ButtonComponent> SetLengthProperty = EditingProperty.Register<ButtonComponent, VideoFile>(
-            nameof(SetLength),
-            EditingPropertyOptions<ButtonComponent>.Create(new ButtonComponentMetadata(Strings.ClipLengthAsVideoLength)).Serialize());
+            EditingPropertyOptions<FileProperty>.Create(new FilePropertyMetadata(Strings.File, string.Empty, new(Strings.VideoFile, DecodingRegistory.EnumerateDecodings()
+                .SelectMany(i => i.SupportExtensions())
+                .Distinct()
+                .Select(i => i.Trim('.'))
+                .ToArray()))).Serialize());
 
         private static readonly MediaOptions _options = new()
         {
@@ -77,8 +70,6 @@ namespace BEditor.Primitive.Objects
         private MediaFile? _mediaFile;
 
         private IDisposable? _disposable1;
-
-        private IDisposable? _disposable2;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="VideoFile"/> class.
@@ -108,11 +99,37 @@ namespace BEditor.Primitive.Objects
         [AllowNull]
         public FileProperty File { get; private set; }
 
+        /// <inheritdoc/>
+        public TimeSpan? Length => _mediaFile?.Video?.Info?.Duration;
+
         /// <summary>
-        /// Gets the command to set the length of the clip.
+        /// Gets whether the file name is supported.
         /// </summary>
-        [AllowNull]
-        public ButtonComponent SetLength => GetValue(SetLengthProperty);
+        /// <param name="file">The name of the file to check if it is supported.</param>
+        /// <returns>Returns true if supported, false otherwise.</returns>
+        public static bool IsSupported(string file)
+        {
+            var ext = Path.GetExtension(file);
+            return DecodingRegistory.EnumerateDecodings()
+                .SelectMany(i => i.SupportExtensions())
+                .Contains(ext);
+        }
+
+        /// <summary>
+        /// Creates an instance from a file name.
+        /// </summary>
+        /// <param name="file">The file name.</param>
+        /// <returns>A new instance of <see cref="VideoFile"/>.</returns>
+        public static VideoFile FromFile(string file)
+        {
+            return new VideoFile
+            {
+                File =
+                {
+                    Value = file,
+                },
+            };
+        }
 
         /// <inheritdoc/>
         public override IEnumerable<PropertyElement> GetProperties()
@@ -125,7 +142,6 @@ namespace BEditor.Primitive.Objects
             yield return Speed;
             yield return Start;
             yield return File;
-            yield return SetLength;
         }
 
         /// <inheritdoc/>
@@ -133,11 +149,18 @@ namespace BEditor.Primitive.Objects
         {
             if (_mediaFile?.Video is null) return null;
 
-            float speed = Speed[args.Frame] / 100;
+            var speed = Speed[args.Frame] / 100;
             var start = (int)Start[args.Frame];
             var time = new Frame((int)((start + args.Frame - Parent!.Start) * speed)).ToTimeSpan(Parent.Parent.Parent!.Framerate);
 
-            return _mediaFile.Video.GetFrame(time);
+            try
+            {
+                return time < Length ? _mediaFile.Video.GetFrame(time) : null;
+            }
+            catch
+            {
+                return null;
+            }
         }
 
         /// <inheritdoc/>
@@ -151,29 +174,26 @@ namespace BEditor.Primitive.Objects
 
                 if (System.IO.File.Exists(File.Value))
                 {
+                    var mes = ServiceProvider?.GetService<IMessage>();
+
                     try
                     {
                         _mediaFile = MediaFile.Open(filename, _options);
                     }
-                    catch (Exception e)
+                    catch (DecoderNotFoundException e)
                     {
-                        var mes = ServiceProvider?.GetService<IMessage>();
-                        var msg = string.Format(Strings.FailedToLoad, filename);
-                        mes?.Snackbar(msg);
-                        LogManager.Logger?.LogError(e, msg);
+                        mes?.Snackbar(Strings.DecoderNotFound);
+                        ServicesLocator.Current.Logger?.LogError(e, Strings.DecoderNotFound);
+                    }
+                    catch (Exception ex)
+                    {
+                        mes?.Snackbar(string.Format(Strings.FailedToLoad, filename));
+                        ServicesLocator.Current.Logger?.LogError(ex, Strings.DecoderNotFound);
                     }
                 }
                 else
                 {
                     _mediaFile = null;
-                }
-            });
-
-            _disposable2 = SetLength.Subscribe(_ =>
-            {
-                if (_mediaFile?.Video is not null)
-                {
-                    Parent.ChangeLength(Parent.Start, Parent.Start + _mediaFile.Video.Info.NumberOfFrames).Execute();
                 }
             });
         }
@@ -185,7 +205,6 @@ namespace BEditor.Primitive.Objects
 
             _mediaFile?.Dispose();
             _disposable1?.Dispose();
-            _disposable2?.Dispose();
         }
     }
 }

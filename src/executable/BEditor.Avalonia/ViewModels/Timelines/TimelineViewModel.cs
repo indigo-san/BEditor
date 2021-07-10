@@ -26,10 +26,10 @@ namespace BEditor.ViewModels.Timelines
         public bool SeekbarIsMouseDown;
         public bool ClipMouseDown;
         public bool KeyframeToggle = true;
-        public byte ClipLeftRight = 0;
+        public byte ClipLeftRight;
         public ClipElement? SelectedClip;
-        public double ClipMovement;
-        public Point ClipStart;
+        public Point ClipStartAbs;
+        public Point ClipStartRel;
         public bool ClipTimeChange;
 
         public TimelineViewModel(Scene scene)
@@ -39,14 +39,14 @@ namespace BEditor.ViewModels.Timelines
             TrackWidth.Value = scene.ToPixel(scene.TotalFrame);
 
             scene.ObserveProperty(s => s.PreviewFrame)
-                .Where(_ => Tool.PreviewIsEnabled)
-                .Subscribe(f =>
+                .Where(_ => Extensions.Tool.PreviewIsEnabled)
+                .Subscribe(async f =>
                 {
                     SeekbarMargin.Value = new Thickness(Scene.ToPixel(f), 0, 0, 0);
 
-                    var type = AppModel.Current.AppStatus is Status.Playing ? RenderType.VideoPreview : RenderType.Preview;
+                    var type = AppModel.Current.AppStatus is Status.Playing ? ApplyType.Video : ApplyType.Edit;
 
-                    Scene.Parent.PreviewUpdate(type);
+                    await Scene.Parent.PreviewUpdateAsync(type);
                 });
 
             scene.ObserveProperty(s => s.TotalFrame)
@@ -72,8 +72,6 @@ namespace BEditor.ViewModels.Timelines
         public ReactiveCommand<ObjectMetadata> AddClip { get; } = new();
 
         public ReactiveCommand Paste { get; } = new();
-
-        public ReactiveCommand ShowSettings { get; } = new();
 
         public ReactiveProperty<StandardCursorType> LayerCursor { get; } = new();
 
@@ -111,9 +109,10 @@ namespace BEditor.ViewModels.Timelines
             {
                 if (SelectedClip is null) return;
                 var selectviewmodel = SelectedClip.GetCreateClipViewModel();
+
                 if (selectviewmodel.ClipCursor.Value == StandardCursorType.Arrow && LayerCursor.Value == StandardCursorType.Arrow)
                 {
-                    var newframe = PointerFrame - Scene.ToFrame(ClipStart.X) + Scene.ToFrame(selectviewmodel.MarginLeft);
+                    var newframe = PointerFrame - Scene.ToFrame(ClipStartRel.X);
                     var newlayer = PointerLayer;
 
                     if (!Scene.InRange(SelectedClip, newframe, newframe + SelectedClip.Length, newlayer))
@@ -128,29 +127,25 @@ namespace BEditor.ViewModels.Timelines
                     selectviewmodel.Row = newlayer;
                     selectviewmodel.MarginProperty.Value = thickness;
 
-                    ClipStart = point;
-
                     ClipTimeChange = true;
                 }
                 else
                 {
-                    ClipMovement = Scene.ToPixel(Scene.ToFrame(point.X) - Scene.ToFrame(ClipStart.X)); //一時的な移動量
-
+                    var move = Scene.ToPixel(PointerFrame - Scene.ToFrame(ClipStartAbs.X)); //一時的な移動量
                     if (ClipLeftRight == 2)
                     {
                         // 左
-                        selectviewmodel.WidthProperty.Value += ClipMovement;
+                        selectviewmodel.WidthProperty.Value += move;
                     }
                     else if (ClipLeftRight == 1)
                     {
                         // 右
-                        var a = ClipMovement;
-                        selectviewmodel.WidthProperty.Value -= a;
-                        selectviewmodel.MarginLeft = selectviewmodel.MarginProperty.Value.Left + a;
+                        selectviewmodel.WidthProperty.Value -= move;
+                        selectviewmodel.MarginLeft += move;
                     }
-
-                    ClipStart = point;
                 }
+
+                ClipStartAbs = point;
             }
         }
 

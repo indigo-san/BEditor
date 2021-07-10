@@ -64,6 +64,36 @@
             Gets or sets the multimedia track number string.
             </summary>
         </member>
+        <member name="T:BEditor.Media.DecoderNotFoundException">
+            <summary>
+            The exception that is thrown when the decoder is not found.
+            </summary>
+        </member>
+        <member name="M:BEditor.Media.DecoderNotFoundException.#ctor">
+            <summary>
+            Initializes a new instance of the <see cref="T:BEditor.Media.DecoderNotFoundException"/> class.
+            </summary>
+        </member>
+        <member name="M:BEditor.Media.DecoderNotFoundException.#ctor(System.String)">
+            <summary>
+            Initializes a new instance of the <see cref="T:BEditor.Media.DecoderNotFoundException"/> class with a specified error message.
+            </summary>
+            <param name="message">The message that describes the error.</param>
+        </member>
+        <member name="M:BEditor.Media.DecoderNotFoundException.#ctor(System.String,System.Exception)">
+            <summary>
+            Initializes a new instance of the <see cref="T:BEditor.Media.DecoderNotFoundException"/> class with a specified error message and a reference to the inner exception that is the cause of this exception.
+            </summary>
+            <param name="message">The message that describes the error.</param>
+            <param name="inner">The exception that is the cause of the current exception, or a null reference (Nothing in Visual Basic) if no inner exception is specified.</param>
+        </member>
+        <member name="M:BEditor.Media.DecoderNotFoundException.#ctor(System.Runtime.Serialization.SerializationInfo,System.Runtime.Serialization.StreamingContext)">
+            <summary>
+            Initializes a new instance of the <see cref="T:BEditor.Media.DecoderNotFoundException"/> class with serialized data.
+            </summary>
+            <param name="info">The <see cref="T:System.Runtime.Serialization.SerializationInfo"/> that holds the serialized object data about the exception being thrown.</param>
+            <param name="context">The <see cref="T:System.Runtime.Serialization.StreamingContext"/> that contains contextual information about the source or destination.</param>
+        </member>
         <member name="T:BEditor.Media.DecodingRegistory">
             <summary>
             Register and record supported decoding.
@@ -458,6 +488,22 @@
             <param name="framesize">The video frame dimensions.</param>
             <param name="framenum">The number of frames.</param>
         </member>
+        <member name="M:BEditor.Media.Decoding.VideoStreamInfo.#ctor(System.String,BEditor.Media.MediaType,System.TimeSpan,BEditor.Drawing.Size,System.Int32,System.Int32)">
+            <summary>
+            Initializes a new instance of the <see cref="T:BEditor.Media.Decoding.VideoStreamInfo"/> class.
+            </summary>
+            <param name="codecName">The codec name of the stream.</param>
+            <param name="type">The media type of the stream.</param>
+            <param name="duration">The duration of the stream.</param>
+            <param name="framesize">The video frame dimensions.</param>
+            <param name="framenum">The number of frames.</param>
+            <param name="framerate">The frame rate.</param>
+        </member>
+        <member name="P:BEditor.Media.Decoding.VideoStreamInfo.FrameRate">
+            <summary>
+            Gets the frame rate.
+            </summary>
+        </member>
         <member name="P:BEditor.Media.Decoding.VideoStreamInfo.NumberOfFrames">
             <summary>
             Gets the number of frames value taken from the container metadata or estimated in constant frame rate videos. Returns null if not available.
@@ -673,6 +719,18 @@
             Adds a new audio stream to the file.
             </summary>
             <param name="settings">The video stream settings.</param>
+            <returns>This <see cref="T:BEditor.Media.Encoding.MediaBuilder"/> object.</returns>
+        </member>
+        <member name="M:BEditor.Media.Encoding.MediaBuilder.WithVideo">
+            <summary>
+            Adds a new video stream to the file.
+            </summary>
+            <returns>This <see cref="T:BEditor.Media.Encoding.MediaBuilder"/> object.</returns>
+        </member>
+        <member name="M:BEditor.Media.Encoding.MediaBuilder.WithAudio">
+            <summary>
+            Adds a new audio stream to the file.
+            </summary>
             <returns>This <see cref="T:BEditor.Media.Encoding.MediaBuilder"/> object.</returns>
         </member>
         <member name="M:BEditor.Media.Encoding.MediaBuilder.Create">
@@ -1035,13 +1093,18 @@
             </summary>
             <returns>Returns the supported extensions.</returns>
         </member>
-        <member name="M:BEditor.Media.IRegisterdEncoding.GetDefaultVideoSettings">
+        <member name="T:BEditor.Media.ISupportEncodingSettings">
+            <summary>
+            Controls the default settings of the encoder.
+            </summary>
+        </member>
+        <member name="M:BEditor.Media.ISupportEncodingSettings.GetDefaultVideoSettings">
             <summary>
             Gets the default settings for video encoder.
             </summary>
             <returns>Returns the default encoder setting.</returns>
         </member>
-        <member name="M:BEditor.Media.IRegisterdEncoding.GetDefaultAudioSettings">
+        <member name="M:BEditor.Media.ISupportEncodingSettings.GetDefaultAudioSettings">
             <summary>
             Gets the default settings for audio encoder.
             </summary>
@@ -1073,7 +1136,7 @@
             </summary>
             <typeparam name="T">The type of the PCM class itself.</typeparam>
         </member>
-        <member name="M:BEditor.Media.PCM.IPCM`1.Add(`0)">
+        <member name="M:BEditor.Media.PCM.IPCM`1.Combine(`0)">
             <summary>
             Returns the value with the specified data appended to this data.
             </summary>
@@ -1126,7 +1189,7 @@
             </summary>
             <param name="value">The 16-bit signed integer.</param>
         </member>
-        <member name="M:BEditor.Media.PCM.PCM16.Add(BEditor.Media.PCM.PCM16)">
+        <member name="M:BEditor.Media.PCM.PCM16.Combine(BEditor.Media.PCM.PCM16)">
             <inheritdoc/>
         </member>
         <member name="M:BEditor.Media.PCM.PCM16.ConvertFrom(BEditor.Media.PCM.PCM32)">
@@ -1172,7 +1235,7 @@
             </summary>
             <param name="value">The 32-bit signed integer.</param>
         </member>
-        <member name="M:BEditor.Media.PCM.PCM32.Add(BEditor.Media.PCM.PCM32)">
+        <member name="M:BEditor.Media.PCM.PCM32.Combine(BEditor.Media.PCM.PCM32)">
             <inheritdoc/>
         </member>
         <member name="M:BEditor.Media.PCM.PCM32.ConvertFrom(BEditor.Media.PCM.PCM16)">
@@ -1215,7 +1278,7 @@
             </summary>
             <param name="value">The 32-bit float.</param>
         </member>
-        <member name="M:BEditor.Media.PCM.PCMFloat.Add(BEditor.Media.PCM.PCMFloat)">
+        <member name="M:BEditor.Media.PCM.PCMFloat.Combine(BEditor.Media.PCM.PCMFloat)">
             <inheritdoc/>
         </member>
         <member name="M:BEditor.Media.PCM.PCMFloat.ConvertFrom(BEditor.Media.PCM.PCM16)">
@@ -1252,7 +1315,7 @@
             <param name="left">The audio data of the left channel.</param>
             <param name="right">The audio data of the right channel.</param>
         </member>
-        <member name="M:BEditor.Media.PCM.StereoPCM16.Add(BEditor.Media.PCM.StereoPCM16)">
+        <member name="M:BEditor.Media.PCM.StereoPCM16.Combine(BEditor.Media.PCM.StereoPCM16)">
             <inheritdoc/>
         </member>
         <member name="M:BEditor.Media.PCM.StereoPCM16.ConvertFrom(BEditor.Media.PCM.StereoPCM32)">
@@ -1292,7 +1355,7 @@
             <param name="left">The audio data of the left channel.</param>
             <param name="right">The audio data of the right channel.</param>
         </member>
-        <member name="M:BEditor.Media.PCM.StereoPCM32.Add(BEditor.Media.PCM.StereoPCM32)">
+        <member name="M:BEditor.Media.PCM.StereoPCM32.Combine(BEditor.Media.PCM.StereoPCM32)">
             <inheritdoc/>
         </member>
         <member name="M:BEditor.Media.PCM.StereoPCM32.ConvertFrom(BEditor.Media.PCM.StereoPCM16)">
@@ -1329,7 +1392,7 @@
             <param name="left">The audio data of the left channel.</param>
             <param name="right">The audio data of the right channel.</param>
         </member>
-        <member name="M:BEditor.Media.PCM.StereoPCMFloat.Add(BEditor.Media.PCM.StereoPCMFloat)">
+        <member name="M:BEditor.Media.PCM.StereoPCMFloat.Combine(BEditor.Media.PCM.StereoPCMFloat)">
             <inheritdoc/>
         </member>
         <member name="M:BEditor.Media.PCM.StereoPCMFloat.ConvertFrom(BEditor.Media.PCM.StereoPCM32)">
@@ -1475,11 +1538,26 @@
             <param name="length">The desired length for the slice.</param>
             <returns>A sound that consists of length elements from the current sound starting at start.</returns>
         </member>
-        <member name="M:BEditor.Media.Sound`1.Add(BEditor.Media.Sound{`0})">
+        <member name="M:BEditor.Media.Sound`1.Slice(System.Int32)">
             <summary>
-            Add the specified <see cref="T:BEditor.Media.Sound`1"/> to this <see cref="T:BEditor.Media.Sound`1"/>.
+            Forms a slice of the current <see cref="T:BEditor.Media.Sound`1"/>, starting at the specified index.
             </summary>
-            <param name="sound">The sound to add.</param>
+            <param name="start">The index at which to begin the slice.</param>
+            <returns>A sound that consists of all elements of the current sound from start to the end of the sound.</returns>
+        </member>
+        <member name="M:BEditor.Media.Sound`1.Slice(System.Int32,System.Int32)">
+            <summary>
+            Forms a slice out of the current <see cref="T:BEditor.Media.Sound`1"/> starting at a specified index for a specified length.
+            </summary>
+            <param name="start">The index at which to begin this slice.</param>
+            <param name="length">The desired length for the slice.</param>
+            <returns>A sound that consists of length elements from the current sound starting at start.</returns>
+        </member>
+        <member name="M:BEditor.Media.Sound`1.Combine(BEditor.Media.Sound{`0})">
+            <summary>
+            Combine the specified <see cref="T:BEditor.Media.Sound`1"/> to this <see cref="T:BEditor.Media.Sound`1"/>.
+            </summary>
+            <param name="sound">The sound to combine.</param>
         </member>
         <member name="M:BEditor.Media.Sound`1.Resamples(System.Int32)">
             <summary>
@@ -1544,6 +1622,22 @@
             </summary>
             <param name="sound">The sound to adjust the gain.</param>
             <param name="gain">The gain.</param>
+        </member>
+        <member name="M:BEditor.Media.Sound.RMS(BEditor.Media.Sound{BEditor.Media.PCM.StereoPCMFloat})">
+            <summary>
+            Calculates the RMS of a sound.
+            </summary>
+            <param name="sound">The sound to calculate RMS.</param>
+            <returns>Returns the RMS.</returns>
+        </member>
+        <member name="M:BEditor.Media.Sound.Delay(BEditor.Media.Sound{BEditor.Media.PCM.StereoPCMFloat},System.Single,System.Single,System.Int32)">
+            <summary>
+            Applies the delay effect.
+            </summary>
+            <param name="sound">The sound to apply effect.</param>
+            <param name="amp">The attenuation rate.</param>
+            <param name="delay">The delay time.</param>
+            <param name="repeat">The number of repetitions.</param>
         </member>
     </members>
 </doc>

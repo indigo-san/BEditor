@@ -18,7 +18,7 @@ namespace BEditor.Extensions.AviUtl
 {
     public sealed class LuaScript : ImageEffect
     {
-        public static readonly DirectEditingProperty<LuaScript, DocumentProperty> CodeProperty = EditingProperty.RegisterDirect<DocumentProperty, LuaScript>(
+        public static readonly DirectProperty<LuaScript, DocumentProperty> CodeProperty = EditingProperty.RegisterDirect<DocumentProperty, LuaScript>(
             nameof(Code),
             owner => owner.Code,
             (owner, obj) => owner.Code = obj,
@@ -44,11 +44,11 @@ namespace BEditor.Extensions.AviUtl
                 }
                 catch (Exception e)
                 {
-                    LogManager.Logger.LogError(e, Strings.FailedToExecuteScript);
+                    ServicesLocator.Current.Logger.LogError(e, Strings.FailedToExecuteScript);
                     ServiceProvider?.GetService<IMessage>()?.Snackbar(Strings.FailedToExecuteScript);
                 }
             }
-            Parent.Parent.GraphicsContext!.MakeCurrentAndBindFbo();
+            Parent.Parent.GraphicsContext!.PlatformImpl.MakeCurrent();
         }
 
         public override IEnumerable<PropertyElement> GetProperties()

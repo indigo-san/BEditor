@@ -27,7 +27,7 @@ namespace BEditor.Primitive.Effects.LookupTables
         /// <summary>
         /// Defines the <see cref="Strength"/> property.
         /// </summary>
-        public static readonly DirectEditingProperty<LookupTable, EaseProperty> StrengthProperty = EditingProperty.RegisterDirect<EaseProperty, LookupTable>(
+        public static readonly DirectProperty<LookupTable, EaseProperty> StrengthProperty = EditingProperty.RegisterDirect<EaseProperty, LookupTable>(
             nameof(Strength),
             owner => owner.Strength,
             (owner, obj) => owner.Strength = obj,
@@ -36,12 +36,12 @@ namespace BEditor.Primitive.Effects.LookupTables
         /// <summary>
         /// Defines the <see cref="LUTFile"/> property.
         /// </summary>
-        public static readonly DirectEditingProperty<LookupTable, FileProperty> LUTFileProperty = EditingProperty.RegisterDirect<FileProperty, LookupTable>(
+        public static readonly DirectProperty<LookupTable, FileProperty> LUTFileProperty = EditingProperty.RegisterDirect<FileProperty, LookupTable>(
             nameof(LUTFile),
             owner => owner.LUTFile,
             (owner, obj) => owner.LUTFile = obj,
             EditingPropertyOptions<FileProperty>.Create(
-                new FilePropertyMetadata(Strings.CubeFile, Filter: new(Strings.CubeFile, new FileExtension[] { new("cube"), new("dat"), new("3dl"), new("m3d") })))
+                new FilePropertyMetadata(Strings.CubeFile, Filter: new(Strings.CubeFile, new[] { "cube" })))
             .Serialize());
 
         private Drawing.LookupTable? _lut;

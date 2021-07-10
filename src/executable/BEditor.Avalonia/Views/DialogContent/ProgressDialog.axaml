@@ -1,51 +1,37 @@
-<Window
+<views:FluentWindow
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:views="using:BEditor.Views"
     xmlns:titlebar="using:BEditor.Views.CustomTitlebars"
     mc:Ignorable="d" Width="480" Height="128"
-    ExtendClientAreaToDecorationsHint="True"
-    ExtendClientAreaChromeHints="NoChrome"
-    ExtendClientAreaTitleBarHeightHint="-1"
-    TransparencyLevelHint="AcrylicBlur"
-    Background="Transparent"
     WindowStartupLocation="CenterScreen"
     CanResize="False"
+    Classes="fluent"
     x:Class="BEditor.Views.DialogContent.ProgressDialog">
-    <ExperimentalAcrylicBorder>
-        <ExperimentalAcrylicBorder.Material>
-            <ExperimentalAcrylicMaterial
-              TintColor="#222222"
-              TintOpacity="{StaticResource AcrylicTintOpacity1}"
-              MaterialOpacity="{StaticResource AcrylicMaterialOpacity1}" />
-        </ExperimentalAcrylicBorder.Material>
-        <Grid RowDefinitions="Auto,*,*,Auto">
+    <Grid RowDefinitions="*,*,Auto">
 
-            <titlebar:WindowsTitlebarButtons CanResize="False"/>
+        <Label
+            Grid.Row="0"
+            Content="{Binding Text.Value}"
+            Margin="8,0" />
 
+        <ProgressBar
+            Margin="8"
+            Grid.Row="1"
+            IsIndeterminate="{Binding IsIndeterminate.Value}"
+            Maximum="{Binding Maximum.Value}"
+            Minimum="{Binding Minimum.Value}"
+            Value="{Binding NowValue.Value}" />
 
-            <Label
-                Grid.Row="1"
-                Content="{Binding Text.Value}"
-                Margin="16,0" />
-
-            <ProgressBar
-                Margin="16"
-                Grid.Row="2"
-                IsIndeterminate="{Binding IsIndeterminate.Value}"
-                Maximum="{Binding Maximum.Value}"
-                Minimum="{Binding Minimum.Value}"
-                Value="{Binding NowValue.Value}" />
-
-            <VirtualizingStackPanel
-                Orientation="Horizontal"
-                HorizontalAlignment="Right"
-                x:Name="stack"
-                Spacing="8"
-                Margin="16"
-                VerticalAlignment="Bottom"
-                Grid.Row="3" />
-        </Grid>
-    </ExperimentalAcrylicBorder>
-</Window>
+        <VirtualizingStackPanel
+            Orientation="Horizontal"
+            HorizontalAlignment="Right"
+            x:Name="stack"
+            Spacing="8"
+            Margin="8"
+            VerticalAlignment="Bottom"
+            Grid.Row="2" />
+    </Grid>
+</views:FluentWindow>

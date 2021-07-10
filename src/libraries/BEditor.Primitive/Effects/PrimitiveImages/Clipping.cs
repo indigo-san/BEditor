@@ -25,7 +25,7 @@ namespace BEditor.Primitive.Effects
         /// <summary>
         /// Defines the <see cref="Top"/> property.
         /// </summary>
-        public static readonly DirectEditingProperty<Clipping, EaseProperty> TopProperty = EditingProperty.RegisterDirect<EaseProperty, Clipping>(
+        public static readonly DirectProperty<Clipping, EaseProperty> TopProperty = EditingProperty.RegisterDirect<EaseProperty, Clipping>(
             nameof(Top),
             owner => owner.Top,
             (owner, obj) => owner.Top = obj,
@@ -34,7 +34,7 @@ namespace BEditor.Primitive.Effects
         /// <summary>
         /// Defines the <see cref="Bottom"/> property.
         /// </summary>
-        public static readonly DirectEditingProperty<Clipping, EaseProperty> BottomProperty = EditingProperty.RegisterDirect<EaseProperty, Clipping>(
+        public static readonly DirectProperty<Clipping, EaseProperty> BottomProperty = EditingProperty.RegisterDirect<EaseProperty, Clipping>(
             nameof(Bottom),
             owner => owner.Bottom,
             (owner, obj) => owner.Bottom = obj,
@@ -43,7 +43,7 @@ namespace BEditor.Primitive.Effects
         /// <summary>
         /// Defines the <see cref="Left"/> property.
         /// </summary>
-        public static readonly DirectEditingProperty<Clipping, EaseProperty> LeftProperty = EditingProperty.RegisterDirect<EaseProperty, Clipping>(
+        public static readonly DirectProperty<Clipping, EaseProperty> LeftProperty = EditingProperty.RegisterDirect<EaseProperty, Clipping>(
             nameof(Left),
             owner => owner.Left,
             (owner, obj) => owner.Left = obj,
@@ -52,7 +52,7 @@ namespace BEditor.Primitive.Effects
         /// <summary>
         /// Defines the <see cref="Right"/> property.
         /// </summary>
-        public static readonly DirectEditingProperty<Clipping, EaseProperty> RightProperty = EditingProperty.RegisterDirect<EaseProperty, Clipping>(
+        public static readonly DirectProperty<Clipping, EaseProperty> RightProperty = EditingProperty.RegisterDirect<EaseProperty, Clipping>(
             nameof(Right),
             owner => owner.Right,
             (owner, obj) => owner.Right = obj,
@@ -61,7 +61,7 @@ namespace BEditor.Primitive.Effects
         /// <summary>
         /// Defines the <see cref="AdjustCoordinates"/> property.
         /// </summary>
-        public static readonly DirectEditingProperty<Clipping, CheckProperty> AdjustCoordinatesProperty = EditingProperty.RegisterDirect<CheckProperty, Clipping>(
+        public static readonly DirectProperty<Clipping, CheckProperty> AdjustCoordinatesProperty = EditingProperty.RegisterDirect<CheckProperty, Clipping>(
             nameof(AdjustCoordinates),
             owner => owner.AdjustCoordinates,
             (owner, obj) => owner.AdjustCoordinates = obj,
@@ -129,10 +129,10 @@ namespace BEditor.Primitive.Effects
                 return;
             }
 
-            int width = img.Width - left - right;
-            int height = img.Height - top - bottom;
-            int x = left;
-            int y = top;
+            var width = img.Width - left - right;
+            var height = img.Height - top - bottom;
+            var x = left;
+            var y = top;
 
             var img1 = img[new Rectangle(x, y, width, height)];
             img.Dispose();

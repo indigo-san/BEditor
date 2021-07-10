@@ -39,7 +39,7 @@ namespace BEditor.Data
         public virtual string SceneName
         {
             get => _sceneName;
-            set => SetValue(value, ref _sceneName, _SceneNameArgs);
+            set => SetAndRaise(value, ref _sceneName, _sceneNameArgs);
         }
 
         /// <summary>
@@ -48,7 +48,7 @@ namespace BEditor.Data
         public Frame TotalFrame
         {
             get => _totalframe;
-            set => SetValue(value, ref _totalframe, _TotalFrameArgs);
+            set => SetAndRaise(value, ref _totalframe, _totalFrameArgs);
         }
 
         /// <summary>
@@ -66,38 +66,11 @@ namespace BEditor.Data
         /// </summary>
         public ClipElement? SelectItem
         {
-            get => _selectItem ??= SelectItems.FirstOrDefault();
+            get => _selectItem;
             set
             {
                 _selectItem = value;
-                RaisePropertyChanged(_SelectItemArgs);
-            }
-        }
-
-        /// <summary>
-        /// Gets the selected <see cref="ClipElement"/>.
-        /// </summary>
-        public ObservableCollection<ClipElement> SelectItems
-        {
-            get
-            {
-                if (_selectItems is null)
-                {
-                    _selectItems = new();
-
-                    _selectItems.CollectionChanged += (s, e) =>
-                    {
-                        if (e.Action == System.Collections.Specialized.NotifyCollectionChangedAction.Remove)
-                        {
-                            if (SelectItems.Count == 0)
-                            {
-                                SelectItem = null;
-                            }
-                        }
-                    };
-                }
-
-                return _selectItems;
+                RaisePropertyChanged(_selectItemArgs);
             }
         }
 
@@ -112,9 +85,9 @@ namespace BEditor.Data
         public DrawingContext? DrawingContext { get; private set; }
 
         /// <summary>
-        /// Gets audio context.
+        /// Gets sampling context.
         /// </summary>
-        public AudioContext? AudioContext { get; private set; }
+        public SamplingContext? SamplingContext { get; private set; }
 
         /// <summary>
         /// Gets a player to play this <see cref="Scene"/>.
@@ -128,7 +101,7 @@ namespace BEditor.Data
         public Frame PreviewFrame
         {
             get => _previewframe;
-            set => SetValue(Math.Clamp(value, 0, TotalFrame), ref _previewframe, _PrevireFrameArgs);
+            set => SetAndRaise(Math.Clamp(value, 0, TotalFrame), ref _previewframe, _previreFrameArgs);
         }
 
         /// <summary>
@@ -137,7 +110,7 @@ namespace BEditor.Data
         public float TimeLineZoom
         {
             get => _timeLineZoom;
-            set => SetValue(Math.Clamp(value, 1, 200), ref _timeLineZoom, _ZoomArgs);
+            set => SetAndRaise(Math.Clamp(value, 1, 200), ref _timeLineZoom, _zoomArgs);
         }
 
         /// <summary>
@@ -146,7 +119,7 @@ namespace BEditor.Data
         public double TimeLineHorizonOffset
         {
             get => _timeLineHorizonOffset;
-            set => SetValue(value, ref _timeLineHorizonOffset, _HoffsetArgs);
+            set => SetAndRaise(value, ref _timeLineHorizonOffset, _hoffsetArgs);
         }
 
         /// <summary>
@@ -155,7 +128,7 @@ namespace BEditor.Data
         public double TimeLineVerticalOffset
         {
             get => _timeLineVerticalOffset;
-            set => SetValue(value, ref _timeLineVerticalOffset, _VoffsetArgs);
+            set => SetAndRaise(value, ref _timeLineVerticalOffset, _voffsetArgs);
         }
 
         /// <inheritdoc/>

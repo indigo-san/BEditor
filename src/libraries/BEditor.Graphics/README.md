@@ -2,12 +2,10 @@
 
 ## Description
 
-OpenGLのWrapperライブラリ
+ハードウェアアクセラレーションによる描画機能を提供します。
 
 ## Dependent libraries
 * [.NET Runtime](https://github.com/dotnet/runtime)
-* [OpenTK.Graphics](https://github.com/opentk/opentk)
-* [OpenTK.Windowing.GraphicsLibraryFramework](https://github.com/opentk/opentk)
 
 ## License
 

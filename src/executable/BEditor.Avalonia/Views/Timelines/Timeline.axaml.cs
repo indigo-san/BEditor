@@ -1,5 +1,7 @@
 using System;
+using System.Collections.Generic;
 using System.Collections.Specialized;
+using System.IO;
 using System.Linq;
 
 using Avalonia;
@@ -19,6 +21,9 @@ using BEditor.Extensions;
 using BEditor.Models;
 using BEditor.Properties;
 using BEditor.ViewModels.Timelines;
+using BEditor.Views.DialogContent;
+
+using Microsoft.Extensions.DependencyInjection;
 
 using Reactive.Bindings.Extensions;
 
@@ -83,6 +88,7 @@ namespace BEditor.Views.Timelines
             _layerLabel = this.FindControl<StackPanel>("LayerLabel");
             _timelineGrid = this.FindControl<Grid>("timelinegrid");
             _timelineMenu = this.FindControl<ContextMenu>("TimelineMenu");
+            AddAllClip(scene.Datas);
 
             InitializeContextMenu();
 
@@ -104,7 +110,7 @@ namespace BEditor.Views.Timelines
                     Height = ConstantSettings.ClipHeight
                 };
 
-                toggle.Click += (s, _) =>
+                toggle.Click += async (s, _) =>
                 {
                     if (s is not ToggleButton toggle || toggle.Content is not int layer) return;
 
@@ -117,7 +123,7 @@ namespace BEditor.Views.Timelines
                         Scene.HideLayer.Add(layer);
                     }
 
-                    Scene.Parent!.PreviewUpdate();
+                    await Scene.Parent!.PreviewUpdateAsync();
                 };
 
                 _layerLabel.Children.Add(toggle);
@@ -151,6 +157,24 @@ namespace BEditor.Views.Timelines
                 vm.Row = layer;
                 vm.MarginTop = TimelineViewModel.ToLayerPixel(layer);
             };
+
+            if (OperatingSystem.IsWindows())
+            {
+                _scrollLine.GetObservable(BoundsProperty).Subscribe(_ =>
+                {
+                    if (VisualRoot is not Window win || win.Content is not Layoutable content) return;
+                    var grid = ((Grid)_scrollLine.Content);
+
+                    if (grid.Bounds.Width >= _scrollLine.Viewport.Width)
+                    {
+                        content.Margin = new(0, 0, 8, 0);
+                    }
+                    else
+                    {
+                        content.Margin = default;
+                    }
+                });
+            }
         }
 
         private TimelineViewModel ViewModel => (TimelineViewModel)DataContext!;
@@ -160,14 +184,6 @@ namespace BEditor.Views.Timelines
         protected override void OnInitialized()
         {
             base.OnInitialized();
-
-            // ƒNƒŠƒbƒv‚ð’Ç‰Á
-            for (var i = 0; i < Scene.Datas.Count; i++)
-            {
-                var clip = Scene.Datas[i];
-
-                _timelineGrid.Children.Add(clip.GetCreateClipView());
-            }
 
             Scene.ObserveProperty(s => s.TimeLineZoom)
                 .Subscribe(_ =>
@@ -192,11 +208,11 @@ namespace BEditor.Views.Timelines
 
                     for (var index = 0; index < scene.Datas.Count; index++)
                     {
-                        var info = scene.Datas[index];
-                        var start = scene.ToPixel(info.Start);
-                        var length = scene.ToPixel(info.Length);
+                        var clip = scene.Datas[index];
+                        var start = scene.ToPixel(clip.Start);
+                        var length = scene.ToPixel(clip.Length);
 
-                        var vm = info.GetCreateClipViewModelSafe();
+                        var vm = clip.GetCreateClipViewModelSafe();
                         vm.MarginLeft = start;
                         vm.WidthProperty.Value = length;
                     }
@@ -273,22 +289,66 @@ namespace BEditor.Views.Timelines
             e.DragEffects = e.Data.Contains("ObjectMetadata") || (e.Data.GetFileNames()?.Any() ?? false) ? DragDropEffects.Copy : DragDropEffects.None;
         }
 
-        private void TimelineGrid_Drop(object? sender, DragEventArgs e)
+        private async void TimelineGrid_Drop(object? sender, DragEventArgs e)
         {
             ViewModel.LayerCursor.Value = StandardCursorType.Arrow;
+            var vm = ViewModel;
+
+            var pt = e.GetPosition((IVisual)sender!);
+
+            vm.ClickedFrame = Scene.ToFrame(pt.X);
+            vm.ClickedLayer = TimelineViewModel.ToLayer(pt.Y);
+
             if (e.Data.Get("ObjectMetadata") is ObjectMetadata metadata)
             {
-                var vm = ViewModel;
-                var pt = e.GetPosition((IVisual)sender!);
-
-                vm.ClickedFrame = Scene.ToFrame(pt.X);
-                vm.ClickedLayer = TimelineViewModel.ToLayer(pt.Y);
-
                 vm.AddClip.Execute(metadata);
             }
             else if (e.Data.GetFileNames() is var files && (files?.Any() ?? false))
             {
+                var mes = AppModel.Current.Message;
+                var file = files.First();
+                var ext = Path.GetExtension(file);
+                if (!Scene.InRange(vm.ClickedFrame, vm.ClickedFrame + 180, vm.ClickedLayer))
+                {
+                    mes.Snackbar(Strings.ClipExistsInTheSpecifiedLocation);
+                    return;
+                }
 
+                if (ext is ".bobj")
+                {
+                    var efct = await Serialize.LoadFromFileAsync<EffectWrapper>(file);
+                    if (efct?.Effect is not ObjectElement obj)
+                    {
+                        mes?.Snackbar(Strings.FailedToLoad);
+                        return;
+                    }
+                    obj.Load();
+                    obj.UpdateId();
+                    Scene.AddClip(vm.ClickedFrame, vm.ClickedLayer, obj, out _).Execute();
+                }
+                else
+                {
+                    var supportedObjects = ObjectMetadata.LoadedObjects
+                        .Where(i => i.IsSupported is not null && i.CreateFromFile is not null && i.IsSupported(file))
+                        .ToArray();
+                    var result = supportedObjects.FirstOrDefault();
+
+                    if (supportedObjects.Length > 1)
+                    {
+                        var dialog = new SelectObjectMetadata
+                        {
+                            Metadatas = supportedObjects,
+                            Selected = result,
+                        };
+
+                        result = await dialog.ShowDialog<ObjectMetadata?>((Window)VisualRoot!);
+                    }
+
+                    if (result is not null)
+                    {
+                        Scene.AddClip(vm.ClickedFrame, vm.ClickedLayer, result.CreateFromFile!.Invoke(file), out _).Execute();
+                    }
+                }
             }
         }
 
@@ -329,6 +389,30 @@ namespace BEditor.Views.Timelines
                     }
                 }
             });
+        }
+
+        private void AddAllClip(IList<ClipElement> clips)
+        {
+            for (var i = 0; i < clips.Count; i++)
+            {
+                var clip = clips[i];
+
+                _timelineGrid.Children.Add(clip.GetCreateClipView());
+            }
+        }
+
+        public async void SceneSettings(object s, RoutedEventArgs e)
+        {
+            var vm = new SceneSettingsViewModel(Scene);
+            var dialog = new SceneSettings { DataContext = vm };
+            await dialog.ShowDialog(App.GetMainWindow());
+        }
+
+        public async void SetMaxFrame(object s, RoutedEventArgs e)
+        {
+            var ctr = new SetMaxFrame(Scene);
+            var dialog = new EmptyDialog(ctr);
+            await dialog.ShowDialog(App.GetMainWindow());
         }
 
         public void ScrollLine_PointerWheel(object? sender, PointerWheelEventArgs e)

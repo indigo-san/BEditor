@@ -1,0 +1,8 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <ItemGroup>
+        <ProjectReference Include="..\BEditor.Drawing\BEditor.Drawing.csproj" />
+        <ProjectReference Include="..\BEditor.Graphics\BEditor.Graphics.csproj" />
+    </ItemGroup>
+
+</Project>

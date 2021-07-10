@@ -6,9 +6,11 @@ using System.Net.Http;
 using System.Text.Json;
 using System.Threading;
 
+using BEditor.Audio;
 using BEditor.Command;
 using BEditor.Data;
 using BEditor.Extensions;
+using BEditor.Models.Authentication;
 using BEditor.Packaging;
 
 using Microsoft.Extensions.DependencyInjection;
@@ -23,25 +25,30 @@ namespace BEditor.Models
 {
     public sealed class AppModel : BasePropertyChanged, IApplication
     {
-        private static readonly PropertyChangedEventArgs _ProjectArgs = new(nameof(Project));
-        private static readonly PropertyChangedEventArgs _StatusArgs = new(nameof(AppStatus));
-        private static readonly PropertyChangedEventArgs _IsPlayingArgs = new(nameof(IsNotPlaying));
+        private static readonly PropertyChangedEventArgs _projectArgs = new(nameof(Project));
+        private static readonly PropertyChangedEventArgs _statusArgs = new(nameof(AppStatus));
+        private static readonly PropertyChangedEventArgs _isPlayingArgs = new(nameof(IsNotPlaying));
+        private static readonly PropertyChangedEventArgs _userArgs = new(nameof(User));
         private Project _project;
         private Status _status;
         private bool _isplaying = true;
         private IServiceProvider _serviceProvider;
+        private AuthenticationLink _user;
 
         private AppModel()
         {
-            CommandManager.Default.Executed += (_, _) =>
+            CommandManager.Default.Executed += async (_, _) =>
             {
-                Project?.PreviewUpdate(RenderType.Preview);
+                if (Project is not null)
+                {
+                    await Project.PreviewUpdateAsync(ApplyType.Edit);
+                }
                 AppStatus = Status.Edit;
             };
 
             Log.Logger = new LoggerConfiguration()
                 .Enrich.FromLogContext()
-                .WriteTo.File(new JsonFormatter(), Path.Combine(AppContext.BaseDirectory, "user", "log.json"))
+                .WriteTo.File(new JsonFormatter(), Path.Combine(ServicesLocator.GetUserFolder(), "log.json"))
                 .CreateLogger();
 
             LoggingFactory = LoggerFactory.Create(builder =>
@@ -53,12 +60,15 @@ namespace BEditor.Models
 
             // DIの設定
             Services = new ServiceCollection()
+                .AddSingleton<IAuthenticationProvider, MockAuthenticationProvider>()
+                .AddSingleton<IRemotePackageProvider, MockPackageUploader>()
+                .AddSingleton<ITopLevel>(_ => this)
+                .AddSingleton<IApplication>(_ => this)
                 .AddSingleton(_ => FileDialog)
                 .AddSingleton(_ => Message)
                 .AddSingleton(_ => LoggingFactory)
+                .AddSingleton<Microsoft.Extensions.Logging.ILogger>(_ => LoggingFactory.CreateLogger<IApplication>())
                 .AddSingleton<HttpClient>();
-
-            LogManager.Logger = LoggingFactory.CreateLogger<LogManager>();
         }
 
         public static AppModel Current { get; } = new();
@@ -66,19 +76,19 @@ namespace BEditor.Models
         public Project Project
         {
             get => _project;
-            set => SetValue(value, ref _project, _ProjectArgs);
+            set => SetAndRaise(value, ref _project, _projectArgs);
         }
 
         public Status AppStatus
         {
             get => _status;
-            set => SetValue(value, ref _status, _StatusArgs);
+            set => SetAndRaise(value, ref _status, _statusArgs);
         }
 
         public bool IsNotPlaying
         {
             get => _isplaying;
-            set => SetValue(value, ref _isplaying, _IsPlayingArgs);
+            set => SetAndRaise(value, ref _isplaying, _isPlayingArgs);
         }
 
         public IServiceCollection Services { get; }
@@ -95,9 +105,17 @@ namespace BEditor.Models
 
         public ILoggerFactory LoggingFactory { get; }
 
+        public AuthenticationLink User
+        {
+            get => _user;
+            set => SetAndRaise(value, ref _user, _userArgs);
+        }
+
         public SynchronizationContext UIThread { get; set; }
 
         Project IParentSingle<Project>.Child => Project;
+
+        public AudioContext AudioContext { get; set; }
 
         public event EventHandler<ProjectOpenedEventArgs> ProjectOpened;
         public event EventHandler Exit;
@@ -127,13 +145,23 @@ namespace BEditor.Models
             IfNotExistCreateDir(cache);
 
             {
+                var projConfig = new ProjectConfig
+                {
+                    BackgroundType = ProjectConfig.GetBackgroundType(project),
+                };
+
+                await using var stream = new FileStream(Path.Combine(directory, ".config"), FileMode.Create);
+                await JsonSerializer.SerializeAsync(stream, projConfig, PackageFile._serializerOptions);
+            }
+
+            {
                 var sceneCacheDir = Path.Combine(cache, "scene");
                 IfNotExistCreateDir(sceneCacheDir);
 
                 foreach (var scene in project.SceneList)
                 {
                     var sceneCache = Path.Combine(sceneCacheDir, scene.SceneName + ".cache");
-                    var cacheObj = new SceneCache(scene.SelectItems.Select(i => i.Name).ToArray())
+                    var cacheObj = new SceneCache
                     {
                         Select = scene.SelectItem?.Name,
                         PreviewFrame = scene.PreviewFrame,
@@ -163,6 +191,21 @@ namespace BEditor.Models
             IfNotExistCreateDir(cache);
 
             {
+                var file = Path.Combine(directory, ".config");
+                if (!File.Exists(file))
+                {
+                    ProjectConfig.SetBackgroundType(project, ViewModels.ConfigurationViewModel.BackgroundType.Transparent);
+                }
+                else
+                {
+                    using var reader = new StreamReader(file);
+                    var projConfig = JsonSerializer.Deserialize<ProjectConfig>(reader.ReadToEnd(), PackageFile._serializerOptions);
+
+                    ProjectConfig.SetBackgroundType(project, projConfig.BackgroundType);
+                }
+            }
+
+            {
                 var sceneCacheDir = Path.Combine(cache, "scene");
                 IfNotExistCreateDir(sceneCacheDir);
 
@@ -190,11 +233,6 @@ namespace BEditor.Models
                             scene.TimeLineZoom = cacheObj.TimelineScale;
                             scene.TimeLineHorizonOffset = cacheObj.TimelineHorizonOffset;
                             scene.TimeLineVerticalOffset = cacheObj.TimelineVerticalOffset;
-
-                            foreach (var select in cacheObj.Selects.Select(i => scene[i]).Where(i => i is not null))
-                            {
-                                scene.SelectItems.Add(select!);
-                            }
                         }
                     }
                     finally

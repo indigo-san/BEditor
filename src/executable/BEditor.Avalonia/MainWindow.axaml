@@ -1,4 +1,4 @@
-<Window
+<views:FluentWindow
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
@@ -15,27 +15,18 @@
     d:DesignWidth="1440"
     d:DesignHeight="760"
     x:DataType="vm:MainWindowViewModel"
-    ExtendClientAreaToDecorationsHint="True"
-    ExtendClientAreaChromeHints="NoChrome"
-    ExtendClientAreaTitleBarHeightHint="-1"
-    TransparencyLevelHint="AcrylicBlur"
-    Background="Transparent"
+    Classes="fluent_setter"
     Icon="/Assets/Images/icon.ico"
+    Background="{StaticResource AcrylicColor1}"
     DataContext="{x:Static vm:MainWindowViewModel.Current}"
     Focusable="True"
     x:Class="BEditor.MainWindow">
     <Grid RowDefinitions="Auto,Auto,*,Auto,*,Auto" ColumnDefinitions="425,Auto,*,Auto,2*">
 
-        <ExperimentalAcrylicBorder Grid.ColumnSpan="5" Grid.RowSpan="6" IsHitTestVisible="False">
-            <ExperimentalAcrylicBorder.Material>
-                <ExperimentalAcrylicMaterial
-                    TintColor="#222222"
-                    TintOpacity="{StaticResource AcrylicTintOpacity1}"
-                    MaterialOpacity="{StaticResource AcrylicMaterialOpacity1}" />
-            </ExperimentalAcrylicBorder.Material>
-        </ExperimentalAcrylicBorder>
-
-        <titlebar:WindowsTitlebar Grid.Row="0" Grid.ColumnSpan="5" />
+        <titlebar:WindowsTitlebar
+            Grid.Row="0"
+            Grid.ColumnSpan="5"
+            x:Name="Titlebar" />
 
         <StackPanel Margin="4" Spacing="4" Grid.Row="1" Orientation="Horizontal">
             <StackPanel.Styles>
@@ -157,7 +148,7 @@
             <ComboBox
                 IsEnabled="{CompiledBinding IsOpened.Value, Mode=OneWay}"
                 Items="{CompiledBinding App.Project.SceneList, Mode=OneWay}"
-                SelectedItem="{CompiledBinding App.Project.PreviewScene, Mode=TwoWay}">
+                SelectedItem="{Binding App.Project.CurrentScene, Mode=TwoWay}">
                 <ComboBox.ItemTemplate>
                     <DataTemplate>
                         <TextBlock Margin="8,0" Text="{Binding SceneName, Mode=OneWay}"/>
@@ -195,13 +186,7 @@
             </Button>
 
             <Popup WindowManagerAddShadowHint="False" x:Name="ObjectsPopup" StaysOpen="False" PlacementMode="Pointer">
-                <ExperimentalAcrylicBorder>
-                    <ExperimentalAcrylicBorder.Material>
-                        <ExperimentalAcrylicMaterial
-                            TintColor="Black"
-                            TintOpacity="{StaticResource AcrylicTintOpacity1}"
-                            MaterialOpacity="{StaticResource AcrylicMaterialOpacity1}" />
-                    </ExperimentalAcrylicBorder.Material>
+                <Border Background="{StaticResource AcrylicColor1}">
 
                     <ItemsControl Items="{Binding Source={x:Static data:ObjectMetadata.LoadedObjects}}">
                         <ItemsControl.ItemTemplate>
@@ -241,7 +226,7 @@
                             </ItemsPanelTemplate>
                         </ItemsControl.ItemsPanel>
                     </ItemsControl>
-                </ExperimentalAcrylicBorder>
+                </Border>
             </Popup>
 
             <Separator/>
@@ -262,17 +247,12 @@
             
         </StackPanel>
 
-        <ExperimentalAcrylicBorder
+        <Border
             Grid.Row="2"
             Grid.RowSpan="3"
+            Background="{StaticResource AcrylicColor2}"
             IsHitTestVisible="False">
-            <ExperimentalAcrylicBorder.Material>
-                <ExperimentalAcrylicMaterial
-                    TintColor="Black"
-                    TintOpacity="{StaticResource AcrylicTintOpacity2}"
-                    MaterialOpacity="{StaticResource AcrylicMaterialOpacity2}" />
-            </ExperimentalAcrylicBorder.Material>
-        </ExperimentalAcrylicBorder>
+        </Border>
 
         <Label
             Grid.Row="2"
@@ -281,24 +261,24 @@
             HorizontalContentAlignment="Stretch"
             VerticalContentAlignment="Stretch"
             IsEnabled="{CompiledBinding IsOpened.Value, Mode=OneWay}"
-            Content="{Binding App.Project.PreviewScene.SelectItem, Converter={StaticResource ClipPropertyConverter}, Mode=OneWay}" />
+            Content="{Binding App.Project.CurrentScene.SelectItem, Converter={StaticResource ClipPropertyConverter}, Mode=OneWay}" />
 
         <GridSplitter Background="Transparent" Grid.Row="2" Grid.RowSpan="3" Grid.Column="1"/>
 
-        <ExperimentalAcrylicBorder
+        <Border
+            Background="{StaticResource AcrylicColor2}"
             Grid.Row="4"
             Grid.Column="2"
             Grid.ColumnSpan="4"
-            Padding="0"
-            Child="{Binding App.Project.PreviewScene, Converter={StaticResource SceneToTimelineConverter}, Mode=OneWay}"
-            IsEnabled="{CompiledBinding IsOpened.Value, Mode=OneWay}">
-            <ExperimentalAcrylicBorder.Material>
-                <ExperimentalAcrylicMaterial
-                    TintColor="Black"
-                    TintOpacity="{StaticResource AcrylicTintOpacity2}"
-                    MaterialOpacity="{StaticResource AcrylicMaterialOpacity2}" />
-            </ExperimentalAcrylicBorder.Material>
-        </ExperimentalAcrylicBorder>
+            Padding="0">
+            <Grid ColumnDefinitions="*,Auto">
+                <ContentControl
+                    Content="{Binding App.Project.CurrentScene, Converter={StaticResource SceneToTimelineConverter}, Mode=OneWay}"
+                    IsEnabled="{CompiledBinding IsOpened.Value, Mode=OneWay}"/>
+
+                <views:VolumeView Grid.Column="1" />
+            </Grid>
+        </Border>
 
         <GridSplitter Background="Transparent" Grid.Row="3" Grid.Column="2" Grid.ColumnSpan="3"/>
 
@@ -335,7 +315,7 @@
                 Header="{x:Static prop:Strings.Library}"
                 FontSize="16"
                 Padding="8" >
-                <views:Library />
+                <views:Library x:Name="Library" />
             </TabItem>
             <TabItem
                 Header="{x:Static prop:Strings.Objects}"
@@ -344,10 +324,12 @@
                 <views:ObjectViewer />
             </TabItem>
             <TabItem
-                Header="{x:Static prop:Strings.Log}"
+                IsEnabled="{CompiledBinding IsOpened.Value, Mode=OneWay}"
+                Header="{x:Static prop:Strings.Configuration}"
                 FontSize="16"
                 Padding="8" >
+                <views:Configuration />
             </TabItem>
         </TabControl>
     </Grid>
-</Window>
+</views:FluentWindow>

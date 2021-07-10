@@ -28,42 +28,42 @@ namespace BEditor.Primitive.Objects
         /// <summary>
         /// Defines the <see cref="Coordinate"/> property.
         /// </summary>
-        public static readonly DirectEditingProperty<GL3DObject, Coordinate> CoordinateProperty = ImageObject.CoordinateProperty.WithOwner<GL3DObject>(
+        public static readonly DirectProperty<GL3DObject, Coordinate> CoordinateProperty = ImageObject.CoordinateProperty.WithOwner<GL3DObject>(
             owner => owner.Coordinate,
             (owner, obj) => owner.Coordinate = obj);
 
         /// <summary>
         /// Defines the <see cref="Data.Property.PrimitiveGroup.Scale"/> property.
         /// </summary>
-        public static readonly DirectEditingProperty<GL3DObject, Scale> ScaleProperty = ImageObject.ScaleProperty.WithOwner<GL3DObject>(
+        public static readonly DirectProperty<GL3DObject, Scale> ScaleProperty = ImageObject.ScaleProperty.WithOwner<GL3DObject>(
             owner => owner.Scale,
             (owner, obj) => owner.Scale = obj);
 
         /// <summary>
         /// Defines the <see cref="Blend"/> property.
         /// </summary>
-        public static readonly DirectEditingProperty<GL3DObject, Blend> BlendProperty = ImageObject.BlendProperty.WithOwner<GL3DObject>(
+        public static readonly DirectProperty<GL3DObject, Blend> BlendProperty = ImageObject.BlendProperty.WithOwner<GL3DObject>(
             owner => owner.Blend,
             (owner, obj) => owner.Blend = obj);
 
         /// <summary>
         /// Defines the <see cref="Data.Property.PrimitiveGroup.Rotate"/> property.
         /// </summary>
-        public static readonly DirectEditingProperty<GL3DObject, Rotate> RotateProperty = ImageObject.RotateProperty.WithOwner<GL3DObject>(
+        public static readonly DirectProperty<GL3DObject, Rotate> RotateProperty = ImageObject.RotateProperty.WithOwner<GL3DObject>(
             owner => owner.Rotate,
             (owner, obj) => owner.Rotate = obj);
 
         /// <summary>
         /// Defines the <see cref="Data.Property.PrimitiveGroup.Rotate"/> property.
         /// </summary>
-        public static readonly DirectEditingProperty<GL3DObject, Material> MaterialProperty = ImageObject.MaterialProperty.WithOwner<GL3DObject>(
+        public static readonly DirectProperty<GL3DObject, Material> MaterialProperty = ImageObject.MaterialProperty.WithOwner<GL3DObject>(
             owner => owner.Material,
             (owner, obj) => owner.Material = obj);
 
         /// <summary>
         /// Defines the <see cref="Type"/> property.
         /// </summary>
-        public static readonly DirectEditingProperty<GL3DObject, SelectorProperty> TypeProperty = EditingProperty.RegisterDirect<SelectorProperty, GL3DObject>(
+        public static readonly DirectProperty<GL3DObject, SelectorProperty> TypeProperty = EditingProperty.RegisterDirect<SelectorProperty, GL3DObject>(
             nameof(Type),
             owner => owner.Type,
             (owner, obj) => owner.Type = obj,
@@ -76,7 +76,7 @@ namespace BEditor.Primitive.Objects
         /// <summary>
         /// Defines the <see cref="Width"/> property.
         /// </summary>
-        public static readonly DirectEditingProperty<GL3DObject, EaseProperty> WidthProperty = EditingProperty.RegisterDirect<EaseProperty, GL3DObject>(
+        public static readonly DirectProperty<GL3DObject, EaseProperty> WidthProperty = EditingProperty.RegisterDirect<EaseProperty, GL3DObject>(
             nameof(Width),
             owner => owner.Width,
             (owner, obj) => owner.Width = obj,
@@ -85,7 +85,7 @@ namespace BEditor.Primitive.Objects
         /// <summary>
         /// Defines the <see cref="Height"/> property.
         /// </summary>
-        public static readonly DirectEditingProperty<GL3DObject, EaseProperty> HeightProperty = EditingProperty.RegisterDirect<EaseProperty, GL3DObject>(
+        public static readonly DirectProperty<GL3DObject, EaseProperty> HeightProperty = EditingProperty.RegisterDirect<EaseProperty, GL3DObject>(
             nameof(Height),
             owner => owner.Height,
             (owner, obj) => owner.Height = obj,
@@ -94,7 +94,7 @@ namespace BEditor.Primitive.Objects
         /// <summary>
         /// Defines the <see cref="Depth"/> property.
         /// </summary>
-        public static readonly DirectEditingProperty<GL3DObject, EaseProperty> DepthProperty = EditingProperty.RegisterDirect<EaseProperty, GL3DObject>(
+        public static readonly DirectProperty<GL3DObject, EaseProperty> DepthProperty = EditingProperty.RegisterDirect<EaseProperty, GL3DObject>(
             nameof(Depth),
             owner => owner.Depth,
             (owner, obj) => owner.Depth = obj,
@@ -167,14 +167,15 @@ namespace BEditor.Primitive.Objects
         /// <inheritdoc/>
         public override void Apply(EffectApplyArgs args)
         {
+            if (args.Type is ApplyType.Audio) return;
             int frame = args.Frame;
             var color = Blend.Color[frame];
             color.A = (byte)(color.A * (Blend.Opacity[frame] / 100));
 
-            float scale = (float)(Scale.Scale1[frame] / 100);
-            float scalex = (float)(Scale.ScaleX[frame] / 100) * scale;
-            float scaley = (float)(Scale.ScaleY[frame] / 100) * scale;
-            float scalez = (float)(Scale.ScaleZ[frame] / 100) * scale;
+            var scale = (float)(Scale.Scale1[frame] / 100);
+            var scalex = (float)(Scale.ScaleX[frame] / 100) * scale;
+            var scaley = (float)(Scale.ScaleY[frame] / 100) * scale;
+            var scalez = (float)(Scale.ScaleZ[frame] / 100) * scale;
 
             var material = new Graphics.Material(Material.Ambient[frame], Material.Diffuse[frame], Material.Specular[frame], Material.Shininess[frame]);
             var trans = new Transform(
@@ -185,25 +186,23 @@ namespace BEditor.Primitive.Objects
 
             if (Type.Index == 0)
             {
-                using var cube = new Cube(
-                    Width[frame],
-                    Height[frame],
-                    Depth[frame],
-                    color,
-                    material,
-                    trans);
+                using var cube = new Cube(Width[frame], Height[frame], Depth[frame])
+                {
+                    Color = color,
+                    Material = material,
+                    Transform = trans,
+                };
 
                 Parent.Parent.GraphicsContext!.DrawCube(cube);
             }
             else
             {
-                using var ball = new Ball(
-                    Width[frame] * 0.5f,
-                    Height[frame] * 0.5f,
-                    Depth[frame] * 0.5f,
-                    color,
-                    material,
-                    trans);
+                using var ball = new Ball(Width[frame] * 0.5f, Height[frame] * 0.5f, Depth[frame] * 0.5f)
+                {
+                    Color = color,
+                    Material = material,
+                    Transform = trans,
+                };
 
                 Parent.Parent.GraphicsContext!.DrawBall(ball);
             }

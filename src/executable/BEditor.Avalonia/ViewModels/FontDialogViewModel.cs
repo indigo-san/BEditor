@@ -150,7 +150,7 @@ namespace BEditor.ViewModels
 
         private static void LoadUsedFonts()
         {
-            var jsonFile = Path.Combine(AppContext.BaseDirectory, "user", "usedFonts.json");
+            var jsonFile = Path.Combine(ServicesLocator.GetUserFolder(), "usedFonts.json");
 
             if (!File.Exists(jsonFile))
             {

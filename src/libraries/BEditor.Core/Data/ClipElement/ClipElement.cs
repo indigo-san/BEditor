@@ -8,6 +8,7 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Linq;
 
 using BEditor.Media;
 
@@ -50,6 +51,25 @@ namespace BEditor.Data
         }
 
         /// <summary>
+        /// Initializes a new instance of the <see cref="ClipElement"/> class.
+        /// </summary>
+        /// <param name="start">The starting frame of the clip.</param>
+        /// <param name="end">The ending frame of the clip.</param>
+        /// <param name="layer">The layer number of the clip.</param>
+        /// <param name="scene">The scene where this clip will be placed.</param>
+        /// <param name="obj">The <see cref="ObjectElement"/> contained in this clip.</param>
+        public ClipElement(Frame start, Frame end, int layer, Scene scene, ObjectElement obj)
+        {
+            _start = start;
+            _end = end;
+            _layer = layer;
+            _effect = new() { obj };
+            Metadata = ObjectMetadata.LoadedObjects.First(i => i.Type == Effect[0].GetType());
+            Parent = _parent = scene;
+            LabelText = Name;
+        }
+
+        /// <summary>
         /// Gets the name of this <see cref="ClipElement"/>.
         /// </summary>
         public string Name => _name ??= Effect[0].GetType().Name;
@@ -60,7 +80,7 @@ namespace BEditor.Data
         public Frame Start
         {
             get => _start;
-            set => SetValue(value, ref _start, _startArgs);
+            set => SetAndRaise(value, ref _start, _startArgs);
         }
 
         /// <summary>
@@ -69,7 +89,7 @@ namespace BEditor.Data
         public Frame End
         {
             get => _end;
-            set => SetValue(value, ref _end, _endArgs);
+            set => SetAndRaise(value, ref _end, _endArgs);
         }
 
         /// <summary>
@@ -86,7 +106,7 @@ namespace BEditor.Data
             set
             {
                 if (value == 0) return;
-                SetValue(value, ref _layer, _layerArgs);
+                SetAndRaise(value, ref _layer, _layerArgs);
             }
         }
 
@@ -96,7 +116,7 @@ namespace BEditor.Data
         public string LabelText
         {
             get => _labelText;
-            set => SetValue(value, ref _labelText, _textArgs);
+            set => SetAndRaise(value, ref _labelText, _textArgs);
         }
 
         /// <inheritdoc/>

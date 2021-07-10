@@ -1,11 +1,11 @@
 <Application
-  xmlns="https://github.com/avaloniaui"
-  xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-  xmlns:convert="using:BEditor.Converters"
-  xmlns:views="using:BEditor.Views"
-  xmlns:models="using:BEditor.Models"
-  xmlns:title="using:BEditor.Views.CustomTitlebars"
-  x:Class="BEditor.App">
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:convert="using:BEditor.Converters"
+    xmlns:titlebar="using:BEditor.Views.CustomTitlebars"
+    xmlns:views="using:BEditor.Views"
+    xmlns:models="using:BEditor.Models"
+    x:Class="BEditor.App">
     <Application.Resources>
         <convert:CursorTypeToCursorConverter x:Key="CursorTypeToCursorConverter" />
         <convert:SceneToTimelineConverter x:Key="SceneToTimelineConverter" />
@@ -20,6 +20,8 @@
         <convert:EffectToKeyframeConverter x:Key="EffectToKeyframeConverter" />
         <convert:GetNameConverter x:Key="GetNameConverter" />
         <convert:PathToImageSourceConverter x:Key="PathToImageSourceConverter" />
+        <convert:ConfigurationViewModelConverter x:Key="ConfigurationViewModelConverter" />
+        <convert:BackgroundTypeConverter x:Key="BackgroundTypeConverter" />
     </Application.Resources>
     <Application.Styles>
         <StyleInclude Source="avares://beditor/Controls/SeekSlider.axaml" />
@@ -31,8 +33,8 @@
         <StyleInclude Source="avares://beditor/Controls/FluentUiIcons_Filled.axaml" />
         <StyleInclude Source="avares://beditor/Controls/FluentUiIcons_Regular.axaml" />
         <StyleInclude Source="avares://beditor/Views/Settings/SettingsResources.axaml" />
-        <StyleInclude Source="avares://beditor/Views/NotifyBar.axaml" />
         <StyleInclude Source="avares://beditor/Controls/HyperLink.axaml" />
+        <StyleInclude Source="avares://beditor/Controls/ColorPicker.axaml" />
 
         <Style Selector="Expander.expandkeyframe /template/ ToggleButton#PART_toggle">
             <Setter Property="Margin" Value="32.5,0,0,0" />
@@ -51,6 +53,21 @@
         </Style>
         <Style Selector="TemplatedControl">
             <Setter Property="FontFamily" Value="Yu Gothic UI, Segoe UI, Hiragino Sans, Helvetica Neue, Ubuntu" />
+        </Style>
+
+        <Style Selector="Window.fluent">
+            <Setter Property="Template">
+                <ControlTemplate>
+                    <Border Background="{StaticResource AcrylicColor1}">
+                        <Grid RowDefinitions="Auto,*">
+
+                            <titlebar:WindowsTitlebarButtons CanResize="{TemplateBinding CanResize}" />
+
+                            <ContentPresenter Grid.Row="1" Content="{TemplateBinding Content}"/>
+                        </Grid>
+                    </Border>
+                </ControlTemplate>
+            </Setter>
         </Style>
     </Application.Styles>
 </Application>

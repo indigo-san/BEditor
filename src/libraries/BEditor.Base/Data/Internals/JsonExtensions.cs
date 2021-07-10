@@ -6,11 +6,7 @@
 // of the MIT license. See the LICENSE file for details.
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Text.Json;
-using System.Threading.Tasks;
 
 namespace BEditor.Data.Internals
 {
@@ -20,7 +16,7 @@ namespace BEditor.Data.Internals
         {
             if (property.Serializer is not null)
             {
-                writer.WritePropertyName(property.Name.Split(',')[0]);
+                writer.WritePropertyName(property.Name);
 
                 property.Serializer.Write(writer, value);
             }
@@ -34,7 +30,7 @@ namespace BEditor.Data.Internals
 
         public static object? Read(this JsonElement element, EditingProperty property)
         {
-            foreach (var item in property.Name.Split(','))
+            foreach (var item in property.Names)
             {
                 if (element.TryGetProperty(item, out var value))
                 {

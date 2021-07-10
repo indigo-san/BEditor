@@ -78,7 +78,7 @@ namespace BEditor.Data.Property
             }
             set
             {
-                SetValue(value, ref _easingTypeProperty, _easingFuncArgs);
+                SetAndRaise(value, ref _easingTypeProperty, _easingFuncArgs);
 
                 EasingData = EasingMetadata.LoadedEasingFunc.Find(x => x.Type == value.GetType())!;
             }
@@ -90,7 +90,7 @@ namespace BEditor.Data.Property
         public EasingMetadata EasingData
         {
             get => _easingData ?? EasingMetadata.LoadedEasingFunc[0];
-            set => SetValue(value, ref _easingData, _easingDataArgs);
+            set => SetAndRaise(value, ref _easingData, _easingDataArgs);
         }
 
         /// <inheritdoc/>
@@ -164,7 +164,7 @@ namespace BEditor.Data.Property
             var blue = EasingType.EaseFunc(now, end - start, stval.B, edval.B);
             var alpha = EasingType.EaseFunc(now, end - start, stval.A, edval.A);
 
-            return Color.FromARGB(
+            return Color.FromArgb(
                 (byte)alpha,
                 (byte)red,
                 (byte)green,
@@ -262,7 +262,7 @@ namespace BEditor.Data.Property
                     .GetProperty("Values")
                     .EnumerateArray()
                     .Select(i => i.GetString()))
-                    .Select(i => new KeyValuePair<float, Color>(i.First, Color.FromHTML(i.Second))));
+                    .Select(i => new KeyValuePair<float, Color>(i.First, Color.Parse(i.Second))));
             }
             else
             {
@@ -270,7 +270,7 @@ namespace BEditor.Data.Property
                     .EnumerateArray()
                     .Select(i => i.GetString()
                     ?.Split(',') ?? new string[2])
-                    .Select(i => new KeyValuePair<float, Color>(float.Parse(i[0]), Color.FromHTML(i[1]))));
+                    .Select(i => new KeyValuePair<float, Color>(float.Parse(i[0]), Color.Parse(i[1]))));
             }
 
             var easing = element.GetProperty("Easing");

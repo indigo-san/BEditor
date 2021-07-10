@@ -609,14 +609,6 @@
     <value>内側シャドウ</value>
     <comment />
   </data>
-  <data name="ClipLengthAsAudioLength" xml:space="preserve">
-    <value>クリップ長さを音声の長さと同じにする。</value>
-    <comment />
-  </data>
-  <data name="ClipLengthAsVideoLength" xml:space="preserve">
-    <value>クリップ長さを動画の長さと同じにする。</value>
-    <comment />
-  </data>
   <data name="SetAlignment" xml:space="preserve">
     <value>アライメントを設定</value>
     <comment />
@@ -641,5 +633,65 @@
   </data>
   <data name="Cycle" xml:space="preserve">
     <value>周期</value>
+  </data>
+  <data name="AudioFile" xml:space="preserve">
+    <value>音声ファイル</value>
+  </data>
+  <data name="AudioEffect" xml:space="preserve">
+    <value>音声エフェクト</value>
+  </data>
+  <data name="Delay" xml:space="preserve">
+    <value>ディレイ</value>
+  </data>
+  <data name="AttenuationRate" xml:space="preserve">
+    <value>減衰率</value>
+  </data>
+  <data name="DelayTime" xml:space="preserve">
+    <value>遅延時間</value>
+  </data>
+  <data name="NumberOfRepetitions" xml:space="preserve">
+    <value>繰り返し回数</value>
+  </data>
+  <data name="ColorDifferenceRange" xml:space="preserve">
+    <value>色差範囲</value>
+  </data>
+  <data name="HueRange" xml:space="preserve">
+    <value>色相範囲</value>
+  </data>
+  <data name="SaturationRange" xml:space="preserve">
+    <value>彩度範囲</value>
+  </data>
+  <data name="MaskType" xml:space="preserve">
+    <value>マスク</value>
+  </data>
+  <data name="Unspecified" xml:space="preserve">
+    <value>未指定</value>
+  </data>
+  <data name="DoNotInvertMask" xml:space="preserve">
+    <value>マスクを反転しない</value>
+  </data>
+  <data name="SigmaX" xml:space="preserve">
+    <value>シグマX</value>
+  </data>
+  <data name="SigmaY" xml:space="preserve">
+    <value>シグマY</value>
+  </data>
+  <data name="FixSize" xml:space="preserve">
+    <value>サイズを固定</value>
+  </data>
+  <data name="KernelWidth" xml:space="preserve">
+    <value>カーネルの横幅</value>
+  </data>
+  <data name="KernelHeight" xml:space="preserve">
+    <value>カーネルの高さ</value>
+  </data>
+  <data name="EdgeBlur" xml:space="preserve">
+    <value>境界ぼかし</value>
+  </data>
+  <data name="BlurBorderOfTransparency" xml:space="preserve">
+    <value>透明度の境界をぼかす</value>
+  </data>
+  <data name="DecoderNotFound" xml:space="preserve">
+    <value>デコーダーが見つかりませんでした。</value>
   </data>
 </root>

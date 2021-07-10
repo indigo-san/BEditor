@@ -45,7 +45,7 @@ namespace BEditor.Data
         public bool IsEnabled
         {
             get => _isEnabled;
-            set => SetValue(value, ref _isEnabled, _isEnabledArgs);
+            set => SetAndRaise(value, ref _isEnabled, _isEnabledArgs);
         }
 
         /// <summary>
@@ -55,7 +55,7 @@ namespace BEditor.Data
         public bool IsExpanded
         {
             get => _isExpanded;
-            set => SetValue(value, ref _isExpanded, _isExpandedArgs);
+            set => SetAndRaise(value, ref _isExpanded, _isExpandedArgs);
         }
 
         /// <inheritdoc/>
@@ -92,10 +92,10 @@ namespace BEditor.Data
         public abstract void Apply(EffectApplyArgs args);
 
         /// <summary>
-        /// It will be called before rendering.
+        /// It will be called before applying.
         /// </summary>
         /// <param name="args">The data used to apply the effect.</param>
-        public virtual void PreviewRender(EffectApplyArgs args)
+        public virtual void PreviewApply(EffectApplyArgs args)
         {
         }
 

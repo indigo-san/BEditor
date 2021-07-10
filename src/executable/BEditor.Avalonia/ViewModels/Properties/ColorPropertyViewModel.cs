@@ -32,7 +32,7 @@ namespace BEditor.ViewModels.Properties
             Brush.Value = new SolidColorBrush(Color.FromArgb(color.A, color.R, color.G, color.B));
 
             Command
-                .Select(x => Drawing.Color.FromARGB(x.Item4, x.Item1, x.Item2, x.Item3))
+                .Select(x => Drawing.Color.FromArgb(x.Item4, x.Item1, x.Item2, x.Item3))
                 .Where(x => x != Property.Value)
                 .Subscribe(x => Property.ChangeColor(x).Execute())
                 .AddTo(_disposables);
@@ -67,10 +67,7 @@ namespace BEditor.ViewModels.Properties
             {
                 var d = new ColorDialog(this);
 
-                d.col.Red = Property.Value.R;
-                d.col.Green = Property.Value.G;
-                d.col.Blue = Property.Value.B;
-                d.col.Alpha = Property.Value.A;
+                d.col.Color = new Color(Property.Value.A, Property.Value.R, Property.Value.G, Property.Value.B);
 
                 return d;
             }

@@ -16,8 +16,6 @@ using BEditor.Graphics;
 using BEditor.Media;
 using BEditor.Resources;
 
-using OpenTK.Graphics.OpenGL4;
-
 namespace BEditor.Data.Primitive
 {
     /// <summary>
@@ -28,7 +26,7 @@ namespace BEditor.Data.Primitive
         /// <summary>
         /// Defines the <see cref="Coordinate"/> property.
         /// </summary>
-        public static readonly DirectEditingProperty<ImageObject, Coordinate> CoordinateProperty = EditingProperty.RegisterDirect<Coordinate, ImageObject>(
+        public static readonly DirectProperty<ImageObject, Coordinate> CoordinateProperty = EditingProperty.RegisterDirect<Coordinate, ImageObject>(
             nameof(Coordinate),
             owner => owner.Coordinate,
             (owner, obj) => owner.Coordinate = obj,
@@ -37,7 +35,7 @@ namespace BEditor.Data.Primitive
         /// <summary>
         /// Defines the <see cref="Scale"/> property.
         /// </summary>
-        public static readonly DirectEditingProperty<ImageObject, Scale> ScaleProperty = EditingProperty.RegisterDirect<Scale, ImageObject>(
+        public static readonly DirectProperty<ImageObject, Scale> ScaleProperty = EditingProperty.RegisterDirect<Scale, ImageObject>(
             nameof(Scale),
             owner => owner.Scale,
             (owner, obj) => owner.Scale = obj,
@@ -46,7 +44,7 @@ namespace BEditor.Data.Primitive
         /// <summary>
         /// Defines the <see cref="Blend"/> property.
         /// </summary>
-        public static readonly DirectEditingProperty<ImageObject, Blend> BlendProperty = EditingProperty.RegisterDirect<Blend, ImageObject>(
+        public static readonly DirectProperty<ImageObject, Blend> BlendProperty = EditingProperty.RegisterDirect<Blend, ImageObject>(
             nameof(Blend),
             owner => owner.Blend,
             (owner, obj) => owner.Blend = obj,
@@ -55,7 +53,7 @@ namespace BEditor.Data.Primitive
         /// <summary>
         /// Defines the <see cref="Rotate"/> property.
         /// </summary>
-        public static readonly DirectEditingProperty<ImageObject, Rotate> RotateProperty = EditingProperty.RegisterDirect<Rotate, ImageObject>(
+        public static readonly DirectProperty<ImageObject, Rotate> RotateProperty = EditingProperty.RegisterDirect<Rotate, ImageObject>(
             nameof(Rotate),
             owner => owner.Rotate,
             (owner, obj) => owner.Rotate = obj,
@@ -64,7 +62,7 @@ namespace BEditor.Data.Primitive
         /// <summary>
         /// Defines the <see cref="Rotate"/> property.
         /// </summary>
-        public static readonly DirectEditingProperty<ImageObject, Property.PrimitiveGroup.Material> MaterialProperty = EditingProperty.RegisterDirect<Property.PrimitiveGroup.Material, ImageObject>(
+        public static readonly DirectProperty<ImageObject, Property.PrimitiveGroup.Material> MaterialProperty = EditingProperty.RegisterDirect<Property.PrimitiveGroup.Material, ImageObject>(
             nameof(Material),
             owner => owner.Material,
             (owner, obj) => owner.Material = obj,
@@ -113,6 +111,8 @@ namespace BEditor.Data.Primitive
         /// <inheritdoc/>
         public override void Apply(EffectApplyArgs args)
         {
+            if (args.Type is ApplyType.Audio) return;
+
             var imgs_args = new EffectApplyArgs<IEnumerable<ImageInfo>>(args.Frame, Enumerable.Empty<ImageInfo>(), args.Type);
             OnRender(imgs_args);
 
@@ -309,7 +309,7 @@ namespace BEditor.Data.Primitive
             var trans = GetTransform(frame) + image.Transform;
             var context = Parent!.Parent.GraphicsContext!;
 
-            if (args.Type is RenderType.Preview && Parent.Parent.SelectItem == Parent)
+            if (args.Type is ApplyType.Edit && Parent.Parent.SelectItem == Parent)
             {
                 var wHalf = (image.Source.Width / 2f) + 10;
                 var hHalf = (image.Source.Height / 2f) + 10;
@@ -320,20 +320,9 @@ namespace BEditor.Data.Primitive
             texture.Material = new(ambient, diffuse, specular, shininess);
             texture.Transform = trans;
             texture.Color = color;
+            texture.BlendMode = (BlendMode)Blend.BlendType.Index;
 
-            GL.Enable(EnableCap.Blend);
-
-            context.DrawTexture(texture, () =>
-            {
-                var blendFunc = Blend.BlentFunc[Blend.BlendType.Index];
-
-                blendFunc?.Invoke();
-                if (blendFunc is null)
-                {
-                    GL.BlendFuncSeparate(BlendingFactorSrc.SrcAlpha, BlendingFactorDest.OneMinusSrcAlpha, BlendingFactorSrc.One, BlendingFactorDest.OneMinusSrcAlpha);
-                    GL.BlendEquation(BlendEquationMode.FuncAdd);
-                }
-            });
+            context.DrawTexture(texture);
         }
     }
 }

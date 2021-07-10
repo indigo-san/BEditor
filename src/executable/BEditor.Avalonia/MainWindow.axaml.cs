@@ -1,14 +1,15 @@
 using System;
-using System.IO;
 using System.Linq;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
 
 using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Controls.Notifications;
 using Avalonia.Controls.Primitives;
 using Avalonia.Input;
 using Avalonia.Interactivity;
+using Avalonia.Layout;
 using Avalonia.Markup.Xaml;
 using Avalonia.Threading;
 
@@ -17,13 +18,15 @@ using BEditor.Models;
 using BEditor.Properties;
 using BEditor.ViewModels;
 using BEditor.ViewModels.DialogContent;
+using BEditor.Views;
+using BEditor.Views.CustomTitlebars;
 using BEditor.Views.DialogContent;
 
 using OpenTK.Audio.OpenAL;
 
 namespace BEditor
 {
-    public class MainWindow : Window
+    public class MainWindow : FluentWindow
     {
         public MainWindow()
         {
@@ -31,27 +34,26 @@ namespace BEditor
             AddHandler(KeyDownEvent, Window_KeyDown, RoutingStrategies.Tunnel);
             vm.New.Subscribe(CreateProjectClick);
 
-            InitializeComponent();
-            // WindowsŠÂ‹«‚¾‚Æ•\Ž¦‚ªƒoƒO‚é‚Ì‚Å‘Îô
-            MainWindowViewModel.Current.IsOpened
-                .ObserveOn(AvaloniaScheduler.Instance)
-                .Where(_ => OperatingSystem.IsWindows())
-                .Subscribe(isopened =>
+            NotificationManager = new(this)
             {
-                var content = (Grid)Content!;
-                if (isopened)
+                Position = NotificationPosition.BottomLeft,
+            };
+
+            InitializeComponent();
+
+            vm.IsOpened.Subscribe(v =>
+            {
+                if (!v && Content is Layoutable layoutable)
                 {
-                    content.Margin = new(0, 0, 8, 0);
-                }
-                else
-                {
-                    content.Margin = default;
+                    layoutable.Margin = default;
                 }
             });
 #if DEBUG
             this.AttachDevTools();
 #endif
         }
+
+        public WindowNotificationManager NotificationManager { get; }
 
         private void Window_KeyDown(object? sender, KeyEventArgs e)
         {
@@ -97,26 +99,17 @@ namespace BEditor
         {
             base.OnOpened(e);
 
-            await ArgumentsContext.ExecuteAsync();
-            await CheckOpenALAsync();
+            await App.StartupTask;
+            App.StartupTask = default;
+
+            this.FindControl<Library>("Library").InitializeTreeView();
+
+            this.FindControl<WindowsTitlebar>("Titlebar").InitializePluginMenu();
         }
 
         private void InitializeComponent()
         {
             AvaloniaXamlLoader.Load(this);
-        }
-
-        private static async Task CheckOpenALAsync()
-        {
-            try
-            {
-                _ = AL.GetError();
-            }
-            catch
-            {
-                await AppModel.Current.Message.DialogAsync(Strings.OpenALNotFound);
-                App.Shutdown(1);
-            }
         }
     }
 }

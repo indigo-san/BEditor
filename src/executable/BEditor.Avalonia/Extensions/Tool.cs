@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -8,7 +9,9 @@ using Avalonia.Threading;
 
 using BEditor.Data;
 using BEditor.Media;
+using BEditor.Media.Encoding;
 using BEditor.Models;
+using BEditor.Packaging;
 using BEditor.Properties;
 using BEditor.ViewModels;
 using BEditor.Views;
@@ -23,28 +26,29 @@ namespace BEditor.Extensions
 
         public static bool PreviewIsEnabled { get; set; } = true;
 
-        public static void PreviewUpdate(this Project project, ClipElement clipData, RenderType type = RenderType.Preview)
+        public static async Task PreviewUpdateAsync(this Project project, ClipElement clipData, ApplyType type = ApplyType.Edit)
         {
             if (project is null) return;
-            var now = project.PreviewScene.PreviewFrame;
+            var now = project.CurrentScene.PreviewFrame;
             if (clipData.Start <= now && now <= clipData.End)
             {
-                project.PreviewUpdate(type);
+                await project.PreviewUpdateAsync(type);
             }
         }
 
-        public static void PreviewUpdate(this Project project, RenderType type = RenderType.Preview)
+        public static async Task PreviewUpdateAsync(this Project project, ApplyType type = ApplyType.Edit)
         {
-            if (project is null || project.PreviewScene.GraphicsContext is null || !PreviewIsEnabled) return;
-
-            Dispatcher.UIThread.InvokeAsync(() =>
+            if (project?.IsLoaded != true || project.CurrentScene.GraphicsContext is null || !PreviewIsEnabled) return;
+            PreviewIsEnabled = false;
+            try
             {
-                _image ??= App.GetMainWindow().FindControl<Previewer>("previewer").FindControl<Image>("image");
-                PreviewIsEnabled = false;
+                using var img = await Task.Run(() => project.CurrentScene.Render(type));
+                var snd = project.CurrentScene.Sample();
 
-                try
+                await Dispatcher.UIThread.InvokeAsync(() =>
                 {
-                    using var img = project.PreviewScene.Render(type);
+                    _image ??= App.GetMainWindow().FindControl<Previewer>("previewer").FindControl<Image>("image");
+
                     var viewmodel = MainWindowViewModel.Current.Previewer;
 
                     if (viewmodel.PreviewImage.Value is null
@@ -73,38 +77,74 @@ namespace BEditor.Extensions
                     // 再描画
                     _image.InvalidateVisual();
 
+                    viewmodel.PreviewAudio.Value?.Dispose();
+                    viewmodel.PreviewAudio.Value = snd;
+                });
+
+                PreviewIsEnabled = true;
+            }
+            catch (Exception e)
+            {
+                var app = AppModel.Current;
+                App.Logger.LogError(e, "Failed to rendering.");
+
+                if (app.AppStatus is Status.Playing)
+                {
+                    app.AppStatus = Status.Edit;
+                    app.Project!.CurrentScene.Player.Stop();
+                    app.IsNotPlaying = true;
+
+                    app.Message.Snackbar(Strings.An_exception_was_thrown_during_rendering);
+
                     PreviewIsEnabled = true;
                 }
-                catch (Exception e)
+                else
                 {
-                    var app = AppModel.Current;
-                    App.Logger.LogError(e, "Failed to rendering.");
+                    PreviewIsEnabled = false;
 
-                    if (app.AppStatus is Status.Playing)
-                    {
-                        app.AppStatus = Status.Edit;
-                        app.Project!.PreviewScene.Player.Stop();
-                        app.IsNotPlaying = true;
+                    app.Message.Snackbar(Strings.An_exception_was_thrown_during_rendering_preview);
 
-                        app.Message.Snackbar(Strings.An_exception_was_thrown_during_rendering);
+                    await Task.Delay(TimeSpan.FromSeconds(5));
 
-                        PreviewIsEnabled = true;
-                    }
-                    else
-                    {
-                        PreviewIsEnabled = false;
-
-                        app.Message.Snackbar(Strings.An_exception_was_thrown_during_rendering_preview);
-
-                        Task.Run(async () =>
-                        {
-                            await Task.Delay(TimeSpan.FromSeconds(5));
-
-                            PreviewIsEnabled = true;
-                        });
-                    }
+                    PreviewIsEnabled = true;
                 }
-            });
+            }
+        }
+
+        public static async ValueTask<AuthenticationLink?> LoadFromAsync(string filename, IAuthenticationProvider provider)
+        {
+            if (!File.Exists(filename)) return null;
+            try
+            {
+                using var reader = new StreamReader(filename);
+                var token = reader.ReadLine();
+                var reftoken = reader.ReadLine();
+
+                if (token is null || reftoken is null) return null;
+                var auth = new AuthenticationLink(
+                    new()
+                    {
+                        RefreshToken = reftoken,
+                        Token = token,
+                    },
+                    provider);
+                await auth.RefreshAuthAsync();
+
+                return auth;
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
+        public static void Save(this Authentication auth, string filename)
+        {
+            using var stream = new FileStream(filename, FileMode.Create);
+            using var writer = new StreamWriter(stream);
+
+            writer.WriteLine(auth.Token);
+            writer.WriteLine(auth.RefreshToken);
         }
 
         public static double ToPixel(this Scene scene, Frame frame)
@@ -232,6 +272,20 @@ namespace BEditor.Extensions
             }
             type = default;
             return false;
+        }
+
+        public static VideoEncoderSettings GetVideoSettings(this IRegisterdEncoding encoding)
+        {
+            return encoding is ISupportEncodingSettings sp
+                ? sp.GetDefaultVideoSettings()
+                : new VideoEncoderSettings(1920, 1080);
+        }
+
+        public static AudioEncoderSettings GetAudioSettings(this IRegisterdEncoding encoding)
+        {
+            return encoding is ISupportEncodingSettings sp
+                ? sp.GetDefaultAudioSettings()
+                : new AudioEncoderSettings(44100, 2);
         }
 
         public enum RangeType

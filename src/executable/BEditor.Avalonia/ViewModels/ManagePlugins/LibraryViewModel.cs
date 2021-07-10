@@ -7,6 +7,8 @@ using System.Reactive.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
+using Avalonia.Dialogs;
+
 using BEditor.Models;
 using BEditor.Models.ManagePlugins;
 using BEditor.Packaging;
@@ -61,7 +63,7 @@ namespace BEditor.ViewModels.ManagePlugins
 
             Search.Where(_ => SelectedSource.Value is not null).Subscribe(_ =>
             {
-                var str = SearchText.Value.ToLowerInvariant();
+                var str = SearchText.Value;
                 if (string.IsNullOrWhiteSpace(str))
                 {
                     _loadedItems = SelectedSource.Value!.Packages;
@@ -73,28 +75,12 @@ namespace BEditor.ViewModels.ManagePlugins
                     return;
                 }
 
-                var regexPattern = Regex.Replace(str, ".", m =>
-                {
-                    var s = m.Value;
-                    if (s.Equals("?"))
-                    {
-                        return ".";
-                    }
-                    else if (s.Equals("*"))
-                    {
-                        return ".*";
-                    }
-                    else
-                    {
-                        return Regex.Escape(s);
-                    }
-                });
-                var regex = new Regex(regexPattern.ToLowerInvariant());
+                var regices = SearchService.CreateRegices(str);
 
                 _loadedItems = SelectedSource.Value!.Packages
-                    .Where(i => regex.IsMatch(i.Name.ToLowerInvariant()) ||
-                        regex.IsMatch(i.Description.ToLowerInvariant()) ||
-                        regex.IsMatch(i.Tag.ToLowerInvariant()))
+                    .Where(i => SearchService.IsMatch(regices, i.Name)
+                    || SearchService.IsMatch(regices, i.Description)
+                    || SearchService.IsMatch(regices, i.Tag))
                     .ToArray();
 
                 ReloadItems();
@@ -114,41 +100,29 @@ namespace BEditor.ViewModels.ManagePlugins
                 .ToReadOnlyReactivePropertySlim();
 
             OpenHomePage.Where(_ => IsSelected.Value)
-                .Subscribe(_ =>
-                {
-                    if (OperatingSystem.IsWindows())
-                    {
-                        Process.Start(new ProcessStartInfo("cmd", $"/c start {SelectedItem.Value!.HomePage}") { CreateNoWindow = true });
-                    }
-                    else if (OperatingSystem.IsLinux())
-                    {
-                        Process.Start(new ProcessStartInfo("xdg-open", SelectedItem.Value!.HomePage) { CreateNoWindow = true });
-                    }
-                    else if (OperatingSystem.IsMacOS())
-                    {
-                        Process.Start(new ProcessStartInfo("open", SelectedItem.Value!.HomePage) { CreateNoWindow = true });
-                    }
-                });
+                .Subscribe(_ => AboutAvaloniaDialog.OpenBrowser(SelectedItem.Value!.HomePage));
 
             LoadTask = Task.Run(async () =>
-              {
-                  foreach (var item in Setting.Default.PackageSources)
-                  {
-                      var repos = await item.ToRepositoryAsync(_client);
-                      if (repos is null) continue;
-                      PackageSources.Add(repos);
-                  }
+            {
+                foreach (var item in Setting.Default.PackageSources)
+                {
+                    var repos = await item.ToRepositoryAsync(_client);
+                    if (repos is null) continue;
+                    PackageSources.Add(repos);
+                }
 
-                  SelectedSource.Value = PackageSources.FirstOrDefault();
-                  IsLoaded.Value = false;
-              });
+                SelectedSource.Value = PackageSources.FirstOrDefault();
+                IsLoaded.Value = false;
+            });
+
+            SelectedVersion = SelectedItem.Select(i => i?.Versions?[0]).ToReactiveProperty();
 
             Install.Where(_ => InstallIsVisible.Value)
                 .Subscribe(_ =>
-            {
-                PluginChangeSchedule.UpdateOrInstall.Add(new(SelectedItem.Value!, PluginChangeType.Install));
-                SelectedItem.ForceNotify();
-            });
+                {
+                    PluginChangeSchedule.UpdateOrInstall.Add(new(SelectedItem.Value!, SelectedVersion.Value!, PluginChangeType.Install));
+                    SelectedItem.ForceNotify();
+                });
 
             CancelChange.Where(_ => CancelIsVisible.Value)
                 .Subscribe(_ =>
@@ -193,6 +167,8 @@ namespace BEditor.ViewModels.ManagePlugins
         public ObservableCollection<Package> Items { get; } = new();
 
         public ReactiveCommand OpenHomePage { get; } = new();
+
+        public ReactiveProperty<PackageVersion?> SelectedVersion { get; }
 
         public ReactiveCommand Install { get; } = new();
 

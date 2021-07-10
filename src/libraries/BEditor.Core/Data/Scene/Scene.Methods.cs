@@ -86,29 +86,15 @@ namespace BEditor.Data
         /// <param name="renderType">The type of rendering.</param>
         /// <returns>Returns the result of rendering.</returns>
         /// <exception cref="RenderingException">Faileds to rendering.</exception>
-        public Image<BGRA32> Render(Frame frame, RenderType renderType = RenderType.Preview)
+        public Image<BGRA32> Render(Frame frame, ApplyType renderType = ApplyType.Edit)
         {
             if (!IsLoaded)
             {
                 return new(Width, Height);
             }
 
-            var layer = GetFrame(frame);
-
-            GraphicsContext!.Camera = new OrthographicCamera(new(0, 0, 1024), Width, Height);
-            GraphicsContext!.Light = null;
-            AudioContext!.MakeCurrent();
-            GraphicsContext!.Clear();
-
-            var args = new ClipRenderArgs(frame, renderType);
-
-            // Preview
-            for (var i = 0; i < layer.Length; i++) layer[i].PreviewRender(args);
-
-            for (var i = 0; i < layer.Length; i++) layer[i].Render(args);
-
             var img = new Image<BGRA32>(Width, Height);
-            GraphicsContext.ReadImage(img);
+            Render(img, frame, renderType);
 
             return img;
         }
@@ -119,7 +105,7 @@ namespace BEditor.Data
         /// <param name="renderType">The type of rendering.</param>
         /// <returns>Returns the result of rendering.</returns>
         /// <exception cref="RenderingException">Faileds to rendering.</exception>
-        public Image<BGRA32> Render(RenderType renderType = RenderType.Preview)
+        public Image<BGRA32> Render(ApplyType renderType = ApplyType.Edit)
         {
             return Render(PreviewFrame, renderType);
         }
@@ -131,7 +117,7 @@ namespace BEditor.Data
         /// <param name="frame">The frame to render.</param>
         /// <param name="renderType">The type of rendering.</param>
         /// <exception cref="RenderingException">Faileds to rendering.</exception>
-        public void Render(Image<BGRA32> image, Frame frame, RenderType renderType = RenderType.Preview)
+        public void Render(Image<BGRA32> image, Frame frame, ApplyType renderType = ApplyType.Edit)
         {
             if (!IsLoaded) return;
 
@@ -141,19 +127,32 @@ namespace BEditor.Data
 
             var layer = GetFrame(frame);
 
-            GraphicsContext!.Camera = new OrthographicCamera(new(0, 0, 1024), Width, Height);
-            GraphicsContext!.Light = null;
-            AudioContext!.MakeCurrent();
-            GraphicsContext!.Clear();
+            if (GraphicsContext!.Camera is OrthographicCamera orthographic)
+            {
+                orthographic.Width = Width;
+                orthographic.Height = Height;
+                orthographic.Near = 0.1f;
+                orthographic.Far = 20000;
+                orthographic.Fov = MathF.PI / 2;
+                orthographic.Target = default;
+                orthographic.Position = new(0, 0, 1024);
+            }
+            else
+            {
+                GraphicsContext.Camera = new OrthographicCamera(new(0, 0, 1024), Width, Height);
+            }
 
-            var args = new ClipRenderArgs(frame, renderType);
+            GraphicsContext.Light = null;
+            GraphicsContext.Clear();
+
+            var args = new ClipApplyArgs(frame, renderType);
 
             // Preview
-            for (var i = 0; i < layer.Length; i++) layer[i].PreviewRender(args);
+            for (var i = 0; i < layer.Length; i++) layer[i].PreviewApply(args);
 
-            for (var i = 0; i < layer.Length; i++) layer[i].Render(args);
+            for (var i = 0; i < layer.Length; i++) layer[i].Apply(args);
 
-            GraphicsContext!.ReadImage(image);
+            GraphicsContext.ReadImage(image);
         }
 
         /// <summary>
@@ -162,9 +161,46 @@ namespace BEditor.Data
         /// <param name="image">The image to be drawn.</param>
         /// <param name="renderType">The type of rendering.</param>
         /// <exception cref="RenderingException">Faileds to rendering.</exception>
-        public void Render(Image<BGRA32> image, RenderType renderType = RenderType.Preview)
+        public void Render(Image<BGRA32> image, ApplyType renderType = ApplyType.Edit)
         {
             Render(image, PreviewFrame, renderType);
+        }
+
+        /// <summary>
+        /// Samples this <see cref="Scene"/>.
+        /// </summary>
+        /// <param name="frame">The frame to sample.</param>
+        /// <param name="applyType">The type of applying.</param>
+        /// <returns>Returns the result of sampling.</returns>
+        public Sound<StereoPCMFloat> Sample(Frame frame, ApplyType applyType = ApplyType.Audio)
+        {
+            if (!IsLoaded)
+            {
+                return new(Width, Height);
+            }
+
+            SamplingContext!.Clear();
+            var layer = GetFrame(frame);
+
+            var args = new ClipApplyArgs(frame, applyType);
+
+            // Preview
+            for (var i = 0; i < layer.Length; i++) layer[i].PreviewApply(args);
+
+            for (var i = 0; i < layer.Length; i++) layer[i].Apply(args);
+
+            return SamplingContext.ReadSamples();
+        }
+
+        /// <summary>
+        /// Sample a frame of <see cref="PreviewFrame"/>.
+        /// </summary>
+        /// <param name="applyType">The type of applying.</param>
+        /// <returns>Returns the result of applying.</returns>
+        /// <exception cref="RenderingException">Faileds to rendering.</exception>
+        public Sound<StereoPCMFloat> Sample(ApplyType applyType = ApplyType.Audio)
+        {
+            return Sample(PreviewFrame, applyType);
         }
 
         /// <summary>
@@ -226,18 +262,14 @@ namespace BEditor.Data
         }
 
         /// <summary>
-        /// Set the selected <see cref="ClipElement"/> and add the name to <see cref="SelectItems"/> if it does not exist.
+        /// Set the selected <see cref="ClipElement"/>.
         /// </summary>
         /// <param name="clip"><see cref="ClipElement"/> to be set to current.</param>
         /// <exception cref="ArgumentNullException"><paramref name="clip"/> is <see langword="null"/>.</exception>
+        [Obsolete("Use Scene.SelectItem.Set")]
         public void SetCurrentClip(ClipElement clip)
         {
             SelectItem = clip ?? throw new ArgumentNullException(nameof(clip));
-
-            if (!SelectItems.Contains(clip))
-            {
-                SelectItems.Add(clip);
-            }
         }
 
         /// <summary>
@@ -250,7 +282,6 @@ namespace BEditor.Data
         {
             // オブジェクトの情報
             clip.Parent = this;
-            clip.UpdateId();
 
             return RecordCommand.Create(
                 clip,
@@ -258,8 +289,9 @@ namespace BEditor.Data
                 {
                     var scene = clip.Parent;
                     clip.Load();
+                    clip.UpdateId();
                     scene.Add(clip);
-                    scene.SetCurrentClip(clip);
+                    scene.SelectItem = clip;
                 },
                 clip =>
                 {
@@ -268,10 +300,17 @@ namespace BEditor.Data
                     clip.Unload();
 
                     // 存在する場合
-                    if (scene.SelectItems.Remove(clip) && scene.SelectItem == clip)
+                    if (scene.SelectItem == clip)
                     {
                         scene.SelectItem = null;
                     }
+                },
+                clip =>
+                {
+                    var scene = clip.Parent;
+                    clip.Load();
+                    scene.Add(clip);
+                    scene.SelectItem = clip;
                 },
                 _ => Strings.AddClip);
         }
@@ -288,6 +327,23 @@ namespace BEditor.Data
         public IRecordCommand AddClip(Frame frame, int layer, ObjectMetadata metadata, out ClipElement generatedClip)
         {
             var command = new ClipElement.AddCommand(this, frame, layer, metadata);
+            generatedClip = command.Clip;
+
+            return command;
+        }
+
+        /// <summary>
+        /// Create a command to add a <see cref="ClipElement"/> to this <see cref="Scene"/>.
+        /// </summary>
+        /// <param name="frame">Frame to add a clip.</param>
+        /// <param name="layer">Layer to add a clip.</param>
+        /// <param name="obj">Object to be added.</param>
+        /// <param name="generatedClip">Generated <see cref="ClipElement"/>.</param>
+        /// <returns>Created <see cref="IRecordCommand"/>.</returns>
+        [Pure]
+        public IRecordCommand AddClip(Frame frame, int layer, ObjectElement obj, out ClipElement generatedClip)
+        {
+            var command = new ClipElement.AddCommand(this, frame, layer, obj);
             generatedClip = command.Clip;
 
             return command;
@@ -320,34 +376,26 @@ namespace BEditor.Data
         /// <inheritdoc/>
         protected override void OnLoad()
         {
-            Parent.Parent.UIThread.Send(s =>
+            GraphicsContext = new GraphicsContext(Width, Height);
+            SamplingContext = new SamplingContext(Parent.Samplingrate, Parent.Framerate);
+
+            if (BEditor.Settings.Default.PrioritizeGPU)
             {
-                var scene = (Scene)s!;
-                scene.GraphicsContext = new GraphicsContext(scene.Width, scene.Height);
-                scene.AudioContext = new AudioContext();
+                DrawingContext = DrawingContext.Create(0);
 
-                if (BEditor.Settings.Default.PrioritizeGPU)
+                if (DrawingContext is not null)
                 {
-                    scene.DrawingContext = DrawingContext.Create(0);
-
-                    if (scene.DrawingContext is not null)
-                    {
-                        scene.ServiceProvider?.GetService<ILogger>()?.LogInformation("{0}はGpuを使用した画像処理が有効です。", SceneName);
-                    }
+                    ServiceProvider?.GetService<ILogger>()?.LogInformation("{0}はGpuを使用した画像処理が有効です。", SceneName);
                 }
-            }, this);
+            }
         }
 
         /// <inheritdoc/>
         protected override void OnUnload()
         {
-            Parent.Parent.UIThread.Send(s =>
-            {
-                var scene = (Scene)s!;
-                scene.GraphicsContext?.Dispose();
-                scene.DrawingContext?.Dispose();
-                scene.AudioContext?.Dispose();
-            }, this);
+            GraphicsContext?.Dispose();
+            DrawingContext?.Dispose();
+            SamplingContext?.Dispose();
         }
     }
 }

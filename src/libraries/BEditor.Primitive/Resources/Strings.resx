@@ -609,14 +609,6 @@
     <value>Inner Shadow</value>
     <comment />
   </data>
-  <data name="ClipLengthAsAudioLength" xml:space="preserve">
-    <value>Set the clip length to the same as the audio length.</value>
-    <comment />
-  </data>
-  <data name="ClipLengthAsVideoLength" xml:space="preserve">
-    <value>Set the clip length to the same as the video length.</value>
-    <comment />
-  </data>
   <data name="SetAlignment" xml:space="preserve">
     <value>Set alignment</value>
     <comment />
@@ -641,5 +633,65 @@
   </data>
   <data name="Cycle" xml:space="preserve">
     <value>Cycle</value>
+  </data>
+  <data name="AudioFile" xml:space="preserve">
+    <value>Audio file</value>
+  </data>
+  <data name="AudioEffect" xml:space="preserve">
+    <value>Audio effect</value>
+  </data>
+  <data name="Delay" xml:space="preserve">
+    <value>Delay</value>
+  </data>
+  <data name="AttenuationRate" xml:space="preserve">
+    <value>Attenuation rate</value>
+  </data>
+  <data name="DelayTime" xml:space="preserve">
+    <value>Delay time</value>
+  </data>
+  <data name="NumberOfRepetitions" xml:space="preserve">
+    <value>Number of repetitions</value>
+  </data>
+  <data name="ColorDifferenceRange" xml:space="preserve">
+    <value>Color difference range</value>
+  </data>
+  <data name="HueRange" xml:space="preserve">
+    <value>Hue range</value>
+  </data>
+  <data name="SaturationRange" xml:space="preserve">
+    <value>Saturation range</value>
+  </data>
+  <data name="MaskType" xml:space="preserve">
+    <value>Mask type</value>
+  </data>
+  <data name="Unspecified" xml:space="preserve">
+    <value>Unspecified</value>
+  </data>
+  <data name="DoNotInvertMask" xml:space="preserve">
+    <value>Do not invert the mask</value>
+  </data>
+  <data name="SigmaX" xml:space="preserve">
+    <value>Sigma x</value>
+  </data>
+  <data name="SigmaY" xml:space="preserve">
+    <value>Sigma y</value>
+  </data>
+  <data name="FixSize" xml:space="preserve">
+    <value>Fix the size</value>
+  </data>
+  <data name="KernelWidth" xml:space="preserve">
+    <value>Kernel width</value>
+  </data>
+  <data name="KernelHeight" xml:space="preserve">
+    <value>Kernel height</value>
+  </data>
+  <data name="EdgeBlur" xml:space="preserve">
+    <value>Edge blur</value>
+  </data>
+  <data name="BlurBorderOfTransparency" xml:space="preserve">
+    <value>Blurs the borders of transparency</value>
+  </data>
+  <data name="DecoderNotFound" xml:space="preserve">
+    <value>Decoder not found.</value>
   </data>
 </root>

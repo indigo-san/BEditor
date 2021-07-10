@@ -48,7 +48,7 @@ namespace BEditor.Plugin
         /// <summary>
         /// Gets or sets the base directory from which to retrieve plugins.
         /// </summary>
-        public string BaseDirectory { get; } = Path.Combine(AppContext.BaseDirectory, "user", "plugins");
+        public string BaseDirectory { get; } = ServicesLocator.GetPluginsFolder();
 
         /// <summary>
         /// Gets all plugin names.
@@ -71,7 +71,8 @@ namespace BEditor.Plugin
                 .Where(static f => f is not null)
                 .Select(f => Path.Combine(BaseDirectory, f, $"{f}.dll"))
                 .Where(static f => File.Exists(f))
-                .Select(static f => Assembly.LoadFrom(f));
+                .Select(static f => Assembly.LoadFrom(f))
+                .ToArray();
             var exceptions = new List<Exception>();
 
             foreach (var asm in plugins)

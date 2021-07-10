@@ -12,6 +12,9 @@ using System.Threading.Tasks;
 using BEditor.Compute.Runtime;
 using BEditor.Drawing.Pixel;
 using BEditor.Drawing.PixelOperation;
+using BEditor.Drawing.Resources;
+
+using OpenCvSharp;
 
 using SkiaSharp;
 
@@ -264,6 +267,128 @@ namespace BEditor.Drawing
         }
 
         /// <summary>
+        /// Start the specified pixel operation using the Gpu.
+        /// </summary>
+        /// <typeparam name="TOperation">The type of operation.</typeparam>
+        /// <typeparam name="TArg1">The type of first argument.</typeparam>
+        /// <typeparam name="TArg2">The type of second argument.</typeparam>
+        /// <typeparam name="TArg3">The type of third argument.</typeparam>
+        /// <typeparam name="TArg4">The type of fourth argument.</typeparam>
+        /// <param name="image">The image to be operated.</param>
+        /// <param name="context">A valid DrawingContext.</param>
+        /// <param name="arg1">The first argument passed to the kernel.</param>
+        /// <param name="arg2">The second argument passed to the kernel.</param>
+        /// <param name="arg3">The third argument passed to the kernel.</param>
+        /// <param name="arg4">The fourth argument passed to the kernel.</param>
+        /// <exception cref="ArgumentNullException"><paramref name="image"/> is <see langword="null"/>.</exception>
+        /// <exception cref="ObjectDisposedException">Cannot access a disposed object.</exception>
+        public static void PixelOperate<TOperation, TArg1, TArg2, TArg3, TArg4>(this Image<BGRA32> image, DrawingContext context, TArg1 arg1, TArg2 arg2, TArg3 arg3, TArg4 arg4)
+            where TOperation : struct, IGpuPixelOperation<TArg1, TArg2, TArg3, TArg4>
+            where TArg1 : notnull
+            where TArg2 : notnull
+            where TArg3 : notnull
+            where TArg4 : notnull
+        {
+            if (image is null) throw new ArgumentNullException(nameof(image));
+            image.ThrowIfDisposed();
+
+            CLProgram program;
+            var operation = (TOperation)default;
+            var key = operation.GetType().Name;
+            if (!context.Programs.ContainsKey(key))
+            {
+                program = context.Context.CreateProgram(operation.GetSource());
+                context.Programs.Add(key, program);
+            }
+            else
+            {
+                program = context.Programs[key];
+            }
+
+            using var kernel = program.CreateKernel(operation.GetKernel());
+
+            var dataSize = image.DataSize;
+            using var buf = context.Context.CreateMappingMemory(image.Data, dataSize);
+            kernel.NDRange(context.CommandQueue, new long[] { image.Width, image.Height }, buf, arg1, arg2, arg3, arg4);
+            context.CommandQueue.WaitFinish();
+            buf.Read(context.CommandQueue, true, image.Data, 0, dataSize).Wait();
+        }
+
+        /// <summary>
+        /// Borders the image.
+        /// </summary>
+        /// <param name="self">The image to be bordered.</param>
+        /// <param name="size">The size of the border.</param>
+        /// <param name="color">The color of the border.</param>
+        /// <returns>Returns an image with <paramref name="self"/> bordered.</returns>
+        /// <exception cref="ArgumentNullException"><paramref name="self"/> is <see langword="null"/>.</exception>
+        /// <exception cref="ArgumentException"><paramref name="size"/> is less than 0.</exception>
+        /// <exception cref="ObjectDisposedException">Cannot access a disposed object.</exception>
+        public static Image<BGRA32> Border(this Image<BGRA32> self, int size, BGRA32 color)
+        {
+            if (self is null) throw new ArgumentNullException(nameof(self));
+            if (size <= 0) throw new ArgumentException(string.Format(Strings.LessThan, nameof(size), 0));
+            self.ThrowIfDisposed();
+
+            var nwidth = self.Width + (size * 2);
+            var nheight = self.Height + (size * 2);
+
+            self = self.MakeBorder(nwidth, nheight);
+
+            // アルファマップ
+            using var alphamap = self.AlphaMap();
+            using var alphaMat = alphamap.ToMat();
+
+            // 縁
+            var border = new Image<BGRA32>(self.Width, self.Height, default(BGRA32));
+            using var borderMat = border.ToMat();
+
+            // 輪郭検出
+            alphaMat.FindContours(out var points, out var h, RetrievalModes.List, ContourApproximationModes.ApproxSimple);
+
+            // 検出した輪郭を描画
+            borderMat.DrawContours(points, -1, new(color.B, color.G, color.R, color.A), size, LineTypes.Link8, h);
+
+            self.Dispose();
+            return border;
+        }
+
+        /// <summary>
+        /// Blurs the edges of the image.
+        /// </summary>
+        /// <param name="image">The image to apply the effect to.</param>
+        /// <param name="kernelSize">The smoothing kernel size.</param>
+        /// <param name="alphaEdge">If true, blurs the borders of transparency.</param>
+        /// <exception cref="ArgumentNullException"><paramref name="image"/> is <see langword="null"/>.</exception>
+        /// <exception cref="ObjectDisposedException">Cannot access a disposed object.</exception>
+        public static void EdgeBlur(this Image<BGRA32> image, Size kernelSize, bool alphaEdge)
+        {
+            if (image is null) throw new ArgumentNullException(nameof(image));
+            image.ThrowIfDisposed();
+
+            Image<BGRA32>? blurred;
+            kernelSize = new(Math.Clamp(kernelSize.Width, 0, image.Width), Math.Clamp(kernelSize.Height, 0, image.Height));
+
+            if (!alphaEdge)
+            {
+                var size = image.Size - kernelSize;
+                blurred = new(size.Width, size.Height, Colors.White);
+                var tmp = blurred.MakeBorder(image.Width, image.Height);
+                blurred.Dispose();
+                blurred = tmp;
+            }
+            else
+            {
+                blurred = image.Clone();
+            }
+
+            Cv.Blur(blurred, kernelSize);
+
+            image.Mask(blurred, default, 0, false);
+            blurred.Dispose();
+        }
+
+        /// <summary>
         /// Makes the specified image a mask for the original image.
         /// </summary>
         /// <param name="self">The image to apply the effect to.</param>
@@ -303,7 +428,7 @@ namespace BEditor.Drawing
             // 回転した画像
             using var m = MakeMask(self.Size, mask, point, rotate);
             using var routed = m.ToImage32();
-            if (!invert)
+            if (invert)
             {
                 routed.ReverseOpacity(context);
             }
@@ -344,25 +469,6 @@ namespace BEditor.Drawing
             fixed (BGRA32* data = image.Data)
             {
                 PixelOperate(image.Data.Length, new SetColorOperation(data, color));
-            }
-        }
-
-        /// <summary>
-        /// Makes a specific color component of the image transparent.
-        /// </summary>
-        /// <param name="image">The image to apply the effect to.</param>
-        /// <param name="color">The color to make transparent.</param>
-        /// <param name="value">The threshold value.</param>
-        /// <exception cref="ArgumentNullException"><paramref name="image"/> is <see langword="null"/>.</exception>
-        /// <exception cref="ObjectDisposedException">Cannot access a disposed object.</exception>
-        public static void ColorKey(this Image<BGRA32> image, BGRA32 color, int value)
-        {
-            if (image is null) throw new ArgumentNullException(nameof(image));
-            image.ThrowIfDisposed();
-
-            fixed (BGRA32* s = image.Data)
-            {
-                PixelOperate(image.Data.Length, new ColorKeyOperation(s, s, color, value));
             }
         }
 

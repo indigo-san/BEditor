@@ -115,6 +115,15 @@ namespace BEditor.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Adjust length.
+        /// </summary>
+        public static string AdjustLengthOfClip {
+            get {
+                return ResourceManager.GetString("AdjustLengthOfClip", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Already cancelled..
         /// </summary>
         public static string AlreadyCancelled {
@@ -216,6 +225,15 @@ namespace BEditor.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Background.
+        /// </summary>
+        public static string Background {
+            get {
+                return ResourceManager.GetString("Background", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Backup file.
         /// </summary>
         public static string BackupFile {
@@ -243,6 +261,15 @@ namespace BEditor.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Black.
+        /// </summary>
+        public static string Black {
+            get {
+                return ResourceManager.GetString("Black", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Cancel.
         /// </summary>
         public static string Cancel {
@@ -261,11 +288,56 @@ namespace BEditor.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Change failed..
+        /// </summary>
+        public static string ChangeFailed {
+            get {
+                return ResourceManager.GetString("ChangeFailed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Change password.
+        /// </summary>
+        public static string ChangePassword {
+            get {
+                return ResourceManager.GetString("ChangePassword", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Changes.
         /// </summary>
         public static string Changes {
             get {
                 return ResourceManager.GetString("Changes", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Change succeeded..
+        /// </summary>
+        public static string ChangeSucceeded {
+            get {
+                return ResourceManager.GetString("ChangeSucceeded", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Checkered (Dark).
+        /// </summary>
+        public static string CheckDark {
+            get {
+                return ResourceManager.GetString("CheckDark", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Checkered (Light).
+        /// </summary>
+        public static string CheckLight {
+            get {
+                return ResourceManager.GetString("CheckLight", resourceCulture);
             }
         }
         
@@ -379,6 +451,24 @@ namespace BEditor.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Configuration.
+        /// </summary>
+        public static string Configuration {
+            get {
+                return ResourceManager.GetString("Configuration", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Confirm new password.
+        /// </summary>
+        public static string ConfirmNewPassword {
+            get {
+                return ResourceManager.GetString("ConfirmNewPassword", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Container format.
         /// </summary>
         public static string ContainerFormat {
@@ -393,6 +483,15 @@ namespace BEditor.Properties {
         public static string ConvertJson {
             get {
                 return ResourceManager.GetString("ConvertJson", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Convert video.
+        /// </summary>
+        public static string ConvertVideo {
+            get {
+                return ResourceManager.GetString("ConvertVideo", resourceCulture);
             }
         }
         
@@ -550,6 +649,24 @@ namespace BEditor.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Effect file.
+        /// </summary>
+        public static string EffectFile {
+            get {
+                return ResourceManager.GetString("EffectFile", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Email.
+        /// </summary>
+        public static string Email {
+            get {
+                return ResourceManager.GetString("Email", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Encoder.
         /// </summary>
         public static string Encoder {
@@ -686,6 +803,15 @@ namespace BEditor.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Forgot your password?.
+        /// </summary>
+        public static string ForgotYourPassword {
+            get {
+                return ResourceManager.GetString("ForgotYourPassword", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Format.
         /// </summary>
         public static string Format {
@@ -727,6 +853,44 @@ namespace BEditor.Properties {
         public static string GoToMainWindow {
             get {
                 return ResourceManager.GetString("GoToMainWindow", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Graphics profile.
+        /// </summary>
+        public static string GraphicsProfile {
+            get {
+                return ResourceManager.GetString("GraphicsProfile", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to OpenGL: 
+        ///- Renders using &quot;OpenGL&quot;.
+        ///
+        ///Skia:
+        ///- Renders using &quot;Skia&quot;.
+        ///- 3D drawing is not supported.
+        ///- Materials, lights, and cameras are not available.
+        ///
+        ///Direct3D 11:
+        ///- Renders using &quot;Direct3D 11&quot;.
+        ///- For Windows.
+        ///- The lighting is not yet implemented.
+        ///
+        ///Metal:
+        ///- Renders using &quot;Metal&quot;.
+        ///- For macOS.
+        ///- The lighting is not yet implemented.
+        ///
+        ///Vulkan: 
+        ///- Renders using &quot;Vulkan&quot;.
+        ///- The lighting is not yet implemented..
+        /// </summary>
+        public static string GraphicsProfileDescription {
+            get {
+                return ResourceManager.GetString("GraphicsProfileDescription", resourceCulture);
             }
         }
         
@@ -849,6 +1013,15 @@ namespace BEditor.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Latest version.
+        /// </summary>
+        public static string LatestVersion {
+            get {
+                return ResourceManager.GetString("LatestVersion", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Layer.
         /// </summary>
         public static string Layer {
@@ -899,6 +1072,15 @@ namespace BEditor.Properties {
         public static string Log {
             get {
                 return ResourceManager.GetString("Log", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Machine translation.
+        /// </summary>
+        public static string MachineTranslation {
+            get {
+                return ResourceManager.GetString("MachineTranslation", resourceCulture);
             }
         }
         
@@ -993,11 +1175,11 @@ namespace BEditor.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to A new version is available!.
+        ///   Looks up a localized string similar to New password.
         /// </summary>
-        public static string NewVersionIsAvailable {
+        public static string NewPassword {
             get {
-                return ResourceManager.GetString("NewVersionIsAvailable", resourceCulture);
+                return ResourceManager.GetString("NewPassword", resourceCulture);
             }
         }
         
@@ -1025,6 +1207,15 @@ namespace BEditor.Properties {
         public static string NotSupportedFormats {
             get {
                 return ResourceManager.GetString("NotSupportedFormats", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Object file.
+        /// </summary>
+        public static string ObjectFile {
+            get {
+                return ResourceManager.GetString("ObjectFile", resourceCulture);
             }
         }
         
@@ -1062,24 +1253,6 @@ namespace BEditor.Properties {
         public static string OpenALNotFound {
             get {
                 return ResourceManager.GetString("OpenALNotFound", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Open the directory where this project file is located.
-        /// </summary>
-        public static string OpenProjectDirectory {
-            get {
-                return ResourceManager.GetString("OpenProjectDirectory", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Open the repository for this software.
-        /// </summary>
-        public static string OpenThisRepository {
-            get {
-                return ResourceManager.GetString("OpenThisRepository", resourceCulture);
             }
         }
         
@@ -1156,6 +1329,24 @@ namespace BEditor.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Password.
+        /// </summary>
+        public static string Password {
+            get {
+                return ResourceManager.GetString("Password", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Password are not matching.
+        /// </summary>
+        public static string PasswordAreNotMatching {
+            get {
+                return ResourceManager.GetString("PasswordAreNotMatching", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Paste.
         /// </summary>
         public static string Paste {
@@ -1219,16 +1410,6 @@ namespace BEditor.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to {0} plugins have been added.
-        ///Please select the plugin you want to load.
-        /// </summary>
-        public static string PluginsAddedMessage {
-            get {
-                return ResourceManager.GetString("PluginsAddedMessage", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Preset.
         /// </summary>
         public static string Preset {
@@ -1270,6 +1451,15 @@ namespace BEditor.Properties {
         public static string PropertyShowHide {
             get {
                 return ResourceManager.GetString("PropertyShowHide", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Publish.
+        /// </summary>
+        public static string Publish {
+            get {
+                return ResourceManager.GetString("Publish", resourceCulture);
             }
         }
         
@@ -1333,15 +1523,6 @@ namespace BEditor.Properties {
         public static string Retry {
             get {
                 return ResourceManager.GetString("Retry", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Run the following command to install FFmpeg..
-        /// </summary>
-        public static string RunFollowingCommandToInstallFFmpeg {
-            get {
-                return ResourceManager.GetString("RunFollowingCommandToInstallFFmpeg", resourceCulture);
             }
         }
         
@@ -1427,20 +1608,20 @@ namespace BEditor.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Send feedback(Open an Issue on GitHub).
-        /// </summary>
-        public static string SendFeedback {
-            get {
-                return ResourceManager.GetString("SendFeedback", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Separate.
         /// </summary>
         public static string Separate {
             get {
                 return ResourceManager.GetString("Separate", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Set maximum frame.
+        /// </summary>
+        public static string SetMaximumFrame {
+            get {
+                return ResourceManager.GetString("SetMaximumFrame", resourceCulture);
             }
         }
         
@@ -1454,11 +1635,11 @@ namespace BEditor.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Setup is complete..
+        ///   Looks up a localized string similar to Setup.
         /// </summary>
-        public static string SetupComplete {
+        public static string Setup {
             get {
-                return ResourceManager.GetString("SetupComplete", resourceCulture);
+                return ResourceManager.GetString("Setup", resourceCulture);
             }
         }
         
@@ -1504,6 +1685,33 @@ namespace BEditor.Properties {
         public static string Shutdown {
             get {
                 return ResourceManager.GetString("Shutdown", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Signin.
+        /// </summary>
+        public static string Signin {
+            get {
+                return ResourceManager.GetString("Signin", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Signout.
+        /// </summary>
+        public static string Signout {
+            get {
+                return ResourceManager.GetString("Signout", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Signup.
+        /// </summary>
+        public static string Signup {
+            get {
+                return ResourceManager.GetString("Signup", resourceCulture);
             }
         }
         
@@ -1562,11 +1770,29 @@ namespace BEditor.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The changes will be applied after restarting..
+        /// </summary>
+        public static string TheChangesWillBeAppliedAfterRestarting {
+            get {
+                return ResourceManager.GetString("TheChangesWillBeAppliedAfterRestarting", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to There is no project..
         /// </summary>
         public static string ThereIsNoProject {
             get {
                 return ResourceManager.GetString("ThereIsNoProject", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to This file cannot be converted..
+        /// </summary>
+        public static string ThisFileCannotBeConverted {
+            get {
+                return ResourceManager.GetString("ThisFileCannotBeConverted", resourceCulture);
             }
         }
         
@@ -1589,15 +1815,6 @@ namespace BEditor.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to This software is latest..
-        /// </summary>
-        public static string ThisSoftwareIsLatest {
-            get {
-                return ResourceManager.GetString("ThisSoftwareIsLatest", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Timeline.
         /// </summary>
         public static string Timeline {
@@ -1616,6 +1833,15 @@ namespace BEditor.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Time remaining.
+        /// </summary>
+        public static string TimeRemaining {
+            get {
+                return ResourceManager.GetString("TimeRemaining", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to If you want to create a project, click New..
         /// </summary>
         public static string ToCreateProjectClickNew {
@@ -1630,6 +1856,15 @@ namespace BEditor.Properties {
         public static string Tool {
             get {
                 return ResourceManager.GetString("Tool", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Transparent.
+        /// </summary>
+        public static string Transparent {
+            get {
+                return ResourceManager.GetString("Transparent", resourceCulture);
             }
         }
         
@@ -1679,6 +1914,15 @@ namespace BEditor.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Update password.
+        /// </summary>
+        public static string UpdatePassword {
+            get {
+                return ResourceManager.GetString("UpdatePassword", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Use automatic backups.
         /// </summary>
         public static string UseAutoBackup {
@@ -1688,11 +1932,38 @@ namespace BEditor.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Use current frame.
+        /// </summary>
+        public static string UseCurrentFrame {
+            get {
+                return ResourceManager.GetString("UseCurrentFrame", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Use dark mode.
         /// </summary>
         public static string UseDarkMode {
             get {
                 return ResourceManager.GetString("UseDarkMode", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to User.
+        /// </summary>
+        public static string User {
+            get {
+                return ResourceManager.GetString("User", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to User name.
+        /// </summary>
+        public static string UserName {
+            get {
+                return ResourceManager.GetString("UserName", resourceCulture);
             }
         }
         
@@ -1778,6 +2049,15 @@ namespace BEditor.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to White.
+        /// </summary>
+        public static string White {
+            get {
+                return ResourceManager.GetString("White", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Width.
         /// </summary>
         public static string Width {
@@ -1801,6 +2081,15 @@ namespace BEditor.Properties {
         public static string Yes {
             get {
                 return ResourceManager.GetString("Yes", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Zoom in.
+        /// </summary>
+        public static string ZoomIn {
+            get {
+                return ResourceManager.GetString("ZoomIn", resourceCulture);
             }
         }
     }

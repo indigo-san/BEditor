@@ -8,7 +8,7 @@ using BEditor.Models;
 
 namespace BEditor.Views
 {
-    public sealed class StartWindow : Window
+    public sealed class StartWindow : FluentWindow
     {
         private readonly TabControl _tabControl;
 
@@ -45,7 +45,8 @@ namespace BEditor.Views
         protected override async void OnOpened(EventArgs e)
         {
             base.OnOpened(e);
-            await ArgumentsContext.ExecuteAsync();
+            await App.StartupTask;
+            App.StartupTask = default;
         }
 
         private void InitializeComponent()
