@@ -16,11 +16,21 @@ namespace BEditor.Data
     /// <summary>
     /// The metadata of <see cref="ObjectElement"/>.
     /// </summary>
-    /// <param name="Name">The name of the object element.</param>
-    /// <param name="CreateFunc">This <see cref="Func{TResult}"/> gets a new instance of the <see cref="ObjectElement"/> object.</param>
-    /// <param name="Type">The type of the object that inherits from <see cref="ObjectElement"/>.</param>
-    public record ObjectMetadata(string Name, Func<ObjectElement> CreateFunc, Type Type)
+    public class ObjectMetadata
     {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ObjectMetadata"/> class.
+        /// </summary>
+        /// <param name="name">The name of the effect element.</param>
+        /// <param name="createFunc">Create a new instance of the <see cref="ObjectMetadata"/> object.</param>
+        /// <param name="type">The type of the object that inherits from <see cref="ObjectMetadata"/>.</param>
+        public ObjectMetadata(string name, Func<ObjectElement> createFunc, Type type)
+        {
+            Name = name;
+            CreateFunc = createFunc;
+            Type = type;
+        }
+
         /// <summary>
         /// Initializes a new instance of the <see cref="ObjectMetadata"/> class.
         /// </summary>
@@ -32,29 +42,44 @@ namespace BEditor.Data
         }
 
         /// <summary>
-        /// Gets or sets the accent color.
+        /// Gets the loaded <see cref="ObjectMetadata"/>.
         /// </summary>
-        public Color AccentColor { get; init; } = Color.FromUInt32(0xff304fee);
+        public static ObservableCollection<ObjectMetadata> LoadedObjects { get; } = new();
 
         /// <summary>
-        /// Gets or sets the path data of an icon.
+        /// Gets or sets the name of the object element.
         /// </summary>
-        public string PathIcon { get; init; } = string.Empty;
+        public string Name { get; }
+
+        /// <summary>
+        /// Create a new instance of the <see cref="ObjectElement"/> object.
+        /// </summary>
+        public Func<ObjectElement> CreateFunc { get; }
+
+        /// <summary>
+        /// Gets or sets the type of the object that inherits from <see cref="ObjectElement"/>.
+        /// </summary>
+        public Type Type { get; }
+
+        /// <summary>
+        /// Gets the accent color.
+        /// </summary>
+        public Color AccentColor { get; private set; } = Color.FromUInt32(0xff304fee);
+
+        /// <summary>
+        /// Gets the path data of an icon.
+        /// </summary>
+        public string PathIcon { get; private set; } = string.Empty;
 
         /// <summary>
         /// Creates an instance from a file name.
         /// </summary>
-        public Func<string, ObjectElement>? CreateFromFile { get; init; }
+        public Func<string, ObjectElement>? CreateFromFile { get; private set; }
 
         /// <summary>
         /// Check to see if the file name is supported.
         /// </summary>
-        public Func<string, bool>? IsSupported { get; init; }
-
-        /// <summary>
-        /// Gets the loaded <see cref="ObjectMetadata"/>.
-        /// </summary>
-        public static ObservableCollection<ObjectMetadata> LoadedObjects { get; } = new();
+        public Func<string, bool>? IsSupported { get; private set; }
 
         /// <summary>
         /// Create the <see cref="ObjectMetadata"/>.

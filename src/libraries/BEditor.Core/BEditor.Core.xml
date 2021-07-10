@@ -1043,17 +1043,14 @@
             <summary>
             The metadata of <see cref="T:BEditor.Data.ObjectElement"/>.
             </summary>
-            <param name="Name">The name of the object element.</param>
-            <param name="CreateFunc">This <see cref="T:System.Func`1"/> gets a new instance of the <see cref="T:BEditor.Data.ObjectElement"/> object.</param>
-            <param name="Type">The type of the object that inherits from <see cref="T:BEditor.Data.ObjectElement"/>.</param>
         </member>
         <member name="M:BEditor.Data.ObjectMetadata.#ctor(System.String,System.Func{BEditor.Data.ObjectElement},System.Type)">
             <summary>
-            The metadata of <see cref="T:BEditor.Data.ObjectElement"/>.
+            Initializes a new instance of the <see cref="T:BEditor.Data.ObjectMetadata"/> class.
             </summary>
-            <param name="Name">The name of the object element.</param>
-            <param name="CreateFunc">This <see cref="T:System.Func`1"/> gets a new instance of the <see cref="T:BEditor.Data.ObjectElement"/> object.</param>
-            <param name="Type">The type of the object that inherits from <see cref="T:BEditor.Data.ObjectElement"/>.</param>
+            <param name="name">The name of the effect element.</param>
+            <param name="createFunc">Create a new instance of the <see cref="T:BEditor.Data.ObjectMetadata"/> object.</param>
+            <param name="type">The type of the object that inherits from <see cref="T:BEditor.Data.ObjectMetadata"/>.</param>
         </member>
         <member name="M:BEditor.Data.ObjectMetadata.#ctor(System.String,System.Linq.Expressions.Expression{System.Func{BEditor.Data.ObjectElement}})">
             <summary>
@@ -1062,14 +1059,34 @@
             <param name="name">The name of the object element.</param>
             <param name="create">This <see cref="T:System.Func`1"/> gets a new instance of the <see cref="T:BEditor.Data.ObjectElement"/> object.</param>
         </member>
+        <member name="P:BEditor.Data.ObjectMetadata.LoadedObjects">
+            <summary>
+            Gets the loaded <see cref="T:BEditor.Data.ObjectMetadata"/>.
+            </summary>
+        </member>
+        <member name="P:BEditor.Data.ObjectMetadata.Name">
+            <summary>
+            Gets or sets the name of the object element.
+            </summary>
+        </member>
+        <member name="P:BEditor.Data.ObjectMetadata.CreateFunc">
+            <summary>
+            Create a new instance of the <see cref="T:BEditor.Data.ObjectElement"/> object.
+            </summary>
+        </member>
+        <member name="P:BEditor.Data.ObjectMetadata.Type">
+            <summary>
+            Gets or sets the type of the object that inherits from <see cref="T:BEditor.Data.ObjectElement"/>.
+            </summary>
+        </member>
         <member name="P:BEditor.Data.ObjectMetadata.AccentColor">
             <summary>
-            Gets or sets the accent color.
+            Gets the accent color.
             </summary>
         </member>
         <member name="P:BEditor.Data.ObjectMetadata.PathIcon">
             <summary>
-            Gets or sets the path data of an icon.
+            Gets the path data of an icon.
             </summary>
         </member>
         <member name="P:BEditor.Data.ObjectMetadata.CreateFromFile">
@@ -1080,11 +1097,6 @@
         <member name="P:BEditor.Data.ObjectMetadata.IsSupported">
             <summary>
             Check to see if the file name is supported.
-            </summary>
-        </member>
-        <member name="P:BEditor.Data.ObjectMetadata.LoadedObjects">
-            <summary>
-            Gets the loaded <see cref="T:BEditor.Data.ObjectMetadata"/>.
             </summary>
         </member>
         <member name="M:BEditor.Data.ObjectMetadata.Create``1(System.String)">
@@ -1924,17 +1936,14 @@
             <summary>
             The metadata of <see cref="T:BEditor.Data.Property.Easing.EasingFunc"/>.
             </summary>
-            <param name="Name">The name of the easing function.</param>
-            <param name="CreateFunc">This <see cref="T:System.Func`1"/> gets a new instance of the <see cref="T:BEditor.Data.Property.Easing.EasingFunc"/> object.</param>
-            <param name="Type">The type of the object that inherits from <see cref="T:BEditor.Data.Property.Easing.EasingFunc"/>.</param>
         </member>
         <member name="M:BEditor.Data.Property.Easing.EasingMetadata.#ctor(System.String,System.Func{BEditor.Data.Property.Easing.EasingFunc},System.Type)">
             <summary>
-            The metadata of <see cref="T:BEditor.Data.Property.Easing.EasingFunc"/>.
+            Initializes a new instance of the <see cref="T:BEditor.Data.Property.Easing.EasingMetadata"/> class.
             </summary>
-            <param name="Name">The name of the easing function.</param>
-            <param name="CreateFunc">This <see cref="T:System.Func`1"/> gets a new instance of the <see cref="T:BEditor.Data.Property.Easing.EasingFunc"/> object.</param>
-            <param name="Type">The type of the object that inherits from <see cref="T:BEditor.Data.Property.Easing.EasingFunc"/>.</param>
+            <param name="name">The name of the effect element.</param>
+            <param name="createFunc">Create a new instance of the <see cref="T:BEditor.Data.Property.Easing.EasingMetadata"/> object.</param>
+            <param name="type">The type of the object that inherits from <see cref="T:BEditor.Data.Property.Easing.EasingMetadata"/>.</param>
         </member>
         <member name="M:BEditor.Data.Property.Easing.EasingMetadata.#ctor(System.String,System.Linq.Expressions.Expression{System.Func{BEditor.Data.Property.Easing.EasingFunc}})">
             <summary>
@@ -1946,6 +1955,21 @@
         <member name="P:BEditor.Data.Property.Easing.EasingMetadata.LoadedEasingFunc">
             <summary>
             Gets the loaded <see cref="T:BEditor.Data.Property.Easing.EasingMetadata"/>.
+            </summary>
+        </member>
+        <member name="P:BEditor.Data.Property.Easing.EasingMetadata.Name">
+            <summary>
+            Gets or sets the name of the easing function.
+            </summary>
+        </member>
+        <member name="P:BEditor.Data.Property.Easing.EasingMetadata.CreateFunc">
+            <summary>
+            Create a new instance of the <see cref="T:BEditor.Data.Property.Easing.EasingFunc"/> object.
+            </summary>
+        </member>
+        <member name="P:BEditor.Data.Property.Easing.EasingMetadata.Type">
+            <summary>
+            Gets or sets the type of the object that inherits from <see cref="T:BEditor.Data.Property.Easing.EasingFunc"/>.
             </summary>
         </member>
         <member name="M:BEditor.Data.Property.Easing.EasingMetadata.Create``1(System.String)">

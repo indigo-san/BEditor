@@ -7,7 +7,6 @@
 
 using System;
 using System.Buffers;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Runtime.CompilerServices;
@@ -18,8 +17,6 @@ using BEditor.Drawing.Pixel;
 using BEditor.Drawing.PixelOperation;
 using BEditor.Drawing.Resources;
 using BEditor.Drawing.RowOperation;
-
-using OpenCvSharp;
 
 namespace BEditor.Drawing
 {
@@ -492,6 +489,15 @@ namespace BEditor.Drawing
         public void ThrowIfDisposed()
         {
             if (IsDisposed) throw new ObjectDisposedException(nameof(Image<T>));
+        }
+
+        /// <summary>
+        /// Gets the pointer.
+        /// </summary>
+        /// <returns>Returns the pointer.</returns>
+        public T* GetPointer()
+        {
+            return _pointer;
         }
 
         /// <inheritdoc/>

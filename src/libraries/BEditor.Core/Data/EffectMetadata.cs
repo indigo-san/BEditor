@@ -57,17 +57,17 @@ namespace BEditor.Data
         /// <summary>
         /// Gets or sets the name of the effect element.
         /// </summary>
-        public string Name { get; init; }
+        public string Name { get; }
 
         /// <summary>
         /// Create a new instance of the <see cref="EffectElement"/> object.
         /// </summary>
-        public Func<EffectElement> CreateFunc { get; init; }
+        public Func<EffectElement> CreateFunc { get; }
 
         /// <summary>
         /// Gets or sets the type of the object that inherits from <see cref="EffectElement"/>.
         /// </summary>
-        public Type Type { get; init; }
+        public Type Type { get; }
 
         /// <summary>
         /// Gets or sets the child elements of the group.
