@@ -1,0 +1,21 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <OutputPath>..\..\src\executable\BEditor.Avalonia\bin\$(Configuration)\net5.0\user\plugins\BEditor.Extensions.MediaFoundation</OutputPath>
+        <Company>b-editor</Company>
+        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+        <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+    </PropertyGroup>
+
+    <Import Project="..\..\props\plugin.props" />
+
+    <ItemGroup>
+        <PackageReference Include="SharpDX.MediaFoundation" Version="4.2.0" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\..\src\libraries\BEditor.Core\BEditor.Core.csproj" />
+        <ProjectReference Include="..\..\src\libraries\BEditor.Media\BEditor.Media.csproj" />
+    </ItemGroup>
+
+</Project>
