@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "BEditor.Avalonia": {
+      "commandName": "Project",
+      "nativeDebugging": true
+    }
+  }
+}
