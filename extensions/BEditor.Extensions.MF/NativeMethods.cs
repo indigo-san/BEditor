@@ -11,31 +11,31 @@ namespace BEditor.Extensions.MF
     {
         const string LibraryName = "BEditor.Extensions.MF.Extern.dll";
 
-        [DllImport(LibraryName, CharSet = CharSet.Unicode)]
+        [DllImport(LibraryName, CharSet = CharSet.Ansi)]
         public static extern string GetError();
 
-        [DllImport(LibraryName, CharSet = CharSet.Unicode)]
+        [DllImport(LibraryName, CharSet = CharSet.Ansi)]
         public static extern int Initialize();
 
-        [DllImport(LibraryName, CharSet = CharSet.Unicode)]
+        [DllImport(LibraryName, CharSet = CharSet.Ansi)]
         public static extern int Uninitialize();
 
-        [DllImport(LibraryName, CharSet = CharSet.Unicode)]
+        [DllImport(LibraryName, CharSet = CharSet.Ansi)]
         public static extern IntPtr NewInputContainer(string file);
 
-        [DllImport(LibraryName, CharSet = CharSet.Unicode)]
+        [DllImport(LibraryName, CharSet = CharSet.Ansi)]
         public static extern void DeleteInputContainer(IntPtr input);
 
-        [DllImport(LibraryName, CharSet = CharSet.Unicode)]
+        [DllImport(LibraryName, CharSet = CharSet.Ansi)]
         public static extern IntPtr GetVideoStream(IntPtr input);
 
-        [DllImport(LibraryName, CharSet = CharSet.Unicode)]
+        [DllImport(LibraryName, CharSet = CharSet.Ansi)]
         public static extern IntPtr GetAudioStream(IntPtr input);
 
-        [DllImport(LibraryName, CharSet = CharSet.Unicode)]
+        [DllImport(LibraryName, CharSet = CharSet.Ansi)]
         public static extern int VStream_TryGetFrame(IntPtr stream, long popsition, NativeImage* image);
 
-        [DllImport(LibraryName, CharSet = CharSet.Unicode)]
+        [DllImport(LibraryName, CharSet = CharSet.Ansi)]
         public static extern NativeVideoStreamInfo VStream_GetInfo(IntPtr stream);
     }
 }

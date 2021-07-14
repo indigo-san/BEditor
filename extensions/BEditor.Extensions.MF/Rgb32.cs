@@ -8,10 +8,10 @@ namespace BEditor.Extensions.MF
     [StructLayout(LayoutKind.Sequential)]
     internal struct Rgb32 : IPixel<Rgb32>, IPixelConvertable<BGRA32>
     {
-        public byte R;
-        public byte G;
         public byte B;
-        public byte Reserve;
+        public byte G;
+        public byte R;
+        public byte A;
 
         public Rgb32 Add(Rgb32 foreground)
         {

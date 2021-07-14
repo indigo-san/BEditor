@@ -7,7 +7,7 @@ static void ConfigureVideoDecoder(IMFSourceReader* reader, GUID format) {
 	Throw(mediaType->SetGUID(MF_MT_MAJOR_TYPE, MFMediaType_Video));
 	Throw(mediaType->SetGUID(MF_MT_SUBTYPE, format));
 
-	Throw(reader->SetCurrentMediaType(MF_SOURCE_READER_FIRST_VIDEO_STREAM, 0, mediaType));
+	reader->SetCurrentMediaType(MF_SOURCE_READER_FIRST_VIDEO_STREAM, 0, mediaType);
 
 	mediaType->Release();
 }
@@ -46,15 +46,20 @@ void Capture(IMFSourceReader* reader, Image* img)
 {
 	DWORD flags;
 	IMFSample* sample;
+	DWORD streamIndex;
+	LONGLONG llVideoTimeStamp = 0, llSampleDuration = 0;
 	Throw(reader->ReadSample(MF_SOURCE_READER_FIRST_VIDEO_STREAM, 0, NULL, &flags, NULL, &sample));
 
 	IMFMediaBuffer* buffer;
+	DWORD bufLength;
 	Throw(sample->GetBufferByIndex(0, &buffer));
+	buffer->GetCurrentLength(&bufLength);
 
 	BYTE* p;
 	DWORD size;
 	buffer->Lock(&p, NULL, &size);
-	memcpy(img->data, p, size);
+
+	memcpy(img->data, p, bufLength);
 	Throw(buffer->Unlock());
 
 	buffer->Release();

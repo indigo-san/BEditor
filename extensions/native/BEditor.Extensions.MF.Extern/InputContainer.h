@@ -10,5 +10,10 @@ public:
 	InputContainer(const char* file);
 	~InputContainer();
 private:
-	IMFSourceReader* _reader;
+	IMFSourceResolver* pSourceResolver = NULL;
+	IUnknown* uSource = NULL;
+	IMFMediaSource* mediaFileSource = NULL;
+	IMFAttributes* pVideoReaderAttributes = NULL;
+	IMFSourceReader* reader = NULL;
+	MF_OBJECT_TYPE ObjectType = MF_OBJECT_INVALID;
 };

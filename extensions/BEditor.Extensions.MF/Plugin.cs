@@ -1,5 +1,6 @@
 ﻿using System;
 
+using BEditor.Extensions.MF.Decoding;
 using BEditor.Plugin;
 
 namespace BEditor.Extensions.MF
@@ -27,6 +28,7 @@ namespace BEditor.Extensions.MF
                 if (NativeMethods.Initialize() is not 0)
                 {
                     PluginBuilder.Configure<Plugin>()
+                        .With(new MFDecoding())
                         .Register();
                 }
                 else
